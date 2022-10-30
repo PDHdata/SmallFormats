@@ -27,6 +27,18 @@ class DeckViewSet(viewsets.ReadOnlyModelViewSet):
         return super().get_serializer_class()
 
 
+class CardFilter(filters.FilterSet):
+    name = filters.CharFilter()
+    identity_w = filters.BooleanFilter(label='is W')
+    identity_u = filters.BooleanFilter(label='is U')
+    identity_b = filters.BooleanFilter(label='is B')
+    identity_r = filters.BooleanFilter(label='is R')
+    identity_g = filters.BooleanFilter(label='is G')
+    ever_common = filters.BooleanFilter()
+    ever_uncommon = filters.BooleanFilter()
+    can_be_pdh_commander = filters.BooleanFilter(label='can be PDH commander')
+
+
 class CardViewSet(viewsets.ReadOnlyModelViewSet):
     """
     API endpoint for viewing cards.
@@ -34,3 +46,4 @@ class CardViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Card.objects.all().order_by('name')
     serializer_class = CardSerializer
     permission_classes = [permissions.IsAuthenticated]
+    filterset_class = CardFilter
