@@ -1,7 +1,7 @@
-from .models import Deck, Card, CardInDeck
+from .models import Deck, Card
 from rest_framework import viewsets
 from rest_framework import permissions
-from .serializers import CardInDeckSerializer, CardSerializer, DeckSerializer
+from .serializers import CardSerializer, DeckSerializer
 
 
 class DeckViewSet(viewsets.ReadOnlyModelViewSet):
@@ -17,15 +17,6 @@ class CardViewSet(viewsets.ReadOnlyModelViewSet):
     """
     API endpoint for viewing cards.
     """
-    queryset = Card.objects.all()
+    queryset = Card.objects.all().order_by('name')
     serializer_class = CardSerializer
-    permission_classes = [permissions.IsAuthenticated]
-
-
-class CardInDeckViewSet(viewsets.ReadOnlyModelViewSet):
-    """
-    API endpoint for cards in a deck
-    """
-    queryset = CardInDeck.objects.all()
-    serializer_class = CardInDeckSerializer
     permission_classes = [permissions.IsAuthenticated]
