@@ -15,7 +15,10 @@ You may not use Scryfall data to create new games, or to imply the information a
 
 [Archidekt][archidekt] has not endorsed this app or its creators.
 
+Thanks to Davis Haupt for the [fly.io deployment article][djangoonfly] which informed the layout of this project.
+
 [archidekt]: https://www.archidekt.com/
+[djangoonfly]: https://davi.sh/blog/2022/10/django-with-flyio/
 [edhrec]: https://www.edhrec.com/
 [pdhhomebase]: https://www.pdhhomebase.com/
 [scryfall]: https://www.scryfall.com/
