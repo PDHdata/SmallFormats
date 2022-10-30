@@ -8,7 +8,7 @@ class User(AbstractUser):
 
 
 class DataSource(models.IntegerChoices):
-    UNKNOWN_OTHER = 0
+    UNKNOWN_OTHER = 0, "Unknown/other"
     ARCHIDEKT = 1
 
 

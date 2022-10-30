@@ -1,7 +1,15 @@
-from .models import Deck, Card
+from .models import Deck, Card, DataSource
 from rest_framework import viewsets
 from rest_framework import permissions
 from .serializers import CardSerializer, DeckListSerializer, DeckInstanceSerializer
+from django_filters import rest_framework as filters
+
+
+class DeckFilter(filters.FilterSet):
+    name = filters.CharFilter()
+    ingested_time = filters.DateTimeFromToRangeFilter()
+    updated_time = filters.DateTimeFromToRangeFilter()
+    source = filters.ChoiceFilter(choices=DataSource.choices)
 
 
 class DeckViewSet(viewsets.ReadOnlyModelViewSet):
@@ -11,6 +19,7 @@ class DeckViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Deck.objects.all().order_by('-updated_time')
     serializer_class = DeckInstanceSerializer
     permission_classes = [permissions.IsAuthenticated]
+    filterset_class = DeckFilter
 
     def get_serializer_class(self):
         if self.action == 'list':
