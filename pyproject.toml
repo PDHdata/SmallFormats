@@ -15,6 +15,7 @@ psycopg2-binary = "^2.9.5"
 djangorestframework = "^3.14.0"
 markdown = "^3.4.1"
 django-filter = "^22.1"
+httpx = "^0.23.0"
 
 
 [build-system]
