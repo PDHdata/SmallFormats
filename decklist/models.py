@@ -8,7 +8,7 @@ class User(AbstractUser):
 
 
 class DataSource(models.IntegerChoices):
-    UNKNOWN_OTHER = 0
+    UNKNOWN_OTHER = 0, "Unknown/other"
     ARCHIDEKT = 1
 
 
@@ -55,6 +55,11 @@ class Card(models.Model):
 
     def __str__(self):
         return self.name
+    
+    @property
+    def color_identity(self):
+        identity = [x for x in "wubrg" if getattr(self, f"identity_{x}")]
+        return ''.join(identity).upper() if identity else 'C'
 
 
 class CardInDeck(models.Model):
