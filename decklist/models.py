@@ -23,6 +23,14 @@ class Deck(models.Model):
 
     def __str__(self):
         return self.name
+    
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=('source', 'source_id'),
+                name='one_entry_per_deck',
+            ),
+        ]
 
 
 class Card(models.Model):
