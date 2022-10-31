@@ -4,15 +4,27 @@ See https://archidekt.com/forum/thread/3476605/1 for more on crawling Archidekt.
 from django.core.management.base import BaseCommand, CommandError
 import httpx
 from decklist.models import Deck, DataSource
-from crawler.models import DeckCrawlResult
+from crawler.models import CrawlRun, DeckCrawlResult
 from django.utils import timezone
 import time
 
+# TODO:
+# - stop when reaching the previous high-water mark (by date)
+# - be able to resume failed/incomplete runs
+# - in the commands, target a particular run
 
 ARCHIDEKT_API_BASE = "https://archidekt.com/api/"
 HEADERS = {
     'User-agent': 'SmallFormats/0.1.0',
 }
+
+def format_response_error(response):
+    result = f"{response.status_code} accessing {response.request.url}\n\n"
+    for hdr, value in response.headers.items():
+        result += f".. {hdr}: {value}\n"
+    result += f"\n{response.text}"
+
+    return result
 
 class Command(BaseCommand):
     help = 'Ask Archidekt for PDH decklists'
@@ -30,6 +42,14 @@ class Command(BaseCommand):
         crawl_time = timezone.now()
         continue_crawling = False
 
+        # TODO: search for and resume existing runs
+        run = CrawlRun(
+            crawl_start_time=crawl_time,
+            target=DataSource.ARCHIDEKT,
+            state=CrawlRun.State.NOT_STARTED,
+        )
+        run.save()
+
         params = {
             'formats': 17,
             'orderBy': '-createdAt',
@@ -45,6 +65,9 @@ class Command(BaseCommand):
                 'response': [self._response_log],
             }
         ) as client:
+            run.state = CrawlRun.State.FETCHING_DECKLISTS
+            run.save()
+
             decks = client.get("decks/cards/", params=params)
             if 200 <= decks.status_code < 300:
                 continue_crawling = True
@@ -54,6 +77,9 @@ class Command(BaseCommand):
                     self.stdout.write(f"There are {count} decks.")
                 results = envelope['results']
             else:
+                run.state = CrawlRun.State.ERROR
+                run.note = format_response_error(decks)
+                run.save()
                 self.stderr.write(f"HTTP error {decks.status_code} accessing {decks.request.url}")
 
             while continue_crawling:
@@ -61,9 +87,12 @@ class Command(BaseCommand):
                 continue_crawling = False
                 # Archidekt seems to send "count = -1" when throttling
                 if count <= 0:
+                    run.state = CrawlRun.State.ERROR
+                    run.note = format_response_error(decks)
+                    run.save()
                     self.stderr.write(f"Received \"{decks.text}\" accessing {decks.request.url}")
                 else:
-                    self._process_page(crawl_time, results)
+                    self._process_page(run, results)
                     retrieved_pages += 1
                     self.stdout.write(f"Seen {retrieved_pages} pages.")
 
@@ -80,9 +109,18 @@ class Command(BaseCommand):
                         count, next = envelope['count'], envelope['next']
                         results = envelope['results']
                     else:
+                        run.state = CrawlRun.State.ERROR
+                        run.note = format_response_error(decks)
+                        run.save()
                         self.stderr.write(f"HTTP error {decks.status_code} accessing {decks.request.url}")
+            
+            # made it to the end
+            if run.state == CrawlRun.State.FETCHING_DECKLISTS:
+                run.state = CrawlRun.State.DONE_FETCHING_DECKLISTS
+                run.save()
+                self.stdout.write(self.style.SUCCESS(f"Run {run.id} completed successfully."))
 
-    def _process_page(self, crawl_time, results):
+    def _process_page(self, run, results):
         self.stdout.write(f"Processing next {len(results)} results.")
         
         # get existing decks for this page
@@ -106,9 +144,9 @@ class Command(BaseCommand):
             deck.updated_time = deck_data['updatedAt']
 
             crawl_result = DeckCrawlResult(
-                crawl_time=crawl_time,
                 url=ARCHIDEKT_API_BASE + f"decks/{this_id}/",
                 deck=deck,
+                run=run,
                 updated_time=deck_data['updatedAt'],
                 got_cards=False, # TODO: write crawler for cards
             )
