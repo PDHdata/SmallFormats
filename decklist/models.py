@@ -47,19 +47,7 @@ class Card(models.Model):
     identity_b = models.BooleanField(default=False, verbose_name='is B')
     identity_r = models.BooleanField(default=False, verbose_name='is R')
     identity_g = models.BooleanField(default=False, verbose_name='is G')
-    # Pauper EDH only cares if a card was _ever_ printed
-    # at a certain rarity, not whether the physical card in your
-    # deck is that rarity.
-    ever_common = models.BooleanField(default=False)
-    ever_uncommon = models.BooleanField(default=False)
-    # Pauper EDH expects an uncommon creature at the helm.
-    # we'll compute that on ingestion so that if an uncommon
-    # planeswalker or other card type ever says "this can be
-    # your commander", we'll be ready for it.
-    can_be_pdh_commander = models.BooleanField(
-        default=False,
-        verbose_name='can be PDH commander',
-    )
+    type_line = models.CharField(max_length=50, blank=True)
 
     def __str__(self):
         return self.name
@@ -68,9 +56,28 @@ class Card(models.Model):
     def color_identity(self):
         identity = [x for x in "wubrg" if getattr(self, f"identity_{x}")]
         return ''.join(identity).upper() if identity else 'C'
+    
+    @property
+    def ever_common(self):
+        return self.printings.filter(
+            rarity=Printing.Rarity.COMMON
+        ).count() > 0
+    
+    @property
+    def ever_uncommon(self):
+        return self.printings.filter(
+            rarity=Printing.Rarity.UNCOMMON
+        ).count() > 0
 
 
 class Printing(models.Model):
+    class Rarity(models.TextChoices):
+        COMMON = 'C', "common"
+        UNCOMMON = 'U', "uncommon"
+        RARE = 'R', "rare"
+        SPECIAL = 'S', "special"
+        MYTHIC = 'M', "mythic"
+        BONUS = 'B', "bonus"
     # this is the Scryfall ID for the card
     id = models.UUIDField(primary_key=True)
     # we'll link back to the oracle card which has all the info
@@ -79,6 +86,11 @@ class Printing(models.Model):
         on_delete=models.CASCADE,
         related_name='printings',
     )
+    set_code = models.CharField(max_length=5, blank=True)
+    rarity = models.CharField(max_length=1, choices=Rarity.choices)
+
+    def __str__(self):
+        return f"{self.card.name} ({self.set_code})"
 
 
 class CardInDeck(models.Model):
