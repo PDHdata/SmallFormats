@@ -70,6 +70,17 @@ class Card(models.Model):
         return ''.join(identity).upper() if identity else 'C'
 
 
+class Printing(models.Model):
+    # this is the Scryfall ID for the card
+    id = models.UUIDField(primary_key=True)
+    # we'll link back to the oracle card which has all the info
+    card = models.ForeignKey(
+        Card,
+        on_delete=models.CASCADE,
+        related_name='printings',
+    )
+
+
 class CardInDeck(models.Model):
     deck = models.ForeignKey(
         Deck,
