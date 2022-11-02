@@ -2,6 +2,17 @@
 
 Inspired by [EDHrec][edhrec], this is a deck-stats site for [Pauper EDH][pdhhomebase] and hopefully other "smaller" (less common) Magic: the Gathering formats someday.
 
+## Fetching data
+
+You will need card data from Scryfall and then a two-pass crawl of Archidekt.
+The `crawl` step will fetch each deck, and then the `populate` step will fetch the decklists for each deck.
+
+```shell
+./manage fetch-cards
+./manage crawl-archidekt
+./manage populate-archidekt --crawl-id $ID_FROM_PREVIOUS_STEP
+```
+
 ## Disclaimers & disclosures
 
 SmallFormats is unofficial Fan Content permitted under WOTC's Fan Content Policy.
