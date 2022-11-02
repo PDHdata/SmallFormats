@@ -7,16 +7,13 @@ from decklist.models import Deck, DataSource
 from crawler.models import CrawlRun, DeckCrawlResult
 from django.utils import timezone
 import time
+from ._api_helpers import HEADERS, ARCHIDEKT_API_BASE
+
 
 # TODO:
 # - stop when reaching the previous high-water mark (by date)
 # - be able to resume failed/incomplete runs
 # - in the commands, target a particular run
-
-ARCHIDEKT_API_BASE = "https://archidekt.com/api/"
-HEADERS = {
-    'User-agent': 'SmallFormats/0.1.0',
-}
 
 def format_response_error(response):
     result = f"{response.status_code} accessing {response.request.url}\n\n"

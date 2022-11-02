@@ -5,12 +5,8 @@ from django.core.management.base import BaseCommand, CommandError
 import httpx
 from ._httpx_json_stream import httpx_load
 from decklist.models import Card, Printing
+from ._api_helpers import HEADERS, SCRYFALL_API_BASE
 
-
-SCRYFALL_API_BASE = "https://api.scryfall.com/"
-HEADERS = {
-    'User-agent': 'SmallFormats/0.1.0',
-}
 
 class CantParseCardError(Exception): ...
 
