@@ -31,13 +31,25 @@ class Command(BaseCommand):
                         
                         if c and p: break
                     
-                    if c and p:
-                        c.save()
-                        p.save()
-                    else:
+                    if not c or not p:
                         self.stderr.write(f"failed to parse {json_card['name']}")
 
+                    elif self._want_card(json_card):
+                        c.save()
+                        p.save()
+
         self.stdout.write(f"end: {Card.objects.all().count()} cards, {Printing.objects.all().count()} printings")
+
+    def _want_card(self, json_card):
+        # we want to exclude some non-playable cards but aren't entirely
+        # beholden to upstream's record of format legalities
+        if 'layout' in json_card and json_card['layout'] in (
+            'planar', 'scheme', 'vanguard', 'token', 'double_faced_token',
+            'emblem', 'art_series', 'reversible_card',
+        ):
+            return False
+
+        return True
 
     def _extract_card_and_printing(self, json_card):
         try:
