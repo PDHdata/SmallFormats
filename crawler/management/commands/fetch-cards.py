@@ -1,12 +1,17 @@
 """
 See https://scryfall.com/docs/api/bulk-data for more on Scryfall data.
 """
-import json
 from django.core.management.base import BaseCommand, CommandError
 import httpx
 import json_stream
+import urllib.request
 from decklist.models import Card, Printing
 
+
+SCRYFALL_API_BASE = "https://api.scryfall.com/"
+HEADERS = {
+    'User-agent': 'SmallFormats/0.1.0',
+}
 
 class CantParseCardError(Exception): ...
 
@@ -14,8 +19,15 @@ class Command(BaseCommand):
     help = 'Ask Scryfall for card data'
 
     def handle(self, *args, **options):
-        # TODO: stream from Scryfall API
-        with open("default-cards.json") as f:
+        self.stdout.write(f"begin: {Card.objects.all().count()} cards, {Printing.objects.all().count()} printings")
+        with httpx.Client(base_url=SCRYFALL_API_BASE, headers=HEADERS) as client:
+            result = client.get("bulk-data/default-cards")
+            result.raise_for_status()
+            download_target = result.json()["download_uri"]
+            self.stdout.write(f"Fetching {download_target}")
+
+        # TODO: get json_stream playing nice with httpx
+        with urllib.request.urlopen(download_target) as f:
             for json_card in json_stream.load(f).persistent():
                 for parse in [self._extract_card_and_printing, self._extract_verhey_card_and_printing]:
                     try:
@@ -29,7 +41,9 @@ class Command(BaseCommand):
                     c.save()
                     p.save()
                 else:
-                    self.stderr.write("failed to parse {json_card['name']}")
+                    self.stderr.write(f"failed to parse {json_card['name']}")
+
+        self.stdout.write(f"end: {Card.objects.all().count()} cards, {Printing.objects.all().count()} printings")
 
     def _extract_card_and_printing(self, json_card):
         try:
