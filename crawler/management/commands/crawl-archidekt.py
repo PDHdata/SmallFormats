@@ -62,7 +62,7 @@ class Command(BaseCommand):
                 'response': [self._response_log],
             }
         ) as client:
-            run.state = CrawlRun.State.FETCHING_DECKLISTS
+            run.state = CrawlRun.State.FETCHING_DECKS
             run.save()
 
             decks = client.get("decks/cards/", params=params)
@@ -112,10 +112,10 @@ class Command(BaseCommand):
                         self.stderr.write(f"HTTP error {decks.status_code} accessing {decks.request.url}")
             
             # made it to the end
-            if run.state == CrawlRun.State.FETCHING_DECKLISTS:
-                run.state = CrawlRun.State.DONE_FETCHING_DECKLISTS
+            if run.state == CrawlRun.State.FETCHING_DECKS:
+                run.state = CrawlRun.State.DONE_FETCHING_DECKS
                 run.save()
-                self.stdout.write(self.style.SUCCESS(f"Run {run.id} completed successfully."))
+                self.stdout.write(self.style.SUCCESS(f"Fetch completed successfully. Now run `populate-archidekt --crawl-id {run.id}`."))
 
     def _process_page(self, run, results):
         self.stdout.write(f"Processing next {len(results)} results.")
@@ -145,7 +145,7 @@ class Command(BaseCommand):
                 deck=deck,
                 run=run,
                 updated_time=deck_data['updatedAt'],
-                got_cards=False, # TODO: write crawler for cards
+                got_cards=False,
             )
             deck.save()
             crawl_result.save()
