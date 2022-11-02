@@ -3,8 +3,7 @@ See https://scryfall.com/docs/api/bulk-data for more on Scryfall data.
 """
 from django.core.management.base import BaseCommand, CommandError
 import httpx
-import json_stream
-import urllib.request
+from ._httpx_json_stream import httpx_load
 from decklist.models import Card, Printing
 
 
@@ -26,22 +25,21 @@ class Command(BaseCommand):
             download_target = result.json()["download_uri"]
             self.stdout.write(f"Fetching {download_target}")
 
-        # TODO: get json_stream playing nice with httpx
-        with urllib.request.urlopen(download_target) as f:
-            for json_card in json_stream.load(f).persistent():
-                for parse in [self._extract_card_and_printing, self._extract_verhey_card_and_printing]:
-                    try:
-                        c, p = parse(json_card)
-                    except CantParseCardError:
-                        ... # try the next method
+            with client.stream('GET', download_target) as f:
+                for json_card in httpx_load(f).persistent():
+                    for parse in [self._extract_card_and_printing, self._extract_verhey_card_and_printing]:
+                        try:
+                            c, p = parse(json_card)
+                        except CantParseCardError:
+                            ... # try the next method
+                        
+                        if c and p: break
                     
-                    if c and p: break
-                
-                if c and p:
-                    c.save()
-                    p.save()
-                else:
-                    self.stderr.write(f"failed to parse {json_card['name']}")
+                    if c and p:
+                        c.save()
+                        p.save()
+                    else:
+                        self.stderr.write(f"failed to parse {json_card['name']}")
 
         self.stdout.write(f"end: {Card.objects.all().count()} cards, {Printing.objects.all().count()} printings")
 
