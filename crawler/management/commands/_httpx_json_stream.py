@@ -1,5 +1,5 @@
 # adapted from https://github.com/daggaz/json-stream/blob/0a31904354b6e731c2c3f80fe53e805cb49e9de4/src/json_stream/requests/__init__.py
-# and see https://github.com/daggaz/json-stream/issues/27
+# fixed in https://github.com/daggaz/json-stream/pull/28
 import io
 
 import json_stream
