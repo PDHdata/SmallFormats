@@ -1,0 +1,6 @@
+{% extends 'base.html' %}
+{% block body %}
+{% for card in cards %}
+<p>{{ card.name }} (in {{ card.num_decks }} decks)</p>
+{% endfor %}
+{% endblock %}

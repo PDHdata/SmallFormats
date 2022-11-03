@@ -13,11 +13,10 @@ def top_commanders(request):
 
     return render(
         request,
-        "card_num_decks.txt",
+        "card_num_decks.html",
         context={
             'cards': cmdr_cards[:10],
         },
-        content_type="text/plain",
     )
 
 
@@ -30,11 +29,10 @@ def top_cards(request):
 
     return render(
         request,
-        "card_num_decks.txt",
+        "card_num_decks.html",
         context={
             'cards': cards[:20],
         },
-        content_type="text/plain",
     )
 
 
@@ -49,9 +47,8 @@ def partner_decks(request):
 
     return render(
         request,
-        "partner_decks.txt",
+        "partner_decks.html",
         context={
             'decks': partner_decks[:20],
         },
-        content_type="text/plain",
     )

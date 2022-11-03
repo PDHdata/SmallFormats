@@ -21,4 +21,5 @@ urlpatterns = [
     path('api/auth/', include('rest_framework.urls', namespace='rest_framework')),
     path('api/core/', include('decklist.urls')),
     path('stats/', include('stats_recos.urls')),
+    path('__debug__/', include('debug_toolbar.urls')),
 ]

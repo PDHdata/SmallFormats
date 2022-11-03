@@ -1,0 +1,9 @@
+{% extends 'base.html' %}
+{% block body %}
+{% for deck in decks %}
+<p>
+  {{ deck.name }}
+  {% for p in deck.commanders %}<br>[{{ p.card.name|safe }}] {% endfor %}
+</p>
+{% endfor %}
+{% endblock %}
