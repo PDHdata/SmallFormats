@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     'django_filters',
     'decklist.apps.DecklistConfig',
     'crawler.apps.CrawlerConfig',
+    'stats_recos.apps.StatsRecosConfig',
 ]
 
 MIDDLEWARE = [
