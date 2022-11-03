@@ -1,4 +1,5 @@
 from django.db import models
+from django.db.models import Q
 from django.contrib.auth.models import AbstractUser
 from django.utils import timezone
 
@@ -34,6 +35,16 @@ class Deck(models.Model):
 
     def commanders(self):
         return self.card_list.filter(is_pdh_commander=True)
+    
+    def identity(self):
+        # TODO: fix ugly n+1 query
+        return {
+            'white': self.commanders().filter(card__identity_w=True).count() > 0,
+            'blue':  self.commanders().filter(card__identity_u=True).count() > 0,
+            'black': self.commanders().filter(card__identity_b=True).count() > 0,
+            'red':   self.commanders().filter(card__identity_r=True).count() > 0,
+            'green': self.commanders().filter(card__identity_g=True).count() > 0,
+        }
     
     def identity_w(self):
         return (
