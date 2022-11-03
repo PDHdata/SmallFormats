@@ -34,11 +34,17 @@ class Deck(models.Model):
         ]
 
     def commanders(self):
-        return self.card_list.filter(is_pdh_commander=True)
+        return (
+            self.card_list
+            .filter(is_pdh_commander=True)
+            .select_related('card')
+        )
     
     def identity(self):
         cmdr_identities = (
-            self.card_list.filter(is_pdh_commander=True)
+            self.card_list
+            .filter(is_pdh_commander=True)
+            .select_related('card')
             .aggregate(
                 white=models.Count('card', filter=Q(card__identity_w=True)),
                 blue= models.Count('card', filter=Q(card__identity_u=True)),
@@ -55,6 +61,7 @@ class Deck(models.Model):
     def identity_w(self):
         return (
             self.card_list
+            .select_related('card')
             .filter(is_pdh_commander=True)
             .filter(card__identity_w=True)
             .count() > 0
@@ -63,6 +70,7 @@ class Deck(models.Model):
     def identity_u(self):
         return (
             self.card_list
+            .select_related('card')
             .filter(is_pdh_commander=True)
             .filter(card__identity_u=True)
             .count() > 0
@@ -71,6 +79,7 @@ class Deck(models.Model):
     def identity_b(self):
         return (
             self.card_list
+            .select_related('card')
             .filter(is_pdh_commander=True)
             .filter(card__identity_b=True)
             .count() > 0
@@ -79,6 +88,7 @@ class Deck(models.Model):
     def identity_r(self):
         return (
             self.card_list
+            .select_related('card')
             .filter(is_pdh_commander=True)
             .filter(card__identity_r=True)
             .count() > 0
@@ -87,6 +97,7 @@ class Deck(models.Model):
     def identity_g(self):
         return (
             self.card_list
+            .select_related('card')
             .filter(is_pdh_commander=True)
             .filter(card__identity_g=True)
             .count() > 0
