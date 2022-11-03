@@ -37,13 +37,19 @@ class Deck(models.Model):
         return self.card_list.filter(is_pdh_commander=True)
     
     def identity(self):
-        # TODO: fix ugly n+1 query
+        cmdr_identities = (
+            self.card_list.filter(is_pdh_commander=True)
+            .aggregate(
+                white=models.Count('card', filter=Q(card__identity_w=True)),
+                blue= models.Count('card', filter=Q(card__identity_u=True)),
+                black=models.Count('card', filter=Q(card__identity_b=True)),
+                red=  models.Count('card', filter=Q(card__identity_r=True)),
+                green=models.Count('card', filter=Q(card__identity_g=True)),
+            )
+        )
+
         return {
-            'white': self.commanders().filter(card__identity_w=True).count() > 0,
-            'blue':  self.commanders().filter(card__identity_u=True).count() > 0,
-            'black': self.commanders().filter(card__identity_b=True).count() > 0,
-            'red':   self.commanders().filter(card__identity_r=True).count() > 0,
-            'green': self.commanders().filter(card__identity_g=True).count() > 0,
+            k: v > 0 for k, v in cmdr_identities.items()
         }
     
     def identity_w(self):
