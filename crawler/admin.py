@@ -2,12 +2,6 @@ from django.contrib import admin
 from . import models
 
 
-class DeckCrawlResultInline(admin.StackedInline):
-    model = models.DeckCrawlResult
-
-class CrawlRunAdmin(admin.ModelAdmin):
-    inlines = (
-        DeckCrawlResultInline,
-    )
-
-admin.site.register(models.CrawlRun, CrawlRunAdmin)
+admin.site.register(models.CrawlRun)
+# this would be a nice inline if it were paginated
+admin.site.register(models.DeckCrawlResult)

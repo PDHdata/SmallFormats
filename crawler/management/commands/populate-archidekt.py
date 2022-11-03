@@ -7,6 +7,9 @@ from django.db import transaction
 from ._api_helpers import HEADERS, ARCHIDEKT_API_BASE
 
 
+# there is no point in backing off any further than this, just cancel the run
+MAX_SLEEP_TIME = 16
+
 def format_response_error(response):
     result = f"{response.status_code} accessing {response.request.url}\n\n"
     for hdr, value in response.headers.items():
@@ -69,6 +72,12 @@ class Command(BaseCommand):
                 if 200 <= response.status_code < 300:
                     envelope = response.json()
                     cards = envelope['cards']
+                    self._process_deck(crawl_result, cards)
+                elif response.status_code == 429 and sleep_time < MAX_SLEEP_TIME:
+                    sleep_time = sleep_time * 2
+                    self.stdout.write(f"Got 429, slowing to {sleep_time}s.")
+                elif response.status_code == 400:
+                    self.stderr.write(f"Got 400, skipping {crawl_result.url}")
                 else:
                     run.state = CrawlRun.State.ERROR
                     run.note = format_response_error(response)
@@ -76,7 +85,6 @@ class Command(BaseCommand):
                     self.stderr.write(f"HTTP error {response.status_code} accessing {response.request.url}")
 
                 if run.state == CrawlRun.State.FETCHING_DECKLISTS:
-                    self._process_deck(crawl_result, cards)
                     self.stdout.write(f"Sleeping {sleep_time}s.")
                     time.sleep(sleep_time)
             
