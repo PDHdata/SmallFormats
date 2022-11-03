@@ -1,0 +1,2 @@
+{% for deck in decks %}{{ deck.name|safe }} {% for p in deck.commanders %}[{{ p.card.name|safe }}] {% endfor %}
+{% endfor %}

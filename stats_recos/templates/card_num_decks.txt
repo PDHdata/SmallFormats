@@ -1,0 +1,2 @@
+{% for card in cards %}{{ card.name|safe }} (in {{ card.num_decks }} decks)
+{% endfor %}
