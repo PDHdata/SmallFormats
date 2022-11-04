@@ -1,0 +1,9 @@
+{% extends 'base.html' %}
+{% block body %}
+<p>
+{% for color in colors %}
+<a href="{% url color.1 %}">{{ color.0.title }}</a>
+{% autoescape off %}{% cycle '|' '|' '|' '<br>' %}{% endautoescape %}
+{% endfor %}
+</p>
+{% endblock %}
