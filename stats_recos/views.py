@@ -14,7 +14,7 @@ def top_commanders(request):
 
     return render(
         request,
-        "card_num_decks.html",
+        "card_num_commands.html",
         context={
             'cards': cmdr_cards[:10],
         },

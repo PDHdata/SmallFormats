@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 {% block body %}
 {% for card in cards %}
-<p>{{ card.name }} (helms {{ card.num_decks }} decks)</p>
+<p>{{ card.name }} [{{ card.color_identity }}] (helms {{ card.num_decks }} decks)</p>
 {% empty %}
 <p>Sorry, no commanders like that.</p>
 {% endfor %}
