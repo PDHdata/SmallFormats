@@ -1,6 +1,7 @@
 {% extends 'base.html' %}
 {% load simple_math %}
 {% block body %}
+<h1>Cards</h1>
 <table>
   <tr>
     <th>#</th>
@@ -18,7 +19,7 @@
     <td>{{ card.num_decks|percent_of:deck_count }}</td>
   </tr>
   {% empty %}
-  <tr><td colspan="5">Sorry, no commanders like that.</td></tr>
+  <tr><td colspan="5">Sorry, no cards found.</td></tr>
   {% endfor %}
   <tr>
     <td></td>

@@ -8,6 +8,7 @@ urlpatterns = (
     path('', views.stats_index, name="index"),
     path('cmdr/', views.commander_index, name="cmdr"),
     path('land/', views.land_index, name="land"),
+    path('card/', views.card_index, name="card"),
 ] +
 [
     path(f'cmdr/{name}/', views.commanders_by_color, filters, name=f'cmdr-{name}')
@@ -18,8 +19,12 @@ urlpatterns = (
     for name, _, filters in COLORS
 ] +
 [
+    path(f'card/{name}/', views.cards_by_color, filters, name=f'card-{name}')
+    for name, _, filters in COLORS
+] +
+[
     path('cmdr/top/', views.top_commanders, name="cmdr-top"),
-    path('cards/top/', views.top_cards, name="top-cards"),
+    path('card/top/', views.top_cards, name="card-top"),
     path('land/top/', views.top_lands, name="land-top"),
     path('partner_decks/', views.partner_decks, name="partner-decks"),
 ])
