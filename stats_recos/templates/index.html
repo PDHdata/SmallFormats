@@ -1,0 +1,10 @@
+{% extends 'base.html' %}
+{% block body %}
+<h1>SmallFormats – Stats</h1>
+<p>
+  {% for link in links %}
+  <a href="{{ link.1|safe }}">{{ link.0 }}</a>
+  {% if not forloop.last %}|{% endif %}
+  {% endfor %}
+</p>
+{% endblock %}

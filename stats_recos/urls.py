@@ -5,8 +5,9 @@ from .wubrg_utils import COLORS
 
 urlpatterns = (
 [
-    path('cmdr/', views.commander_colors, name="cmdr"),
-    path('land/', views.land_colors, name="land"),
+    path('', views.stats_index, name="index"),
+    path('cmdr/', views.commander_index, name="cmdr"),
+    path('land/', views.land_index, name="land"),
 ] +
 [
     path(f'cmdr/{name}/', views.commanders_by_color, filters, name=f'cmdr-{name}')

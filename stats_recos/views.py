@@ -1,7 +1,24 @@
 from django.shortcuts import render
+from django.urls import reverse
 from django.db.models import Count, Sum, Q
 from decklist.models import Card, Deck, Printing
 from .wubrg_utils import COLORS
+
+
+def stats_index(request):
+    links = (
+        ('Top cards', reverse('top-cards')),
+        ('Commanders', reverse('cmdr')),
+        ('Lands', reverse('land')),
+        ('Partner decks', reverse('partner-decks')),
+    )
+    return render(
+        request,
+        "index.html",
+        context={
+            'links': links,
+        },
+    )
 
 
 def top_cards(request):
@@ -38,7 +55,7 @@ def partner_decks(request):
     )
 
 
-def commander_colors(request):
+def commander_index(request):
     return render(
         request,
         "commander_colors.html",
@@ -105,7 +122,7 @@ def commanders_by_color(request, w=False, u=False, b=False, r=False, g=False):
     )
 
 
-def land_colors(request):
+def land_index(request):
     return render(
         request,
         "land_colors.html",
