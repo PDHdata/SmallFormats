@@ -105,6 +105,18 @@ def commanders_by_color(request, w=False, u=False, b=False, r=False, g=False):
     )
 
 
+def land_colors(request):
+    return render(
+        request,
+        "land_colors.html",
+        context={
+            'colors': [
+                (c[0], f'land-{c[0]}') for c in COLORS
+            ],
+        },
+    )
+
+
 def top_lands(request):
     land_cards = (
         Card.objects

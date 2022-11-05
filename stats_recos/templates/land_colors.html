@@ -1,8 +1,8 @@
 {% extends 'base.html' %}
 {% block body %}
-<h1>Commanders</h1>
+<h1>Lands</h1>
 <p>
-<a href="{% url 'cmdr-top' %}">Any color</a><br>
+<a href="{% url 'land-top' %}">Any color</a><br>
 {% for color in colors %}
 <a href="{% url color.1 %}">{{ color.0.title }}</a>
 {% autoescape off %}{% cycle '|' '|' '|' '<br>' %}{% endautoescape %}
