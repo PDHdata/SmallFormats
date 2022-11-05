@@ -123,3 +123,30 @@ def top_lands(request):
             'deck_count': deck_count,
         },
     )
+
+
+def lands_by_color(request, w=False, u=False, b=False, r=False, g=False):
+    land_cards = (
+        Card.objects
+        .filter(
+            type_line__contains='Land',
+            identity_w=w,
+            identity_u=u,
+            identity_b=b,
+            identity_r=r,
+            identity_g=g,
+        )
+        .annotate(num_decks=Count('deck_list'))
+        .order_by('-num_decks')
+        .filter(num_decks__gt=0)
+    )
+    deck_count = Deck.objects.count()
+
+    return render(
+        request,
+        "lands.html",
+        context={
+            'cards': land_cards,
+            'deck_count': deck_count,
+        },
+    )

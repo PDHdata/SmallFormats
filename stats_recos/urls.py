@@ -12,8 +12,12 @@ urlpatterns = (
     for name, _, filters in COLORS
 ] +
 [
+    path(f'lands/{name}/', views.lands_by_color, filters, name=f'land-{name}')
+    for name, _, filters in COLORS
+] +
+[
     path('cmdr/top/', views.top_commanders, name="cmdr-top"),
     path('cards/top/', views.top_cards, name="top-cards"),
-    path('lands/top/', views.top_lands, name="top-lands"),
+    path('lands/top/', views.top_lands, name="land-top"),
     path('partner_decks/', views.partner_decks, name="partner-decks"),
 ])
