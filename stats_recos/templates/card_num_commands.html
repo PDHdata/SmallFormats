@@ -1,8 +1,31 @@
 {% extends 'base.html' %}
+{% load simple_math %}
 {% block body %}
-{% for card in cards %}
-<p>{{ card.name }} [{{ card.color_identity }}] (helms {{ card.num_decks }} decks)</p>
-{% empty %}
-<p>Sorry, no commanders like that.</p>
-{% endfor %}
+<table>
+  <tr>
+    <th>#</th>
+    <th>Name</th>
+    <th>Color identity</th>
+    <th># of decks</th>
+    <th>% of decks</th>
+  </tr>
+  {% for card in cards %}
+  <tr>
+    <td>{{ forloop.counter }}</td>
+    <td>{{ card.name }}</td>
+    <td>{{ card.color_identity }}</td>
+    <td>{{ card.num_decks }}</td>
+    <td>{{ card.num_decks|percent_of:deck_count }}</td>
+  </tr>
+  {% empty %}
+  <tr><td colspan="5">Sorry, no commanders like that.</td></tr>
+  {% endfor %}
+  <tr>
+    <td></td>
+    <th></th>
+    <th></th>
+    <th>{{ deck_count }}</th>
+    <th>100%</th>
+  </tr>
+</table>
 {% endblock %}

@@ -1,5 +1,5 @@
 from django.shortcuts import render
-from django.db.models import Count, Q
+from django.db.models import Count, Sum, Q
 from decklist.models import Card, Deck, Printing
 from .wubrg_utils import COLORS
 
@@ -11,12 +11,14 @@ def top_commanders(request):
         .annotate(num_decks=Count('deck_list'))
         .order_by('-num_decks')
     )
+    deck_count = Deck.objects.count()
 
     return render(
         request,
         "card_num_commands.html",
         context={
             'cards': cmdr_cards[:10],
+            'deck_count': deck_count,
         },
     )
 
@@ -91,11 +93,13 @@ def commanders_by_color(request, w=False, u=False, b=False, r=False, g=False):
         .filter(num_decks__gt=0)
         .order_by('-num_decks')
     )
+    decks_of_color = cmdrs.aggregate(Sum('num_decks'))['num_decks__sum']
 
     return render(
         request,
         "card_num_commands.html",
         context={
             'cards': cmdrs,
+            'deck_count': decks_of_color,
         },
     )
