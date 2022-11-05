@@ -13,6 +13,7 @@ urlpatterns = (
 ] +
 [
     path('cmdr/top/', views.top_commanders, name="cmdr-top"),
-    path('top_cards/', views.top_cards, name="top-cards"),
+    path('cards/top/', views.top_cards, name="top-cards"),
+    path('lands/top/', views.top_lands, name="top-lands"),
     path('partner_decks/', views.partner_decks, name="partner-decks"),
 ])
