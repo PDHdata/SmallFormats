@@ -4,25 +4,6 @@ from decklist.models import Card, Deck, Printing
 from .wubrg_utils import COLORS
 
 
-def top_commanders(request):
-    cmdr_cards = (
-        Card.objects
-        .filter(deck_list__is_pdh_commander=True)
-        .annotate(num_decks=Count('deck_list'))
-        .order_by('-num_decks')
-    )
-    deck_count = Deck.objects.count()
-
-    return render(
-        request,
-        "card_num_commands.html",
-        context={
-            'cards': cmdr_cards[:10],
-            'deck_count': deck_count,
-        },
-    )
-
-
 def top_cards(request):
     cards = (
         Card.objects
@@ -65,6 +46,25 @@ def commander_colors(request):
             'colors': [
                 (c[0], f'cmdr-{c[0]}') for c in COLORS
             ],
+        },
+    )
+
+
+def top_commanders(request):
+    cmdr_cards = (
+        Card.objects
+        .filter(deck_list__is_pdh_commander=True)
+        .annotate(num_decks=Count('deck_list'))
+        .order_by('-num_decks')
+    )
+    deck_count = Deck.objects.count()
+
+    return render(
+        request,
+        "card_num_commands.html",
+        context={
+            'cards': cmdr_cards[:10],
+            'deck_count': deck_count,
         },
     )
 
