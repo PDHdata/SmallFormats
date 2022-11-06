@@ -1,11 +1,18 @@
 from django.shortcuts import render
-from django.urls import reverse
+from django.urls import reverse_lazy
 from django.db.models import Count, Q
 from decklist.models import Card, Deck, Printing, CardInDeck
 from .wubrg_utils import COLORS
 import operator
 import functools
 
+
+_LINKS = (
+    ('Cards', reverse_lazy('card')),
+    ('Commanders', reverse_lazy('cmdr')),
+    ('Lands', reverse_lazy('land')),
+    ('Partner decks', reverse_lazy('partner-decks')),
+)
 
 def _deck_count_exact_color(w, u, b, r, g):
     return (
@@ -47,17 +54,11 @@ def _deck_count_at_least_color(w, u, b, r, g):
 
 
 def stats_index(request):
-    links = (
-        ('Cards', reverse('card')),
-        ('Commanders', reverse('cmdr')),
-        ('Lands', reverse('land')),
-        ('Partner decks', reverse('partner-decks')),
-    )
     return render(
         request,
         "index.html",
         context={
-            'links': links,
+            'links': _LINKS,
         },
     )
 
@@ -76,6 +77,7 @@ def partner_decks(request):
         "partner_decks.html",
         context={
             'decks': partner_decks[:20],
+            'links': _LINKS,
         },
     )
 
@@ -88,6 +90,7 @@ def commander_index(request):
             'colors': [
                 (c[0], f'cmdr-{c[0]}') for c in COLORS
             ],
+            'links': _LINKS,
         },
     )
 
@@ -107,6 +110,7 @@ def top_commanders(request):
         context={
             'cards': cmdr_cards[:10],
             'deck_count': deck_count,
+            'links': _LINKS,
         },
     )
 
@@ -143,6 +147,7 @@ def commanders_by_color(request, w=False, u=False, b=False, r=False, g=False):
             'cards': cmdrs,
             # TODO: probably fails to account for partners
             'deck_count': _deck_count_exact_color(w, u, b, r, g),
+            'links': _LINKS,
         },
     )
 
@@ -155,6 +160,7 @@ def land_index(request):
             'colors': [
                 (c[0], f'land-{c[0]}') for c in COLORS
             ],
+            'links': _LINKS,
         },
     )
 
@@ -175,6 +181,7 @@ def top_lands(request):
         context={
             'cards': land_cards,
             'deck_count': deck_count,
+            'links': _LINKS,
         },
     )
 
@@ -201,6 +208,7 @@ def lands_by_color(request, w=False, u=False, b=False, r=False, g=False):
         context={
             'cards': land_cards,
             'deck_count': _deck_count_at_least_color(w, u, b, r, g),
+            'links': _LINKS,
         },
     )
 
@@ -213,6 +221,7 @@ def card_index(request):
             'colors': [
                 (c[0], f'card-{c[0]}') for c in COLORS
             ],
+            'links': _LINKS,
         },
     )
 
@@ -231,6 +240,7 @@ def top_cards(request):
         context={
             'cards': cards[:20],
             'deck_count': deck_count,
+            'links': _LINKS,
         },
     )
 
@@ -256,5 +266,6 @@ def cards_by_color(request, w=False, u=False, b=False, r=False, g=False):
         context={
             'cards': card_cards,
             'deck_count': _deck_count_at_least_color(w, u, b, r, g),
+            'links': _LINKS,
         },
     )

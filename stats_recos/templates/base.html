@@ -8,9 +8,24 @@
     <link href="{% static 'bs/bootstrap.min.css' %}" rel="stylesheet">
   </head>
   <body style="padding-top: 3.5rem">
-    <nav class="navbar fixed-top navbar-dark bg-dark">
+    <nav class="navbar fixed-top navbar-dark bg-dark navbar-expand-sm">
       <div class="container-fluid">
-        <a class="navbar-brand" href="{% url 'index' %}">SmallFormats</a>
+        <a class="navbar-brand" href="{% url 'index' %}">SmallFormats</a>    
+        {% if links %}
+        <button class="navbar-toggler" type="button"
+          data-bs-toggle="collapse" data-bs-target="#topNav"
+          aria-controls="topNav" aria-expanded="false"
+          aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="navbar-collapse collapse" id="topNav">
+          <div class="navbar-nav">
+          {% for link in links %}
+          <a href="{{ link.1|safe }}" class="nav-link">{{ link.0 }}</a>
+          {% endfor %}
+          </div>
+        </div>
+        {% endif %}
       </div>
     </nav>
     <div class="container-fluid">
