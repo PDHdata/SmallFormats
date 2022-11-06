@@ -1,11 +1,21 @@
 <!doctype html>
+{% load static %}
 <html lang="en">
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>{% block title %}SmallFormats{% endblock %}</title>
+    <link href="{% static 'bs/bootstrap.min.css' %}" rel="stylesheet">
   </head>
-  <body>
+  <body style="padding-top: 3.5rem">
+    <nav class="navbar fixed-top navbar-dark bg-dark">
+      <div class="container-fluid">
+        <a class="navbar-brand" href="{% url 'index' %}">SmallFormats</a>
+      </div>
+    </nav>
+    <div class="container-fluid">
   {% block body %}{% endblock %}
+    </div>
+  <script src="{% static 'bs/bootstrap.bundle.min.js' %}"></script>
   </body>
 </html>
