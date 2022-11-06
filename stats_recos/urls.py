@@ -25,6 +25,7 @@ urlpatterns = (
 [
     path('cmdr/top/', views.top_commanders, name="cmdr-top"),
     path('card/top/', views.top_cards, name="card-top"),
+    path('card/<uuid:card_id>', views.single_card, name="card-single"),
     path('land/top/', views.top_lands, name="land-top"),
     path('partner_decks/', views.partner_decks, name="partner-decks"),
 ])

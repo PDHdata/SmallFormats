@@ -1,4 +1,4 @@
-from django.shortcuts import render
+from django.shortcuts import render, get_object_or_404
 from django.urls import reverse_lazy
 from django.db.models import Count, Q
 from decklist.models import Card, Deck, Printing, CardInDeck
@@ -279,6 +279,19 @@ def cards_by_color(request, w=False, u=False, b=False, r=False, g=False):
         context={
             'cards': card_cards,
             'deck_count': _deck_count_at_least_color(w, u, b, r, g),
+            'links': _LINKS,
+        },
+    )
+
+
+def single_card(request, card_id):
+    card = get_object_or_404(Card, pk=card_id)
+
+    return render(
+        request,
+        "single_card.html",
+        context={
+            'card': card,
             'links': _LINKS,
         },
     )
