@@ -7,11 +7,24 @@ import operator
 import functools
 
 
+_CARDS_LINKS = (
+    ('Top cards', reverse_lazy('card-top')),
+    ('All cards', reverse_lazy('card')),
+ )
+_CMDRS_LINKS = (
+    ('Top commanders', reverse_lazy('cmdr-top')),
+    ('All commanders', reverse_lazy('cmdr')),
+ )
+_LANDS_LINKS = (
+    ('Top lands', reverse_lazy('land-top')),
+    ('All lands ', reverse_lazy('land')),
+ )
 _LINKS = (
-    ('Cards', reverse_lazy('card')),
-    ('Commanders', reverse_lazy('cmdr')),
-    ('Lands', reverse_lazy('land')),
-    ('Partner decks', reverse_lazy('partner-decks')),
+    # menu? title    link or menu items
+    (True,  'Cards', _CARDS_LINKS),
+    (True,  'Commanders', _CMDRS_LINKS),
+    (True,  'Lands', _LANDS_LINKS),
+    (False, 'Partner decks', reverse_lazy('partner-decks')),
 )
 
 def _deck_count_exact_color(w, u, b, r, g):
