@@ -1,9 +1,26 @@
 from django.shortcuts import render
 from django.urls import reverse
-from django.db.models import Count, Sum, Q
-from decklist.models import Card, Deck, Printing
+from django.db.models import Count, Q
+from decklist.models import Card, Deck, Printing, CardInDeck
 from .wubrg_utils import COLORS
 
+
+def _deck_count_exact_color(w, u, b, r, g):
+    return (
+        CardInDeck.objects
+        .filter(is_pdh_commander=True)
+        .aggregate(count=(
+            Count('deck',
+            filter=
+                Q(card__identity_w=w) & 
+                Q(card__identity_u=u) &
+                Q(card__identity_b=b) &
+                Q(card__identity_r=r) &
+                Q(card__identity_g=g),
+            distinct=True,
+            ))
+        )
+    )['count']
 
 def stats_index(request):
     links = (
@@ -94,15 +111,14 @@ def commanders_by_color(request, w=False, u=False, b=False, r=False, g=False):
         .filter(num_decks__gt=0)
         .order_by('-num_decks')
     )
-    # FIXME: this math is wrong, it doesn't count distinct decks
-    decks_of_color = cmdrs.aggregate(Sum('num_decks'))['num_decks__sum']
 
     return render(
         request,
         "commanders.html",
         context={
             'cards': cmdrs,
-            'deck_count': decks_of_color,
+            # TODO: probably fails to account for partners
+            'deck_count': _deck_count_exact_color(w, u, b, r, g),
         },
     )
 
