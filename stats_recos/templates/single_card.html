@@ -4,4 +4,14 @@
 <h1>{{ card.name }}</h1>
 <p>{{ card.type_line }}</p>
 <p>In {{ is_in }} of {{ could_be_in }} decks ({{ is_in|percent_of:could_be_in }}).</p>
+{% if commanders %}
+<p>
+  Commanders:
+  <ul>
+    {% for cmdr, count in commanders %}
+    <li><a href="{% url 'card-single' cmdr.id %}">{{ cmdr.name }}</a> ({{ count }})</li>
+    {% endfor %}
+  </ul>
+</p>
+{% endif %}
 {% endblock %}

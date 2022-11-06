@@ -5,6 +5,7 @@ from decklist.models import Card, Deck, Printing, CardInDeck
 from .wubrg_utils import COLORS
 import operator
 import functools
+from collections import Counter
 
 
 _CARDS_LINKS = (
@@ -141,6 +142,7 @@ def commanders_by_color(request, w=False, u=False, b=False, r=False, g=False):
         )
         .filter(
             # TODO: banlist? silver cards which say "Summon"?
+            # TODO: backgrounds
             type_line__contains='Creature',
             printings__rarity=Printing.Rarity.UNCOMMON,
         )
@@ -298,16 +300,21 @@ def single_card(request, card_id):
     is_in = (
         Deck.objects
         .filter(card_list__card=card)
-        .count()
     )
+
+    cmdrs = Counter()
+    for deck in is_in:
+        for cmdr in deck.commanders():
+            cmdrs[cmdr.card] += 1
 
     return render(
         request,
         "single_card.html",
         context={
             'card': card,
-            'is_in': is_in,
+            'is_in': is_in.count(),
             'could_be_in': could_be_in,
+            'commanders': cmdrs.most_common(),
             'links': _LINKS,
         },
     )
