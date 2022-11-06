@@ -3,6 +3,8 @@ from django.urls import reverse
 from django.db.models import Count, Q
 from decklist.models import Card, Deck, Printing, CardInDeck
 from .wubrg_utils import COLORS
+import operator
+import functools
 
 
 def _deck_count_exact_color(w, u, b, r, g):
@@ -21,6 +23,28 @@ def _deck_count_exact_color(w, u, b, r, g):
             ))
         )
     )['count']
+
+
+def _deck_count_at_least_color(w, u, b, r, g):
+    if not any([w, u, b, r, g]):
+        return Deck.objects.count()
+
+    # build up a filter for the aggregation
+    # that has a Q object set to True for each color we
+    # care about and nothing for the colors which we don't
+    q_objs = []
+    for c in 'wubrg':
+        if locals()[c]:
+            key = f'card__identity_{c}'
+            q_objs.append(Q(**dict([(key,True),])))
+    filter_q = functools.reduce(operator.and_, q_objs)
+
+    return (
+        CardInDeck.objects
+        .filter(is_pdh_commander=True)
+        .aggregate(count=Count('deck', filter=filter_q, distinct=True))
+    )['count']
+
 
 def stats_index(request):
     links = (
@@ -170,14 +194,13 @@ def lands_by_color(request, w=False, u=False, b=False, r=False, g=False):
         .order_by('-num_decks')
         .filter(num_decks__gt=0)
     )
-    deck_count = Deck.objects.count()
 
     return render(
         request,
         "lands.html",
         context={
             'cards': land_cards,
-            'deck_count': deck_count,
+            'deck_count': _deck_count_at_least_color(w, u, b, r, g),
         },
     )
 
@@ -226,14 +249,12 @@ def cards_by_color(request, w=False, u=False, b=False, r=False, g=False):
         .order_by('-num_decks')
         .filter(num_decks__gt=0)
     )
-    # TODO: count how many decks contain this color identity
-    deck_count = 0
 
     return render(
         request,
         "cards.html",
         context={
             'cards': card_cards,
-            'deck_count': deck_count,
+            'deck_count': _deck_count_at_least_color(w, u, b, r, g),
         },
     )
