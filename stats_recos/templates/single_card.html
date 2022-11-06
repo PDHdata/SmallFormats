@@ -3,4 +3,5 @@
 {% block body %}
 <h1>{{ card.name }}</h1>
 <p>{{ card.type_line }}</p>
+<p>In {{ is_in }} of {{ could_be_in }} decks ({{ is_in|percent_of:could_be_in }}).</p>
 {% endblock %}

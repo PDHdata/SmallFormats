@@ -287,11 +287,27 @@ def cards_by_color(request, w=False, u=False, b=False, r=False, g=False):
 def single_card(request, card_id):
     card = get_object_or_404(Card, pk=card_id)
 
+    could_be_in = _deck_count_at_least_color(
+        card.identity_w,
+        card.identity_u,
+        card.identity_b,
+        card.identity_r,
+        card.identity_g
+    )
+
+    is_in = (
+        Deck.objects
+        .filter(card_list__card=card)
+        .count()
+    )
+
     return render(
         request,
         "single_card.html",
         context={
             'card': card,
+            'is_in': is_in,
+            'could_be_in': could_be_in,
             'links': _LINKS,
         },
     )
