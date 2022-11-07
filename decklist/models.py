@@ -140,6 +140,13 @@ class Card(models.Model):
         return self.printings.filter(
             rarity=Printing.Rarity.UNCOMMON
         ).count() > 0
+    
+    @property
+    def image_uri(self):
+        try:
+            return self.printings.all()[0].image_uri
+        except IndexError:
+            return None
 
 
 class Printing(models.Model):
