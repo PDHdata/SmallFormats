@@ -1,4 +1,5 @@
 from django.db import models
+from django.db.models import Q
 from django.contrib.auth.models import AbstractUser
 from django.utils import timezone
 
@@ -31,6 +32,76 @@ class Deck(models.Model):
                 name='one_entry_per_deck',
             ),
         ]
+
+    def commanders(self):
+        return (
+            self.card_list
+            .filter(is_pdh_commander=True)
+            .select_related('card')
+        )
+    
+    def identity(self):
+        cmdr_identities = (
+            self.card_list
+            .filter(is_pdh_commander=True)
+            .select_related('card')
+            .aggregate(
+                white=models.Count('card', filter=Q(card__identity_w=True)),
+                blue= models.Count('card', filter=Q(card__identity_u=True)),
+                black=models.Count('card', filter=Q(card__identity_b=True)),
+                red=  models.Count('card', filter=Q(card__identity_r=True)),
+                green=models.Count('card', filter=Q(card__identity_g=True)),
+            )
+        )
+
+        return {
+            k: v > 0 for k, v in cmdr_identities.items()
+        }
+    
+    def identity_w(self):
+        return (
+            self.card_list
+            .select_related('card')
+            .filter(is_pdh_commander=True)
+            .filter(card__identity_w=True)
+            .count() > 0
+        )
+    
+    def identity_u(self):
+        return (
+            self.card_list
+            .select_related('card')
+            .filter(is_pdh_commander=True)
+            .filter(card__identity_u=True)
+            .count() > 0
+        )
+    
+    def identity_b(self):
+        return (
+            self.card_list
+            .select_related('card')
+            .filter(is_pdh_commander=True)
+            .filter(card__identity_b=True)
+            .count() > 0
+        )
+    
+    def identity_r(self):
+        return (
+            self.card_list
+            .select_related('card')
+            .filter(is_pdh_commander=True)
+            .filter(card__identity_r=True)
+            .count() > 0
+        )
+    
+    def identity_g(self):
+        return (
+            self.card_list
+            .select_related('card')
+            .filter(is_pdh_commander=True)
+            .filter(card__identity_g=True)
+            .count() > 0
+        )
 
 
 class Card(models.Model):

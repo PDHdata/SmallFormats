@@ -1,0 +1,24 @@
+<nav class="navbar fixed-top navbar-dark bg-dark navbar-expand-sm">
+  <div class="container-fluid">
+    <a class="navbar-brand" href="{% url 'index' %}">SmallFormats</a>    
+    {% if links %}
+    <button class="navbar-toggler" type="button"
+      data-bs-toggle="collapse" data-bs-target="#topNav"
+      aria-controls="topNav" aria-expanded="false"
+      aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="navbar-collapse collapse" id="topNav">
+      <div class="navbar-nav">
+        {% for link in links %}
+          {% if link.0 %}
+          {% include '_nav_item_menu.html' %}
+          {% else %}
+          {% include '_nav_item.html' %}
+          {% endif %}
+        {% endfor %}
+      </div>{#/navbar-nav#}
+    </div>{#/topNav#}
+    {% endif %}
+  </div>
+</nav>

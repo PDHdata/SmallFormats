@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+{% block body %}
+<h1>Partner decks</h1>
+{% for deck in decks %}
+<p>
+  {{ deck.name }}
+  {% for p in deck.commanders %}<br>[<a href="{% url 'card-single' p.card.id %}">{{ p.card.name|safe }}</a>] {% endfor %}
+</p>
+{% endfor %}
+<p>
+  {% if decks.has_previous %}
+  <a href="?page=1">first</a>
+  <a href="?page={{ decks.previous_page_number }}">previous</a>
+  {% endif %}
+  (page {{ decks.number }} of {{ decks.paginator.num_pages }})
+  {% if decks.has_next %}
+  <a href="?page={{ decks.next_page_number }}">next</a>
+  <a href="?page={{ decks.paginator.num_pages }}">last</a>
+  {% endif %}
+</p>
+{% endblock %}

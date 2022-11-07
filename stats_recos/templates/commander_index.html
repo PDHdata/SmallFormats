@@ -1,0 +1,11 @@
+{% extends 'base.html' %}
+{% block body %}
+<h1>Commanders</h1>
+<p>
+<a href="{% url 'cmdr-top' %}">Any color</a><br>
+{% for color in colors %}
+<a href="{% url color.1 %}">{{ color.0.title }}</a>
+{% autoescape off %}{% cycle '|' '|' '|' '<br>' %}{% endautoescape %}
+{% endfor %}
+</p>
+{% endblock %}

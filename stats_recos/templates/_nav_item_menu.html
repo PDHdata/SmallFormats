@@ -1,0 +1,11 @@
+<div class="nav-item dropdown">
+  <a class="nav-link dropdown-toggle" href="#" role="button"
+    data-bs-toggle="dropdown" aria-expanded="false">
+    {{ link.1 }}
+  </a>
+  <ul class="dropdown-menu">
+    {% for item in link.2 %}
+    <li><a class="dropdown-item" href="{{ item.1|safe }}">{{ item.0 }}</a></li>
+    {% endfor %}
+  </ul>
+</div>

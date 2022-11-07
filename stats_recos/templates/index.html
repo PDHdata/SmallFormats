@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+{% block body %}
+<h1>SmallFormats – Stats</h1>
+<p>
+  {% for link in links %}
+  {% if link.0 %}
+  {% for item in link.2 %}
+  <a href="{{ item.1|safe }}">{{ item.0 }}</a>
+  {% if not forloop.last %}|{% endif %}
+  {% endfor %}
+  {% else %}
+  <a href="{{ link.2|safe }}">{{ link.1 }}</a>
+  {% endif %}
+  {% if not forloop.last %}|{% endif %}
+  {% endfor %}
+</p>
+{% endblock %}
