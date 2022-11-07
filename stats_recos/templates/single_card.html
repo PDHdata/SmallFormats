@@ -17,6 +17,15 @@
     <li><a href="{% url 'card-single' cmdr.card__id %}">{{ cmdr.card__name }}</a> ({{ cmdr.count }})</li>
     {% endfor %}
   </ul>
+  {% if commanders.has_previous %}
+  <a href="?page=1">first</a>
+  <a href="?page={{ commanders.previous_page_number }}">previous</a>
+  {% endif %}
+  (page {{ commanders.number }} of {{ commanders.paginator.num_pages }})
+  {% if commanders.has_next %}
+  <a href="?page={{ commanders.next_page_number }}">next</a>
+  <a href="?page={{ commanders.paginator.num_pages }}">last</a>
+  {% endif %}
 </p>
 {% endif %}
 {% endblock %}

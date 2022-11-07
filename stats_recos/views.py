@@ -1,6 +1,7 @@
 from django.shortcuts import render, get_object_or_404
 from django.urls import reverse_lazy
 from django.db.models import Count, Q
+from django.core.paginator import Paginator
 from decklist.models import Card, Deck, Printing, CardInDeck
 from .wubrg_utils import COLORS
 import operator
@@ -322,6 +323,9 @@ def single_card(request, card_id):
         .values('count', 'card__id', 'card__name')
         .order_by('-count')
     )
+    paginator = Paginator(cmdrs, 25, orphans=3)
+    page_number = request.GET.get('page')
+    cmdrs_page = paginator.get_page(page_number)
 
     return render(
         request,
@@ -331,7 +335,7 @@ def single_card(request, card_id):
             'is_in': is_in.count(),
             'commands': commands.count(),
             'could_be_in': could_be_in,
-            'commanders': cmdrs,
+            'commanders': cmdrs_page,
             'links': _LINKS,
         },
     )
