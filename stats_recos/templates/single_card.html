@@ -2,7 +2,18 @@
 {% load simple_math %}
 {% block body %}
 <h1>{{ card.name }}</h1>
-<p>{{ card.type_line }} ({{ card.color_identity }})</p>
+<p>
+  {{ card.type_line }} ({{ card.color_identity }})
+  {% if card.scryfall_uri %}<small>[<a href="{{ card.scryfall_uri }}">View on Scryfall</a>]</small>{% endif %}
+</p>
+{% if card.image_uri %}
+<p>
+<details>
+  <summary>Card image</summary>
+  <img src="{{ card.image_uri }}" loading="lazy">
+</details>
+</p>
+{% endif %}
 <p>
   Appears in {{ is_in }} of {{ could_be_in }} decks ({{ is_in|percent_of:could_be_in }}).
   {% if commands %}

@@ -3,7 +3,7 @@ See https://scryfall.com/docs/api/bulk-data for more on Scryfall data.
 """
 from django.core.management.base import BaseCommand, CommandError
 import httpx
-from ._httpx_json_stream import httpx_load
+import json_stream.httpx
 from decklist.models import Card, Printing
 from ._api_helpers import HEADERS, SCRYFALL_API_BASE
 
@@ -22,7 +22,7 @@ class Command(BaseCommand):
             self.stdout.write(f"Fetching {download_target}")
 
             with client.stream('GET', download_target) as f:
-                for json_card in httpx_load(f).persistent():
+                for json_card in json_stream.httpx.load(f).persistent():
                     for parse in [self._extract_card_and_printing, self._extract_verhey_card_and_printing]:
                         try:
                             c, p = parse(json_card)
@@ -62,6 +62,7 @@ class Command(BaseCommand):
                 identity_r="R" in json_card['color_identity'],
                 identity_g="G" in json_card['color_identity'],
                 type_line=json_card['type_line'],
+                scryfall_uri=json_card['scryfall_uri'],
             )
             p = Printing(
                 id=json_card['id'],
@@ -69,6 +70,15 @@ class Command(BaseCommand):
                 set_code=json_card['set'],
                 rarity=Printing.Rarity[json_card['rarity'].upper()],
             )
+
+            # single-faced card
+            if 'image_uris' in json_card:
+                p.image_uri = json_card['image_uris'].get('normal')
+            
+            # front of double-faced card
+            elif 'card_faces' in json_card and 'image_uris' in json_card['card_faces'][0]:
+                p.image_uri = json_card['card_faces'][0]['image_uris'].get('normal')
+                
             return c, p
         except KeyError:
             raise CantParseCardError()
@@ -88,6 +98,7 @@ class Command(BaseCommand):
                     identity_r="R" in json_card['color_identity'],
                     identity_g="G" in json_card['color_identity'],
                     type_line=face['type_line'],
+                    scryfall_uri=json_card['scryfall_uri'],
                 )
                 p = Printing(
                     id=json_card['id'],
@@ -95,6 +106,8 @@ class Command(BaseCommand):
                     set_code=json_card['set'],
                     rarity=Printing.Rarity[json_card['rarity'].upper()],
                 )
+                if 'image_uris' in face:
+                    p.image_uri = face['image_uris'].get('normal')
                 return c, p
             except Exception as ex:
                 raise CantParseCardError() from ex
