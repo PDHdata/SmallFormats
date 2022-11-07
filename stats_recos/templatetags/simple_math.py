@@ -10,5 +10,8 @@ def percent_of(numerator, denominator):
     return str(round(float(numerator) / float(denominator) * 100, 1)) + "%"
 
 @register.filter
-def intplus(value, addend):
-    return value + addend
+def plus(value, addend):
+    try:
+        return value + addend
+    except TypeError:
+        return '---'

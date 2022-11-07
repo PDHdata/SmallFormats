@@ -12,7 +12,7 @@
   </tr>
   {% for card in cards %}
   <tr>
-    <td>{{ cards.start_index|intplus:forloop.counter0 }}</td>
+    <td>{{ cards.start_index|plus:forloop.counter0 }}</td>
     <td><a href="{% url 'card-single' card.id %}">{{ card.name }}</a></td>
     <td>{{ card.color_identity }}</td>
     <td>{{ card.num_decks }}</td>
