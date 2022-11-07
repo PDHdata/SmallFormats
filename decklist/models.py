@@ -119,6 +119,7 @@ class Card(models.Model):
     identity_r = models.BooleanField(default=False, verbose_name='is R')
     identity_g = models.BooleanField(default=False, verbose_name='is G')
     type_line = models.CharField(max_length=50, blank=True)
+    scryfall_uri = models.URLField(max_length=200, blank=True)
 
     def __str__(self):
         return self.name
@@ -159,6 +160,7 @@ class Printing(models.Model):
     )
     set_code = models.CharField(max_length=5, blank=True)
     rarity = models.CharField(max_length=1, choices=Rarity.choices)
+    image_uri = models.URLField(max_length=200, blank=True)
 
     def __str__(self):
         return f"{self.card.name} ({self.set_code})"
