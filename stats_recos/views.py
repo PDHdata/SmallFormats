@@ -85,12 +85,15 @@ def partner_decks(request):
         ))
         .filter(num_cmdrs__gt=1)
     )
+    paginator = Paginator(partner_decks, 25, orphans=3)
+    page_number = request.GET.get('page')
+    decks_page = paginator.get_page(page_number)
 
     return render(
         request,
         "partner_decks.html",
         context={
-            'decks': partner_decks[:20],
+            'decks': decks_page,
             'links': _LINKS,
         },
     )
@@ -117,12 +120,15 @@ def top_commanders(request):
         .order_by('-num_decks')
     )
     deck_count = Deck.objects.count()
+    paginator = Paginator(cmdr_cards, 25, orphans=3)
+    page_number = request.GET.get('page')
+    cards_page = paginator.get_page(page_number)
 
     return render(
         request,
         "commanders.html",
         context={
-            'cards': cmdr_cards[:10],
+            'cards': cards_page,
             'deck_count': deck_count,
             'links': _LINKS,
         },
@@ -154,12 +160,15 @@ def commanders_by_color(request, w=False, u=False, b=False, r=False, g=False):
         .filter(num_decks__gt=0)
         .order_by('-num_decks')
     )
+    paginator = Paginator(cmdrs, 25, orphans=3)
+    page_number = request.GET.get('page')
+    cards_page = paginator.get_page(page_number)
 
     return render(
         request,
         "commanders.html",
         context={
-            'cards': cmdrs,
+            'cards': cards_page,
             # TODO: probably fails to account for partners
             'deck_count': _deck_count_exact_color(w, u, b, r, g),
             'links': _LINKS,
@@ -189,12 +198,15 @@ def top_lands(request):
         .filter(num_decks__gt=0)
     )
     deck_count = Deck.objects.count()
+    paginator = Paginator(land_cards, 25, orphans=3)
+    page_number = request.GET.get('page')
+    cards_page = paginator.get_page(page_number)
 
     return render(
         request,
         "lands.html",
         context={
-            'cards': land_cards,
+            'cards': cards_page,
             'deck_count': deck_count,
             'links': _LINKS,
         },
@@ -216,12 +228,15 @@ def lands_by_color(request, w=False, u=False, b=False, r=False, g=False):
         .order_by('-num_decks')
         .filter(num_decks__gt=0)
     )
+    paginator = Paginator(land_cards, 25, orphans=3)
+    page_number = request.GET.get('page')
+    cards_page = paginator.get_page(page_number)
 
     return render(
         request,
         "lands.html",
         context={
-            'cards': land_cards,
+            'cards': cards_page,
             'deck_count': _deck_count_at_least_color(w, u, b, r, g),
             'links': _LINKS,
         },
