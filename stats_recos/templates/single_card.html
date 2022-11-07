@@ -2,14 +2,14 @@
 {% load simple_math %}
 {% block body %}
 <h1>{{ card.name }}</h1>
-<p>{{ card.type_line }}</p>
+<p>{{ card.type_line }} ({{ card.color_identity }})</p>
 <p>In {{ is_in }} of {{ could_be_in }} decks ({{ is_in|percent_of:could_be_in }}).</p>
 {% if commanders %}
 <p>
-  Commanders:
+  Appears with these commanders:
   <ul>
-    {% for cmdr, count in commanders %}
-    <li><a href="{% url 'card-single' cmdr.id %}">{{ cmdr.name }}</a> ({{ count }})</li>
+    {% for cmdr in commanders %}
+    <li><a href="{% url 'card-single' cmdr.card__id %}">{{ cmdr.card__name }}</a> ({{ cmdr.count }})</li>
     {% endfor %}
   </ul>
 </p>

@@ -5,7 +5,6 @@ from decklist.models import Card, Deck, Printing, CardInDeck
 from .wubrg_utils import COLORS
 import operator
 import functools
-from collections import Counter
 
 
 _CARDS_LINKS = (
@@ -302,10 +301,21 @@ def single_card(request, card_id):
         .filter(card_list__card=card)
     )
 
-    cmdrs = Counter()
-    for deck in is_in:
-        for cmdr in deck.commanders():
-            cmdrs[cmdr.card] += 1
+    cmdrs = (
+        CardInDeck.objects
+        .filter(
+            is_pdh_commander=True,
+            deck__in=(
+                Deck.objects
+                .filter(card_list__card=card)
+                .distinct()
+            ),
+        )
+        .values('card')
+        .annotate(count=Count('deck'))
+        .values('count', 'card__id', 'card__name')
+        .order_by('-count')
+    )
 
     return render(
         request,
@@ -314,7 +324,7 @@ def single_card(request, card_id):
             'card': card,
             'is_in': is_in.count(),
             'could_be_in': could_be_in,
-            'commanders': cmdrs.most_common(),
+            'commanders': cmdrs,
             'links': _LINKS,
         },
     )
