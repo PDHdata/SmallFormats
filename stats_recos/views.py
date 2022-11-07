@@ -245,15 +245,19 @@ def top_cards(request):
     cards = (
         Card.objects
         .annotate(num_decks=Count('deck_list'))
+        .filter(num_decks__gt=0)
         .order_by('-num_decks')
     )
     deck_count = Deck.objects.count()
+    paginator = Paginator(cards, 25, orphans=3)
+    page_number = request.GET.get('page')
+    cards_page = paginator.get_page(page_number)
 
     return render(
         request,
         "cards.html",
         context={
-            'cards': cards[:20],
+            'cards': cards_page,
             'deck_count': deck_count,
             'links': _LINKS,
         },
@@ -261,7 +265,7 @@ def top_cards(request):
 
 
 def cards_by_color(request, w=False, u=False, b=False, r=False, g=False):
-    card_cards = (
+    cards = (
         Card.objects
         .filter(
             identity_w=w,
@@ -274,12 +278,15 @@ def cards_by_color(request, w=False, u=False, b=False, r=False, g=False):
         .order_by('-num_decks')
         .filter(num_decks__gt=0)
     )
+    paginator = Paginator(cards, 25, orphans=3)
+    page_number = request.GET.get('page')
+    cards_page = paginator.get_page(page_number)
 
     return render(
         request,
         "cards.html",
         context={
-            'cards': card_cards,
+            'cards': cards_page,
             'deck_count': _deck_count_at_least_color(w, u, b, r, g),
             'links': _LINKS,
         },
