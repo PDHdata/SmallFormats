@@ -301,6 +301,11 @@ def single_card(request, card_id):
         .filter(card_list__card=card)
     )
 
+    commands = (
+        Deck.objects
+        .filter(card_list__card=card, card_list__is_pdh_commander=True)
+    )
+
     cmdrs = (
         CardInDeck.objects
         .filter(
@@ -311,6 +316,7 @@ def single_card(request, card_id):
                 .distinct()
             ),
         )
+        .exclude(is_pdh_commander=True, card=card)
         .values('card')
         .annotate(count=Count('deck'))
         .values('count', 'card__id', 'card__name')
@@ -323,6 +329,7 @@ def single_card(request, card_id):
         context={
             'card': card,
             'is_in': is_in.count(),
+            'commands': commands.count(),
             'could_be_in': could_be_in,
             'commanders': cmdrs,
             'links': _LINKS,

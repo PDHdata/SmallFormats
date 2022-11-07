@@ -3,7 +3,12 @@
 {% block body %}
 <h1>{{ card.name }}</h1>
 <p>{{ card.type_line }} ({{ card.color_identity }})</p>
-<p>In {{ is_in }} of {{ could_be_in }} decks ({{ is_in|percent_of:could_be_in }}).</p>
+<p>
+  Appears in {{ is_in }} of {{ could_be_in }} decks ({{ is_in|percent_of:could_be_in }}).
+  {% if commands %}
+  Commands {{ commands }} of those.
+  {% endif %}
+</p>
 {% if commanders %}
 <p>
   Appears with these commanders:
