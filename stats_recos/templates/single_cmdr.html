@@ -18,23 +18,12 @@
 <p>
   Commands {{ commands }} of {{ could_be_in }} decks ({{ commands|percent_of:could_be_in }}).
 </p>
-{% if common_cards %}
-<p>
-  Common cards:
-  <ul>
-    {% for card in common_cards %}
-    <li><a href="{% url 'card-single' card.card__id %}">{{ card.card__name }}</a> ({{ card.count }} / {{ card.count|percent_of:commands }})</li>
-    {% endfor %}
-  </ul>
-  {% if common_cards.has_previous %}
-  <a href="?page=1">first</a>
-  <a href="?page={{ common_cards.previous_page_number }}">previous</a>
-  {% endif %}
-  (page {{ common_cards.number }} of {{ common_cards.paginator.num_pages }})
-  {% if common_cards.has_next %}
-  <a href="?page={{ common_cards.next_page_number }}">next</a>
-  <a href="?page={{ common_cards.paginator.num_pages }}">last</a>
-  {% endif %}
-</p>
-{% endif %}
+<div hx-get="{% url 'hx-common-cards' card.id 'c' '1' %}" hx-trigger="load" hx-swap="outerHTML"></div>
+<div hx-get="{% url 'hx-common-cards' card.id 'a' '1' %}" hx-trigger="load" hx-swap="outerHTML"></div>
+<div hx-get="{% url 'hx-common-cards' card.id 'e' '1' %}" hx-trigger="load" hx-swap="outerHTML"></div>
+<div hx-get="{% url 'hx-common-cards' card.id 'i' '1' %}" hx-trigger="load" hx-swap="outerHTML"></div>
+<div hx-get="{% url 'hx-common-cards' card.id 's' '1' %}" hx-trigger="load" hx-swap="outerHTML"></div>
+<div hx-get="{% url 'hx-common-cards' card.id 'p' '1' %}" hx-trigger="load" hx-swap="outerHTML"></div>
+<div hx-get="{% url 'hx-common-cards' card.id 'l' '1' %}" hx-trigger="load" hx-swap="outerHTML"></div>
+<div hx-get="{% url 'hx-common-cards' card.id 'g' '1' %}" hx-trigger="load" hx-swap="outerHTML"></div>
 {% endblock %}

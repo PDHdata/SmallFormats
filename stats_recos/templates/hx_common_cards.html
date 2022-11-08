@@ -1,0 +1,27 @@
+{% load simple_math %}
+<div id="common-{{ card_type_plural }}" hx-target="#common-{{ card_type_plural }}" hx-swap="outerHTML">
+{% if common_cards %}
+  <p>
+  Most common {{ card_type_plural }}:
+  <ul>
+    {% for card in common_cards %}
+    <li><a href="{% url 'card-single' card.card__id %}">{{ card.card__name }}</a> ({{ card.count }} / {{ card.count|percent_of:commands }})</li>
+    {% endfor %}
+  </ul>
+  {% if common_cards.has_previous %}
+  <a hx-get="{% url 'hx-common-cards' cmdr_id card_type '1' %}" href="">first</a>
+  <a hx-get="{% url 'hx-common-cards' cmdr_id card_type common_cards.previous_page_number %}"
+    href="">previous</a>
+  {% endif %}
+  (page {{ common_cards.number }} of {{ common_cards.paginator.num_pages }})
+  {% if common_cards.has_next %}
+  <a hx-get="{% url 'hx-common-cards' cmdr_id card_type common_cards.next_page_number %}"
+    href="">next</a>
+  <a hx-get="{% url 'hx-common-cards' cmdr_id card_type common_cards.paginator.num_pages %}"
+    href="">last</a>
+  {% endif %}
+</p>
+{% else %}
+<p>No common {{ card_type_plural }}.</p>
+{% endif %}
+</div>

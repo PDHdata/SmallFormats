@@ -29,4 +29,5 @@ urlpatterns = (
     path('card/<uuid:card_id>', views.single_card, name="card-single"),
     path('land/top/', views.top_lands, name="land-top"),
     path('partner_decks/', views.partner_decks, name="partner-decks"),
+    path('hx/cmdr/<uuid:card_id>/<card_type>/<int:page_number>', views.hx_common_cards, name="hx-common-cards"),
 ])
