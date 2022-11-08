@@ -393,21 +393,23 @@ def single_cmdr(request, card_id):
         .values('card')
         .annotate(count=Count('deck'))
         .values('count', 'card__id', 'card__name', 'card__type_line')
+        .filter(count__gt=1)
         # TODO: this is an unsatisfying user experience -- the different
         # types should be in different sections with their own pagers
-        .annotate(
-            main_type=Case(
-                When(card__type_line__contains='Creature', then=Value('creature')),
-                When(card__type_line__contains='Artifact', then=Value('artifact')),
-                When(card__type_line__contains='Enchantment', then=Value('enchantment')),
-                When(card__type_line__contains='Planeswalker', then=Value('planeswalker')),
-                When(card__type_line__contains='Land', then=Value('land')),
-                When(card__type_line__contains='Sorcery', then=Value('sorcery')),
-                When(card__type_line__contains='Instant', then=Value('instant')),
-                default=Value('other')
-            ),
-        )
-        .order_by('main_type', '-count')
+        # .annotate(
+        #     main_type=Case(
+        #         When(card__type_line__contains='Creature', then=Value('creature')),
+        #         When(card__type_line__contains='Artifact', then=Value('artifact')),
+        #         When(card__type_line__contains='Enchantment', then=Value('enchantment')),
+        #         When(card__type_line__contains='Planeswalker', then=Value('planeswalker')),
+        #         When(card__type_line__contains='Land', then=Value('land')),
+        #         When(card__type_line__contains='Sorcery', then=Value('sorcery')),
+        #         When(card__type_line__contains='Instant', then=Value('instant')),
+        #         default=Value('other')
+        #     ),
+        # )
+        # .order_by('main_type', '-count')
+        .order_by('-count')
     )
     paginator = Paginator(common_cards, 25, orphans=3)
     page_number = request.GET.get('page')

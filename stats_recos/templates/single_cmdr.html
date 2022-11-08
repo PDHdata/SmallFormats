@@ -4,7 +4,8 @@
 <h1>{{ card.name }}</h1>
 <p>
   {{ card.type_line }} ({{ card.color_identity }})
-  {% if card.scryfall_uri %}<small>[<a href="{{ card.scryfall_uri }}">View on Scryfall</a>]</small>{% endif %}
+  <small>[<a href="{% url 'card-single' card.id %}">view as card</a>]</small>
+  {% if card.scryfall_uri %}<small>[<a href="{{ card.scryfall_uri }}">view on Scryfall</a>]</small>{% endif %}
 </p>
 {% if card.image_uri %}
 <p>
@@ -22,7 +23,7 @@
   Common cards:
   <ul>
     {% for card in common_cards %}
-    <li><a href="{% url 'card-single' card.card__id %}">{{ card.card__name }}</a> ({{ card.count }})</li>
+    <li><a href="{% url 'card-single' card.card__id %}">{{ card.card__name }}</a> ({{ card.count }} / {{ card.count|percent_of:commands }})</li>
     {% endfor %}
   </ul>
   {% if common_cards.has_previous %}
