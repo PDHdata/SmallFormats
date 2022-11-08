@@ -4,7 +4,8 @@
 <h1>{{ card.name }}</h1>
 <p>
   {{ card.type_line }} ({{ card.color_identity }})
-  {% if card.scryfall_uri %}<small>[<a href="{{ card.scryfall_uri }}">View on Scryfall</a>]</small>{% endif %}
+  {% if commands > 0 %}<small>[<a href="{% url 'cmdr-single' card.id %}">view as commander</a>]</small>{% endif %}
+  {% if card.scryfall_uri %}<small>[<a href="{{ card.scryfall_uri }}">view on Scryfall</a>]</small>{% endif %}
 </p>
 {% if card.image_uri %}
 <p>
@@ -17,7 +18,7 @@
 <p>
   Appears in {{ is_in }} of {{ could_be_in }} decks ({{ is_in|percent_of:could_be_in }}).
   {% if commands %}
-  Commands {{ commands }} of those.
+  <a href="{% url 'cmdr-single' card.id %}">Commands {{ commands }}</a> of those.
   {% endif %}
 </p>
 {% if commanders %}

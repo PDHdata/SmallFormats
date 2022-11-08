@@ -1,6 +1,6 @@
 from django.shortcuts import render, get_object_or_404
 from django.urls import reverse_lazy
-from django.db.models import Count, Q
+from django.db.models import Count, Q, When, Case, Value
 from django.core.paginator import Paginator
 from decklist.models import Card, Deck, Printing, CardInDeck
 from .wubrg_utils import COLORS
@@ -358,6 +358,71 @@ def single_card(request, card_id):
             'commands': commands.count(),
             'could_be_in': could_be_in,
             'commanders': cmdrs_page,
+            'links': _LINKS,
+        },
+    )
+
+
+def single_cmdr(request, card_id):
+    card = get_object_or_404(Card, pk=card_id)
+
+    could_be_in = _deck_count_at_least_color(
+        card.identity_w,
+        card.identity_u,
+        card.identity_b,
+        card.identity_r,
+        card.identity_g
+    )
+
+    commands = (
+        Deck.objects
+        .filter(card_list__card=card, card_list__is_pdh_commander=True)
+    )
+
+    common_cards = (
+        CardInDeck.objects
+        .filter(
+            is_pdh_commander=False,
+            deck__in=(
+                Deck.objects
+                .filter(card_list__card=card)
+                .distinct()
+            ),
+        )
+        .exclude(card__type_line__contains='Basic')
+        .values('card')
+        .annotate(count=Count('deck'))
+        .values('count', 'card__id', 'card__name', 'card__type_line')
+        .filter(count__gt=1)
+        # TODO: this is an unsatisfying user experience -- the different
+        # types should be in different sections with their own pagers
+        # .annotate(
+        #     main_type=Case(
+        #         When(card__type_line__contains='Creature', then=Value('creature')),
+        #         When(card__type_line__contains='Artifact', then=Value('artifact')),
+        #         When(card__type_line__contains='Enchantment', then=Value('enchantment')),
+        #         When(card__type_line__contains='Planeswalker', then=Value('planeswalker')),
+        #         When(card__type_line__contains='Land', then=Value('land')),
+        #         When(card__type_line__contains='Sorcery', then=Value('sorcery')),
+        #         When(card__type_line__contains='Instant', then=Value('instant')),
+        #         default=Value('other')
+        #     ),
+        # )
+        # .order_by('main_type', '-count')
+        .order_by('-count')
+    )
+    paginator = Paginator(common_cards, 25, orphans=3)
+    page_number = request.GET.get('page')
+    cards_page = paginator.get_page(page_number)
+
+    return render(
+        request,
+        "single_cmdr.html",
+        context={
+            'card': card,
+            'commands': commands.count(),
+            'could_be_in': could_be_in,
+            'common_cards': cards_page,
             'links': _LINKS,
         },
     )

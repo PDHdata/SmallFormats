@@ -13,7 +13,7 @@
   {% for card in cards %}
   <tr>
     <td>{{ cards.start_index|plus:forloop.counter0 }}</td>
-    <td><a href="{% url 'card-single' card.id %}">{{ card.name }}</a></td>
+    <td><a href="{% url 'cmdr-single' card.id %}">{{ card.name }}</a></td>
     <td>{{ card.color_identity }}</td>
     <td>{{ card.num_decks }}</td>
     <td>{{ card.num_decks|percent_of:deck_count }}</td>

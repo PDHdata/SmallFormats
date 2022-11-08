@@ -4,7 +4,7 @@
 {% for deck in decks %}
 <p>
   {{ deck.name }}
-  {% for p in deck.commanders %}<br>[<a href="{% url 'card-single' p.card.id %}">{{ p.card.name|safe }}</a>] {% endfor %}
+  {% for p in deck.commanders %}<br>[<a href="{% url 'cmdr-single' p.card.id %}">{{ p.card.name|safe }}</a>] {% endfor %}
 </p>
 {% endfor %}
 <p>
