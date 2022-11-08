@@ -1,13 +1,15 @@
 {% load simple_math %}
-<div id="common-{{ card_type_plural }}" hx-target="#common-{{ card_type_plural }}" hx-swap="outerHTML">
-{% if common_cards %}
-  <p>
-  Most common {{ card_type_plural }}:
-  <ul>
+<div class="col">
+<div id="common-{{ card_type_plural }}" class="card mb-3"
+  hx-target="#common-{{ card_type_plural }}" hx-swap="outerHTML">
+  <h5 class="card-header">{{ card_type_plural|title }}</h5>
+  {% if common_cards %}
+  <ul class="list-group list-group-flush">
     {% for card in common_cards %}
-    <li><a href="{% url 'card-single' card.card__id %}">{{ card.card__name }}</a> ({{ card.count }} / {{ card.count|percent_of:commands }})</li>
+    <li class="list-group-item"><a href="{% url 'card-single' card.card__id %}">{{ card.card__name }}</a> ({{ card.count }} / {{ card.count|percent_of:commands }})</li>
     {% endfor %}
   </ul>
+  <div class="card-body">{# pagination #}
   {% if common_cards.has_previous %}
   <a hx-get="{% url 'hx-common-cards' cmdr_id card_type '1' %}" href="">first</a>
   <a hx-get="{% url 'hx-common-cards' cmdr_id card_type common_cards.previous_page_number %}"
@@ -20,8 +22,11 @@
   <a hx-get="{% url 'hx-common-cards' cmdr_id card_type common_cards.paginator.num_pages %}"
     href="">last</a>
   {% endif %}
-</p>
-{% else %}
-<p>No common {{ card_type_plural }}.</p>
-{% endif %}
+  </div>{# /pagination #}
+  {% else %}
+  <div class="card-body">
+    <p class="card-text">No {{ card_type_plural }} appear in more than one deck.</p>
+  </div>
+  {% endif %}
+</div>
 </div>
