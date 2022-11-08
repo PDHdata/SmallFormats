@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+{% load simple_math %}
+{% block body %}
+<h1>{{ card.name }}</h1>
+<p>
+  {{ card.type_line }} ({{ card.color_identity }})
+  {% if card.scryfall_uri %}<small>[<a href="{{ card.scryfall_uri }}">View on Scryfall</a>]</small>{% endif %}
+</p>
+{% if card.image_uri %}
+<p>
+<details>
+  <summary>Card image</summary>
+  <img src="{{ card.image_uri }}" loading="lazy">
+</details>
+</p>
+{% endif %}
+<p>
+  Commands {{ commands }} of {{ could_be_in }} decks ({{ commands|percent_of:could_be_in }}).
+</p>
+{% if common_cards %}
+<p>
+  Common cards:
+  <ul>
+    {% for card in common_cards %}
+    <li><a href="{% url 'card-single' card.card__id %}">{{ card.card__name }}</a> ({{ card.count }})</li>
+    {% endfor %}
+  </ul>
+  {% if common_cards.has_previous %}
+  <a href="?page=1">first</a>
+  <a href="?page={{ common_cards.previous_page_number }}">previous</a>
+  {% endif %}
+  (page {{ common_cards.number }} of {{ common_cards.paginator.num_pages }})
+  {% if common_cards.has_next %}
+  <a href="?page={{ common_cards.next_page_number }}">next</a>
+  <a href="?page={{ common_cards.paginator.num_pages }}">last</a>
+  {% endif %}
+</p>
+{% endif %}
+{% endblock %}
