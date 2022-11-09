@@ -1,5 +1,6 @@
 <!doctype html>
 {% load static %}
+{% load django_htmx %}
 <html lang="en">
   <head>
     <meta charset="utf-8">
@@ -13,5 +14,8 @@
   {% block body %}{% endblock %}
     </div>
   <script src="{% static 'bs/bootstrap.bundle.min.js' %}"></script>
+  <script src="{% static 'htmx/htmx.min.js' %}"></script>
+  {% django_htmx_script %}
+  {% block postscript %}{% endblock %}
   </body>
 </html>

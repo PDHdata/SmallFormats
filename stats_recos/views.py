@@ -1,9 +1,11 @@
 from django.shortcuts import render, get_object_or_404
+from django.http import HttpResponseNotAllowed
 from django.urls import reverse_lazy
-from django.db.models import Count, Q, When, Case, Value
+from django.db.models import Count, Q
 from django.core.paginator import Paginator
 from decklist.models import Card, Deck, Printing, CardInDeck
 from .wubrg_utils import COLORS
+from django_htmx.http import trigger_client_event
 import operator
 import functools
 
@@ -379,6 +381,72 @@ def single_cmdr(request, card_id):
         .filter(card_list__card=card, card_list__is_pdh_commander=True)
     )
 
+    context = {}
+    # card type codes, see `hx_common_cards`
+    for letter in 'caeisplg':
+        if page_number := request.GET.get(letter, default=None):
+            try:
+                if int(page_number) > 1:
+                    context[f'page_{letter}'] = page_number
+            except ValueError:
+                # user probably munged the URL with something like "?c=foo"
+                pass
+    
+    context.update({
+        'card': card,
+        'commands': commands.count(),
+        'could_be_in': could_be_in,
+        'links': _LINKS,
+    })
+
+    return render(
+        request,
+        "single_cmdr.html",
+        context=context,
+    )
+
+
+def hx_common_cards(request, card_id, card_type, page_number):
+    if not request.htmx:
+        return HttpResponseNotAllowed("expected HTMX request")
+    
+    card = get_object_or_404(Card, pk=card_id)
+
+    commands = (
+        Deck.objects
+        .filter(card_list__card=card, card_list__is_pdh_commander=True)
+        .count()
+    )
+
+    match card_type:
+        case 'c':
+            filter_to = 'Creature'
+            card_type_plural = 'creatures'
+        case 'a':
+            filter_to = 'Artifact'
+            card_type_plural = 'artifacts'
+        case 'e':
+            filter_to = 'Enchantment'
+            card_type_plural = 'enchantments'
+        case 'i':
+            filter_to = 'Instant'
+            card_type_plural = 'instants'
+        case 's':
+            filter_to = 'Sorcery'
+            card_type_plural = 'sorceries'
+        case 'p':
+            filter_to = 'Planeswalker'
+            card_type_plural = 'planeswalkers'
+        case 'l':
+            filter_to = 'Land'
+            card_type_plural = 'lands'
+        case 'g':
+            filter_to = 'Legendary'
+            card_type_plural = 'legendaries'
+        case _:
+            return HttpResponseNotAllowed()
+
+    
     common_cards = (
         CardInDeck.objects
         .filter(
@@ -390,39 +458,34 @@ def single_cmdr(request, card_id):
             ),
         )
         .exclude(card__type_line__contains='Basic')
+        .filter(card__type_line__contains=filter_to)
         .values('card')
         .annotate(count=Count('deck'))
-        .values('count', 'card__id', 'card__name', 'card__type_line')
+        .values('count', 'card__id', 'card__name')
         .filter(count__gt=1)
-        # TODO: this is an unsatisfying user experience -- the different
-        # types should be in different sections with their own pagers
-        # .annotate(
-        #     main_type=Case(
-        #         When(card__type_line__contains='Creature', then=Value('creature')),
-        #         When(card__type_line__contains='Artifact', then=Value('artifact')),
-        #         When(card__type_line__contains='Enchantment', then=Value('enchantment')),
-        #         When(card__type_line__contains='Planeswalker', then=Value('planeswalker')),
-        #         When(card__type_line__contains='Land', then=Value('land')),
-        #         When(card__type_line__contains='Sorcery', then=Value('sorcery')),
-        #         When(card__type_line__contains='Instant', then=Value('instant')),
-        #         default=Value('other')
-        #     ),
-        # )
-        # .order_by('main_type', '-count')
         .order_by('-count')
     )
-    paginator = Paginator(common_cards, 25, orphans=3)
-    page_number = request.GET.get('page')
+    paginator = Paginator(common_cards, 10, orphans=3)
     cards_page = paginator.get_page(page_number)
 
-    return render(
+    response = render(
         request,
-        "single_cmdr.html",
+        "hx_common_cards.html",
         context={
-            'card': card,
-            'commands': commands.count(),
-            'could_be_in': could_be_in,
+            'cmdr_id': card_id,
+            'card_type': card_type,
+            'card_type_plural': card_type_plural,
+            'commands': commands,
             'common_cards': cards_page,
-            'links': _LINKS,
         },
+    )
+    
+    return trigger_client_event(
+        response,
+        "page_move",
+        {
+            'type': card_type,
+            'page': page_number,
+        },
+        after="settle",
     )

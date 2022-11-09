@@ -1,0 +1,40 @@
+{% load simple_math %}
+<div class="col">
+<div id="common-{{ card_type_plural }}" class="card mb-3"
+  hx-target="#common-{{ card_type_plural }}" hx-swap="outerHTML">
+  <h5 class="card-header">{{ card_type_plural|title }}</h5>
+  {% if common_cards %}
+  <ul class="list-group list-group-flush">
+    {% for card in common_cards %}
+    <li class="list-group-item"><a href="{% url 'card-single' card.card__id %}">{{ card.card__name }}</a> ({{ card.count }} / {{ card.count|percent_of:commands }})</li>
+    {% endfor %}
+  </ul>
+  <div class="card-footer">
+    <ul class="nav nav-pills">
+    {% if common_cards.has_previous %}
+    <li class="nav-item"><a class="nav-link" hx-get="{% url 'hx-common-cards' cmdr_id card_type '1' %}" href="">first</a></li>
+    <li class="nav-item"><a class="nav-link" hx-get="{% url 'hx-common-cards' cmdr_id card_type common_cards.previous_page_number %}"
+      href="">prev</a></li>
+    {% else %}
+    <li class="nav-item"><span class="nav-link disabled">first</span></li>
+    <li class="nav-item"><span class="nav-link disabled">prev</span></li>
+    {% endif %}
+    <li class="nav-item"><span class="nav-link active">{{ common_cards.number }} of {{ common_cards.paginator.num_pages }}</span></li>
+    {% if common_cards.has_next %}
+    <li class="nav-item"><a class="nav-link" hx-get="{% url 'hx-common-cards' cmdr_id card_type common_cards.next_page_number %}"
+      href="">next</a></li>
+    <li class="nav-item"><a class="nav-link" hx-get="{% url 'hx-common-cards' cmdr_id card_type common_cards.paginator.num_pages %}"
+      href="">last</a></li>
+    {% else %}
+    <li class="nav-item"><span class="nav-link disabled">next</span></li>
+    <li class="nav-item"><span class="nav-link disabled">last</span></li>
+    {% endif %}
+    </ul>
+  </div>
+  {% else %}
+  <div class="card-body">
+    <p class="card-text">No {{ card_type_plural }} appear in more than one deck.</p>
+  </div>
+  {% endif %}
+</div>
+</div>
