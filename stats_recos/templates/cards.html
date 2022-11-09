@@ -1,8 +1,8 @@
 {% extends 'base.html' %}
 {% load simple_math %}
-{% block title %}Cards{% endblock %}
+{% block title %}{{ heading|title }} cards{% endblock %}
 {% block body %}
-<h1>Cards</h1>
+<h1>{{ heading|title }} cards</h1>
 <table>
   <tr>
     <th>#</th>
