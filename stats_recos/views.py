@@ -69,10 +69,10 @@ def _deck_count_at_least_color(w, u, b, r, g):
     )['count']
 
 
-def stats_index(request):
+def stats_index(request, page="index.html"):
     return render(
         request,
-        "index.html",
+        page,
         context={
             'links': _LINKS,
         },
