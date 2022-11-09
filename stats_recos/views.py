@@ -12,15 +12,15 @@ import functools
 
 _CARDS_LINKS = (
     ('Top cards', reverse_lazy('card-top')),
-    ('All cards', reverse_lazy('card')),
+    ('Cards by color', reverse_lazy('card')),
  )
 _CMDRS_LINKS = (
     ('Top commanders', reverse_lazy('cmdr-top')),
-    ('All commanders', reverse_lazy('cmdr')),
+    ('Commanders by color', reverse_lazy('cmdr')),
  )
 _LANDS_LINKS = (
     ('Top lands', reverse_lazy('land-top')),
-    ('All lands ', reverse_lazy('land')),
+    ('Lands by color', reverse_lazy('land')),
  )
 _LINKS = (
     # menu? title    link or menu items
