@@ -5,6 +5,7 @@ from django.db.models import Count, Q
 from django.core.paginator import Paginator
 from decklist.models import Card, Deck, Printing, CardInDeck
 from .wubrg_utils import COLORS
+from django_htmx.http import trigger_client_event
 import operator
 import functools
 
@@ -380,28 +381,41 @@ def single_cmdr(request, card_id):
         .filter(card_list__card=card, card_list__is_pdh_commander=True)
     )
 
+    context = {}
+    # card type codes, see `hx_common_cards`
+    for letter in 'caeisplg':
+        if page_number := request.GET.get(letter, default=None):
+            try:
+                if int(page_number) > 1:
+                    context[f'page_{letter}'] = page_number
+            except ValueError:
+                # user probably munged the URL with something like "?c=foo"
+                pass
+    
+    context.update({
+        'card': card,
+        'commands': commands.count(),
+        'could_be_in': could_be_in,
+        'links': _LINKS,
+    })
+
     return render(
         request,
         "single_cmdr.html",
-        context={
-            'card': card,
-            'commands': commands.count(),
-            'could_be_in': could_be_in,
-            'links': _LINKS,
-        },
+        context=context,
     )
 
 
-# TODO: read and write page numbers to the querystring of the parent page
 def hx_common_cards(request, card_id, card_type, page_number):
     if not request.htmx:
         return HttpResponseNotAllowed("expected HTMX request")
-
+    
     card = get_object_or_404(Card, pk=card_id)
 
     commands = (
         Deck.objects
         .filter(card_list__card=card, card_list__is_pdh_commander=True)
+        .count()
     )
 
     match card_type:
@@ -454,14 +468,24 @@ def hx_common_cards(request, card_id, card_type, page_number):
     paginator = Paginator(common_cards, 10, orphans=3)
     cards_page = paginator.get_page(page_number)
 
-    return render(
+    response = render(
         request,
         "hx_common_cards.html",
         context={
             'cmdr_id': card_id,
             'card_type': card_type,
             'card_type_plural': card_type_plural,
-            'commands': commands.count(),
+            'commands': commands,
             'common_cards': cards_page,
         },
+    )
+    
+    return trigger_client_event(
+        response,
+        "page_move",
+        {
+            'type': card_type,
+            'page': page_number,
+        },
+        after="settle",
     )

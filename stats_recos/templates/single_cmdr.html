@@ -20,14 +20,44 @@
 </p>
 <div class="container-fluid">
   <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 row-cols-xxl-4">
-    <div class="col" hx-get="{% url 'hx-common-cards' card.id 'c' '1' %}" hx-trigger="load" hx-swap="outerHTML"></div>
-    <div class="col" hx-get="{% url 'hx-common-cards' card.id 'a' '1' %}" hx-trigger="load" hx-swap="outerHTML"></div>
-    <div class="col" hx-get="{% url 'hx-common-cards' card.id 'e' '1' %}" hx-trigger="load" hx-swap="outerHTML"></div>
-    <div class="col" hx-get="{% url 'hx-common-cards' card.id 'i' '1' %}" hx-trigger="load" hx-swap="outerHTML"></div>
-    <div class="col" hx-get="{% url 'hx-common-cards' card.id 's' '1' %}" hx-trigger="load" hx-swap="outerHTML"></div>
-    <div class="col" hx-get="{% url 'hx-common-cards' card.id 'p' '1' %}" hx-trigger="load" hx-swap="outerHTML"></div>
-    <div class="col" hx-get="{% url 'hx-common-cards' card.id 'l' '1' %}" hx-trigger="load" hx-swap="outerHTML"></div>
-    <div class="col" hx-get="{% url 'hx-common-cards' card.id 'g' '1' %}" hx-trigger="load" hx-swap="outerHTML"></div>
+    {% firstof page_c '1' as c %}
+    {% firstof page_a '1' as a %}
+    {% firstof page_e '1' as e %}
+    {% firstof page_i '1' as i %}
+    {% firstof page_s '1' as s %}
+    {% firstof page_p '1' as p %}
+    {% firstof page_l '1' as l %}
+    {% firstof page_g '1' as g %}
+    <div class="col" hx-get="{% url 'hx-common-cards' card.id 'c' c %}" hx-trigger="load" hx-swap="outerHTML"><div class="card mb-3"><h5 class="card-header">Creatures</h5><div class="card-body"><p class="card-text placeholder-glow"><span class="placeholder col-5"></span><span class="placeholder col-6"></span><span class="placeholder col-7"></span><span class="placeholder col-4"></span></p></div></div></div>
+    <div class="col" hx-get="{% url 'hx-common-cards' card.id 'a' a %}" hx-trigger="load" hx-swap="outerHTML"><div class="card mb-3"><h5 class="card-header">Artifacts</h5><div class="card-body"><p class="card-text placeholder-glow"><span class="placeholder col-5"></span><span class="placeholder col-6"></span><span class="placeholder col-7"></span><span class="placeholder col-4"></span></p></div></div></div>
+    <div class="col" hx-get="{% url 'hx-common-cards' card.id 'e' e %}" hx-trigger="load" hx-swap="outerHTML"><div class="card mb-3"><h5 class="card-header">Enchantments</h5><div class="card-body"><p class="card-text placeholder-glow"><span class="placeholder col-5"></span><span class="placeholder col-6"></span><span class="placeholder col-7"></span><span class="placeholder col-4"></span></p></div></div></div>
+    <div class="col" hx-get="{% url 'hx-common-cards' card.id 'i' i %}" hx-trigger="load" hx-swap="outerHTML"><div class="card mb-3"><h5 class="card-header">Instants</h5><div class="card-body"><p class="card-text placeholder-glow"><span class="placeholder col-5"></span><span class="placeholder col-6"></span><span class="placeholder col-7"></span><span class="placeholder col-4"></span></p></div></div></div>
+    <div class="col" hx-get="{% url 'hx-common-cards' card.id 's' s %}" hx-trigger="load" hx-swap="outerHTML"><div class="card mb-3"><h5 class="card-header">Sorceries</h5><div class="card-body"><p class="card-text placeholder-glow"><span class="placeholder col-5"></span><span class="placeholder col-6"></span><span class="placeholder col-7"></span><span class="placeholder col-4"></span></p></div></div></div>
+    <div class="col" hx-get="{% url 'hx-common-cards' card.id 'p' p %}" hx-trigger="load" hx-swap="outerHTML"><div class="card mb-3"><h5 class="card-header">Planeswalkers</h5><div class="card-body"><p class="card-text placeholder-glow"><span class="placeholder col-5"></span><span class="placeholder col-6"></span><span class="placeholder col-7"></span><span class="placeholder col-4"></span></p></div></div></div>
+    <div class="col" hx-get="{% url 'hx-common-cards' card.id 'l' l %}" hx-trigger="load" hx-swap="outerHTML"><div class="card mb-3"><h5 class="card-header">Lands</h5><div class="card-body"><p class="card-text placeholder-glow"><span class="placeholder col-5"></span><span class="placeholder col-6"></span><span class="placeholder col-7"></span><span class="placeholder col-4"></span></p></div></div></div>
+    <div class="col" hx-get="{% url 'hx-common-cards' card.id 'g' g %}" hx-trigger="load" hx-swap="outerHTML"><div class="card mb-3"><h5 class="card-header">Legendaries</h5><div class="card-body"><p class="card-text placeholder-glow"><span class="placeholder col-5"></span><span class="placeholder col-6"></span><span class="placeholder col-7"></span><span class="placeholder col-4"></span></p></div></div></div>
   </div>
 </div>
+{% endblock %}
+{% block postscript %}
+<script>
+  htmx.on("page_move", function(evt) {
+    let params = new URLSearchParams(document.location.search);
+    const type = evt.detail.type;
+    const page = evt.detail.page;
+
+    if (page == 1)
+    {
+      params.delete(type);
+    } else {
+      params.set(type, page);
+    }
+
+    newParams = params.toString();
+    if (newParams != document.location.search)
+    {
+      history.replaceState({}, '', "?" + newParams);
+    }
+  });
+</script>
 {% endblock %}

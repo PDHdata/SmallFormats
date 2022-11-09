@@ -7,7 +7,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>{% block title %}SmallFormats{% endblock %}</title>
     <link href="{% static 'bs/bootstrap.min.css' %}" rel="stylesheet">
-    <script src="{% static 'htmx/htmx.min.js' %}" defer></script>
   </head>
   <body style="padding-top: 3.5rem">
     {% include '_nav.html' %}
@@ -15,6 +14,8 @@
   {% block body %}{% endblock %}
     </div>
   <script src="{% static 'bs/bootstrap.bundle.min.js' %}"></script>
+  <script src="{% static 'htmx/htmx.min.js' %}"></script>
   {% django_htmx_script %}
+  {% block postscript %}{% endblock %}
   </body>
 </html>
