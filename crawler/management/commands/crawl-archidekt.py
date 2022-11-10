@@ -30,8 +30,8 @@ class Command(BaseCommand):
     def add_arguments(self, parser) -> None:
         parser.add_argument(
             '--stop-after',
-            type=int, default=3,
-            help='Stop crawling after this many pages of results; use 0 to remove the limit')
+            type=int, default=0,
+            help='Stop crawling after this many pages of results')
 
     def handle(self, *args, **options):
         sleep_time = 2
