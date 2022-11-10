@@ -3,42 +3,44 @@
 {% block title %}{{ heading|title }} commanders{% endblock %}
 {% block body %}
 <h1>{{ heading|title }} commanders</h1>
-<table>
-  <tr>
-    <th>#</th>
-    <th>Name</th>
-    <th>Color identity</th>
-    <th># of decks</th>
-    <th>% of decks</th>
-  </tr>
-  {% for card in cards %}
-  <tr>
-    <td>{{ cards.start_index|plus:forloop.counter0 }}</td>
-    <td><a href="{% url 'cmdr-single' card.id %}">{{ card.name }}</a></td>
-    <td>{{ card.color_identity }}</td>
-    <td>{{ card.num_decks }}</td>
-    <td>{{ card.num_decks|percent_of:deck_count }}</td>
-  </tr>
-  {% empty %}
-  <tr><td colspan="5">Sorry, no commanders like that.</td></tr>
-  {% endfor %}
-  <tr>
-    <td></td>
-    <th></th>
-    <th></th>
-    <th>{{ deck_count }}</th>
-    <th>100%</th>
-  </tr>
-</table>
-<p>
-  {% if cards.has_previous %}
-  <a href="?page=1">first</a>
-  <a href="?page={{ cards.previous_page_number }}">previous</a>
-  {% endif %}
-  (page {{ cards.number }} of {{ cards.paginator.num_pages }})
-  {% if cards.has_next %}
-  <a href="?page={{ cards.next_page_number }}">next</a>
-  <a href="?page={{ cards.paginator.num_pages }}">last</a>
-  {% endif %}
-</p>
+<div class="container">
+  <table class="table">
+    <tr>
+      <th>#</th>
+      <th>Name</th>
+      <th>Color identity</th>
+      <th># of decks</th>
+      <th>% of decks</th>
+    </tr>
+    {% for card in cards %}
+    <tr>
+      <td>{{ cards.start_index|plus:forloop.counter0 }}</td>
+      <td><a href="{% url 'cmdr-single' card.id %}">{{ card.name }}</a></td>
+      <td>{{ card.color_identity }}</td>
+      <td>{{ card.num_decks }}</td>
+      <td>{{ card.num_decks|percent_of:deck_count }}</td>
+    </tr>
+    {% empty %}
+    <tr><td colspan="5">Sorry, no commanders like that.</td></tr>
+    {% endfor %}
+    <tr>
+      <td></td>
+      <th></th>
+      <th></th>
+      <th>{{ deck_count }}</th>
+      <th>100%</th>
+    </tr>
+  </table>
+  <p>
+    {% if cards.has_previous %}
+    <a href="?page=1">first</a>
+    <a href="?page={{ cards.previous_page_number }}">previous</a>
+    {% endif %}
+    (page {{ cards.number }} of {{ cards.paginator.num_pages }})
+    {% if cards.has_next %}
+    <a href="?page={{ cards.next_page_number }}">next</a>
+    <a href="?page={{ cards.paginator.num_pages }}">last</a>
+    {% endif %}
+  </p>
+</div>
 {% endblock %}
