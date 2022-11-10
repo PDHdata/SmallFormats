@@ -2,8 +2,25 @@
 
 Inspired by [EDHrec][edhrec], this is a deck-stats site for [Pauper EDH][pdhhomebase] and hopefully other "smaller" (less common) Magic: the Gathering formats someday.
 
-## Fetching data
+## Running your own
 
+### Naming
+This software is offered to you under the [MIT license](LICENSE).
+That means you may use some or all of it to run your own project.
+However, you don't have the right to the name `SmallFormats`.
+You'll need to set an environment variable `SMALLFORMATS_NAME` or edit the config in `smallformats/settings.py` to whatever you're choosing to call your project.
+
+### Initial setup
+It's a Django project managed with Poetry. For local dev, it's mostly the usual cycle of commands (though I've added a `./manage` shell script so you can avoid typing `poetry run ./manage.py` all the time)
+
+```shell
+poetry install
+./manage migrate
+./manage createsuperuser
+./manage runserver
+```
+
+### Fetching data
 You will need card data from Scryfall and then a two-pass crawl of Archidekt.
 The `crawl` step will fetch each deck, and then the `populate` step will fetch the decklists for each deck.
 
@@ -12,6 +29,9 @@ The `crawl` step will fetch each deck, and then the `populate` step will fetch t
 ./manage crawl-archidekt
 ./manage populate-archidekt --crawl-id $ID_FROM_PREVIOUS_STEP
 ```
+
+### Deploying to production
+That part is up to you!
 
 ## Disclaimers & disclosures
 
