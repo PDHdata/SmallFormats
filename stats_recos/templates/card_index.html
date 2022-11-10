@@ -2,11 +2,12 @@
 {% block title %}Cards by color{% endblock %}
 {% block body %}
 <h1>Cards by color</h1>
-<p>
-<a href="{% url 'card-top' %}">Any color</a><br>
-{% for color in colors %}
-<a href="{% url color.1 %}">{{ color.0.title }}</a>
-{% autoescape off %}{% cycle '|' '|' '|' '<br>' %}{% endautoescape %}
-{% endfor %}
-</p>
+<div class="container">
+  <div class="row row-cols-2 row-cols-md-3 row-cols-lg-4 row-cols-xxl-6">
+    <div class="col"><a href="{% url 'card-top' %}">Any color</a></div>
+    {% for color in colors %}
+    <div class="col"><a href="{% url color.1 %}">{{ color.0.title }}</a></div>
+    {% endfor %}
+  </div>
+</div>
 {% endblock %}
