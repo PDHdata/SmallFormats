@@ -92,7 +92,7 @@ class Command(BaseCommand):
             if run.state == CrawlRun.State.FETCHING_DECKLISTS:
                 run.state = CrawlRun.State.DONE_FETCHING_DECKLISTS
                 run.save()
-                # TODO: delete all the DeckCrawlResults for this run where
+                # delete all the DeckCrawlResults for this run where
                 # `got_cards` is True
                 self.stdout.write(self.style.SUCCESS(f"Run {run.id} populated successfully."))
                 count, _ = (

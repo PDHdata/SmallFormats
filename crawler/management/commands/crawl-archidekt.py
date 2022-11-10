@@ -82,7 +82,7 @@ class Command(BaseCommand):
             while continue_crawling:
                 # default to stopping; we'll flip this later if we should continue
                 continue_crawling = False
-                # Archidekt seems to send "count = -1" when throttling
+                # Archidekt seems to send "count = -1" under some conditions
                 if count <= 0:
                     run.state = CrawlRun.State.ERROR
                     run.note = format_response_error(decks)

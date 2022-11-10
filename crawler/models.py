@@ -31,7 +31,7 @@ class DeckCrawlResult(models.Model):
         blank=True,
         null=True,
     )
-    # Last update time according to data source"
+    # Last update time according to data source
     updated_time = models.DateTimeField()
     got_cards = models.BooleanField(default=False)
     run = models.ForeignKey(
