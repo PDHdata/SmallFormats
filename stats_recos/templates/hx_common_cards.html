@@ -6,7 +6,7 @@
   {% if common_cards %}
   <ul class="list-group list-group-flush">
     {% for card in common_cards %}
-    <li class="list-group-item"><a href="{% url 'card-single' card.card__id %}">{{ card.card__name }}</a> ({{ card.count }} / {{ card.count|percent_of:commands }})</li>
+    <li class="list-group-item">{{ common_cards.start_index|plus:forloop.counter0 }}. <a href="{% url 'card-single' card.card__id %}">{{ card.card__name }}</a> ({{ card.count }} / {{ card.count|percent_of:commands }})</li>
     {% endfor %}
   </ul>
   <div class="card-footer">

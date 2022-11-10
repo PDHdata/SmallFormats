@@ -69,12 +69,28 @@ def _deck_count_at_least_color(w, u, b, r, g):
     )['count']
 
 
+@functools.cache
+def _get_front_image():
+    try:
+        top_cmdr = (
+            Card.objects
+            .filter(deck_list__is_pdh_commander=True)
+            .annotate(num_decks=Count('deck_list'))
+            .order_by('-num_decks')
+            .first()
+        )
+        return top_cmdr.image_uri
+    except Card.DoesNotExist:
+        return "https://cards.scryfall.io/normal/front/a/4/a4fab67f-00c2-4125-9262-d21a29411797.jpg?1644853041="
+
+
 def stats_index(request, page="index.html"):
     return render(
         request,
         page,
         context={
             'links': _LINKS,
+            'image_uri': _get_front_image(),
         },
     )
 
