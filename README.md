@@ -1,13 +1,14 @@
 # SmallFormats
 
-Inspired by [EDHrec][edhrec], this is a deck-stats site for [Pauper EDH][pdhhomebase] and hopefully other "smaller" (less common) Magic: the Gathering formats someday.
+Inspired by [EDHrec][edhrec], this is a deck-stats tool for [Pauper EDH][pdhhomebase] and hopefully other "smaller" (less common) Magic: the Gathering formats someday.
+It was built to power [PDHdata][pdhdata], which is a deck-stats site specifically for PDH.
 
 ## Running your own
 
 ### Naming
 This software is offered to you under the [MIT license](LICENSE).
 That means you may use some or all of it to run your own project.
-However, you don't have the right to the name `SmallFormats`.
+However, you don't have the right to the name `SmallFormats` or `PDHdata`.
 You'll need to set an environment variable `SMALLFORMATS_NAME` or edit the config in `smallformats/settings.py` to whatever you're choosing to call your project.
 
 ### Initial setup
@@ -51,6 +52,7 @@ Thanks to Davis Haupt for the [fly.io deployment article][djangoonfly] which inf
 [archidekt]: https://www.archidekt.com/
 [djangoonfly]: https://davi.sh/blog/2022/10/django-with-flyio/
 [edhrec]: https://www.edhrec.com/
+[pdhdata]: https://COMING-SOON.example.com/
 [pdhhomebase]: https://www.pdhhomebase.com/
 [scryfall]: https://www.scryfall.com/
 [wotc]: https://magic.wizards.com/
