@@ -1,6 +1,7 @@
 {% extends 'base.html' %}
+{% block title %}Commanders by color{% endblock %}
 {% block body %}
-<h1>Commanders</h1>
+<h1>Commanders by color</h1>
 <p>
 <a href="{% url 'cmdr-top' %}">Any color</a><br>
 {% for color in colors %}

@@ -1,17 +1,20 @@
 {% extends 'base.html' %}
 {% block body %}
-<h1>SmallFormats – Stats</h1>
-<p>
-  {% for link in links %}
-  {% if link.0 %}
-  {% for item in link.2 %}
-  <a href="{{ item.1|safe }}">{{ item.0 }}</a>
-  {% if not forloop.last %}|{% endif %}
-  {% endfor %}
-  {% else %}
-  <a href="{{ link.2|safe }}">{{ link.1 }}</a>
-  {% endif %}
-  {% if not forloop.last %}|{% endif %}
-  {% endfor %}
-</p>
+<div class="container col-xxl-8 px-4 py-5">
+  <div class="row flex-lg-row align-items-center g-5 py-5">
+    <div class="col-lg-6">
+      <h1 class="display-5 fw-bold lh-1 mb-3">{{ SITENAME }}: better decks through data</h1>
+      <p class="lead">{{ SITENAME }} provides a place to discover new commanders and see what people are running in Pauper Commander (PDH). EDH has plenty of tools, why shouldn't PDH have one, too?</p>
+      <div class="d-grid gap-2 d-md-flex justify-content-md-start">
+        <a class="btn btn-primary btn-lg px-4 me-md-2" href="{% url 'cmdr-top' %}">Explore</a>
+        <a class="btn btn-outline-secondary btn-lg px-4" href="{% url 'about' %}">About</a>
+      </div>
+    </div>
+    <div class="col-10 col-sm-8 col-lg-6">
+      <img src="https://cards.scryfall.io/normal/front/a/4/a4fab67f-00c2-4125-9262-d21a29411797.jpg?1644853041="
+        class="d-block mx-lg-auto img-fluid" alt="Card name"
+        width="488" height="680" loading="lazy">
+    </div>
+  </div>
+</div>
 {% endblock %}

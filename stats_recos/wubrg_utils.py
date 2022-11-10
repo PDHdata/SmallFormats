@@ -11,37 +11,56 @@ def _u(name, color_str):
     return (name, len(color_str), _c(color_str))
 
 # powerset ahoy!
-COLORS = [
-    _u('colorless',  ''),
-    _u('white',      'W'),
-    _u('blue',       'U'),
-    _u('black',      'B'),
-    _u('red',        'R'),
-    _u('green',      'G'),
-    _u('azorius',    'WU'),
-    _u('dimir',      'UB'),
-    _u('rakdos',     'BR'),
-    _u('gruul',      'RG'),
-    _u('selesnya',   'GW'),
-    _u('orzhov',     'WB'),
-    _u('izzet',      'UR'),
-    _u('golgari',    'BG'),
-    _u('boros',      'RW'),
-    _u('simic',      'GU'),
-    _u('esper',      'WUB'),
-    _u('grixis',     'UBR'),
-    _u('jund',       'BRG'),
-    _u('naya',       'RGW'),
-    _u('bant',       'GWU'),
-    _u('abzan',      'WBG'),
-    _u('jeskai',     'URW'),
-    _u('sultai',     'BGU'),
-    _u('mardu',      'RWB'),
-    _u('temur',      'GUR'),
-    _u('artifice',   'WUBR'),
-    _u('chaos',      'UBRG'),
-    _u('aggression', 'BRGW'),
-    _u('altruism',   'RGWU'),
-    _u('growth',     'GWUB'),
-    _u('rainbow',    'WUBRG'),
+_COLORS_BASE = [
+    ('colorless',  ''),
+    ('white',      'W'),
+    ('blue',       'U'),
+    ('black',      'B'),
+    ('red',        'R'),
+    ('green',      'G'),
+    ('azorius',    'WU'),
+    ('dimir',      'UB'),
+    ('rakdos',     'BR'),
+    ('gruul',      'RG'),
+    ('selesnya',   'GW'),
+    ('orzhov',     'WB'),
+    ('izzet',      'UR'),
+    ('golgari',    'BG'),
+    ('boros',      'RW'),
+    ('simic',      'GU'),
+    ('esper',      'WUB'),
+    ('grixis',     'UBR'),
+    ('jund',       'BRG'),
+    ('naya',       'RGW'),
+    ('bant',       'GWU'),
+    ('abzan',      'WBG'),
+    ('jeskai',     'URW'),
+    ('sultai',     'BGU'),
+    ('mardu',      'RWB'),
+    ('temur',      'GUR'),
+    ('artifice',   'WUBR'),
+    ('chaos',      'UBRG'),
+    ('aggression', 'BRGW'),
+    ('altruism',   'RGWU'),
+    ('growth',     'GWUB'),
+    ('rainbow',    'WUBRG'),
 ]
+
+COLORS = [_u(name, color_str) for name, color_str in _COLORS_BASE]
+
+# these are not suitable for display, they're for looking up against
+# because the color string needs to be alphabetized
+REVERSE_COLORS = {"".join(sorted(color_str)): name for name, color_str in _COLORS_BASE}
+
+def filter_to_name(filter):
+    """Convert a dict to a color name.
+    
+    Examples:
+      {W: True} => 'white'
+      {W: True, U: True} => 'azorius'
+      {W: True, uU: False} => 'white'"""
+    key = ""
+    for letter in 'WUBRG':
+        if letter in filter.keys() and filter[letter]:
+            key += letter
+    return REVERSE_COLORS["".join(sorted(key))]

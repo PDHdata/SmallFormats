@@ -4,7 +4,7 @@ from django.urls import reverse_lazy
 from django.db.models import Count, Q
 from django.core.paginator import Paginator
 from decklist.models import Card, Deck, Printing, CardInDeck
-from .wubrg_utils import COLORS
+from .wubrg_utils import COLORS, filter_to_name
 from django_htmx.http import trigger_client_event
 import operator
 import functools
@@ -12,15 +12,15 @@ import functools
 
 _CARDS_LINKS = (
     ('Top cards', reverse_lazy('card-top')),
-    ('All cards', reverse_lazy('card')),
+    ('Cards by color', reverse_lazy('card')),
  )
 _CMDRS_LINKS = (
     ('Top commanders', reverse_lazy('cmdr-top')),
-    ('All commanders', reverse_lazy('cmdr')),
+    ('Commanders by color', reverse_lazy('cmdr')),
  )
 _LANDS_LINKS = (
     ('Top lands', reverse_lazy('land-top')),
-    ('All lands ', reverse_lazy('land')),
+    ('Lands by color', reverse_lazy('land')),
  )
 _LINKS = (
     # menu? title    link or menu items
@@ -69,10 +69,10 @@ def _deck_count_at_least_color(w, u, b, r, g):
     )['count']
 
 
-def stats_index(request):
+def stats_index(request, page="index.html"):
     return render(
         request,
-        "index.html",
+        page,
         context={
             'links': _LINKS,
         },
@@ -130,6 +130,7 @@ def top_commanders(request):
         request,
         "commanders.html",
         context={
+            'heading': 'top',
             'cards': cards_page,
             'deck_count': deck_count,
             'links': _LINKS,
@@ -170,6 +171,7 @@ def commanders_by_color(request, w=False, u=False, b=False, r=False, g=False):
         request,
         "commanders.html",
         context={
+            'heading': filter_to_name({'W':w,'U':u,'B':b,'R':r,'G':g}),
             'cards': cards_page,
             # TODO: probably fails to account for partners
             'deck_count': _deck_count_exact_color(w, u, b, r, g),
@@ -208,6 +210,7 @@ def top_lands(request):
         request,
         "lands.html",
         context={
+            'heading': 'top',
             'cards': cards_page,
             'deck_count': deck_count,
             'links': _LINKS,
@@ -238,6 +241,7 @@ def lands_by_color(request, w=False, u=False, b=False, r=False, g=False):
         request,
         "lands.html",
         context={
+            'heading': filter_to_name({'W':w,'U':u,'B':b,'R':r,'G':g}),
             'cards': cards_page,
             'deck_count': _deck_count_at_least_color(w, u, b, r, g),
             'links': _LINKS,
@@ -274,6 +278,7 @@ def top_cards(request):
         request,
         "cards.html",
         context={
+            'heading': 'Top',
             'cards': cards_page,
             'deck_count': deck_count,
             'links': _LINKS,
@@ -303,6 +308,7 @@ def cards_by_color(request, w=False, u=False, b=False, r=False, g=False):
         request,
         "cards.html",
         context={
+            'heading': filter_to_name({'W':w,'U':u,'B':b,'R':r,'G':g}),
             'cards': cards_page,
             'deck_count': _deck_count_at_least_color(w, u, b, r, g),
             'links': _LINKS,

@@ -18,14 +18,13 @@ import dj_database_url
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/4.1/howto/deployment/checklist/
-
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = os.getenv("DJANGO_SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = SECRET_KEY.startswith('django-insecure-')
+
+SMALLFORMATS_NAME = os.getenv("SMALLFORMATS_NAME", "Nameless Knockoff")
 
 ALLOWED_HOSTS = []
 
@@ -78,6 +77,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'smallformats.context_processors.sitename',
             ],
         },
     },
