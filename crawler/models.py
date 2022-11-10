@@ -33,8 +33,6 @@ class DeckCrawlResult(models.Model):
     deck = models.ForeignKey(
         Deck,
         on_delete=models.CASCADE,
-        blank=True,
-        null=True,
     )
     # Last update time according to data source
     updated_time = models.DateTimeField()

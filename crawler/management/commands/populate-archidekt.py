@@ -60,8 +60,7 @@ class Command(BaseCommand):
             run.save()
 
             for crawl_result in run.deck_results.all():
-                # TODO: no reason for this to be nullable
-                if crawl_result.deck is None or crawl_result.got_cards:
+                if crawl_result.got_cards:
                     continue
                 
                 if run.state == CrawlRun.State.FETCHING_DECKLISTS:

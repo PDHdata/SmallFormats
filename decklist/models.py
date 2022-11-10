@@ -18,7 +18,7 @@ class Deck(models.Model):
     source = models.IntegerField(choices=DataSource.choices)
     source_id = models.CharField(max_length=20, blank=True)
     source_link = models.URLField(blank=True)
-    creator_display_name = models.CharField(max_length=50)
+    creator_display_name = models.CharField(max_length=50, blank=True)
     ingested_time = models.DateTimeField(auto_now_add=True)
     updated_time = models.DateTimeField(default=timezone.now)
 
@@ -118,8 +118,8 @@ class Card(models.Model):
     identity_b = models.BooleanField(default=False, verbose_name='is B')
     identity_r = models.BooleanField(default=False, verbose_name='is R')
     identity_g = models.BooleanField(default=False, verbose_name='is G')
-    type_line = models.CharField(max_length=50, blank=True)
-    scryfall_uri = models.URLField(max_length=200, blank=True)
+    type_line = models.CharField(max_length=50)
+    scryfall_uri = models.URLField(max_length=200)
 
     def __str__(self):
         return self.name
@@ -165,7 +165,7 @@ class Printing(models.Model):
         on_delete=models.CASCADE,
         related_name='printings',
     )
-    set_code = models.CharField(max_length=5, blank=True)
+    set_code = models.CharField(max_length=5)
     rarity = models.CharField(max_length=1, choices=Rarity.choices)
     image_uri = models.URLField(max_length=200, blank=True)
 
