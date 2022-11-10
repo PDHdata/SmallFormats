@@ -10,11 +10,23 @@
 </p>
 {% if card.image_uri %}
 <p>
-<details>
-  <summary>Card image</summary>
-  <img src="{{ card.image_uri }}" loading="lazy">
-</details>
+<a href="#" data-bs-toggle="modal" data-bs-target="#cardModal">
+  <img src="{{ card.image_uri }}" loading="lazy" width="244" height="340">
+</a>
 </p>
+<div class="modal fade" id="cardModal" tabindex="-1" aria-labelledby="cardModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h1 class="modal-title fs-5" id="cardModalLabel">{{ card.name }}</h1>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body mx-auto">
+        <img src="{{ card.image_uri }}" loading="lazy" width="488" height="680">
+      </div>
+    </div>
+  </div>
+</div>
 {% endif %}
 <p>
   Commands {{ commands }} of {{ could_be_in }} decks ({{ commands|percent_of:could_be_in }}).
