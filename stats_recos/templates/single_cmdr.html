@@ -11,7 +11,7 @@
 {% if card.image_uri %}
 <p>
 <a href="#" data-bs-toggle="modal" data-bs-target="#cardModal">
-  <img src="{{ card.image_uri }}" loading="lazy" width="244" height="340">
+  <img src="{{ card.image_uri }}" style="border-radius: 10px" loading="lazy" width="244" height="340">
 </a>
 </p>
 <div class="modal fade" id="cardModal" tabindex="-1" aria-labelledby="cardModalLabel" aria-hidden="true">
@@ -22,7 +22,7 @@
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body mx-auto">
-        <img src="{{ card.image_uri }}" loading="lazy" width="488" height="680">
+        <img src="{{ card.image_uri }}" style="border-radius: 20px" loading="lazy" width="488" height="680">
       </div>
     </div>
   </div>
