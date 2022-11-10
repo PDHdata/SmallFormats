@@ -2,6 +2,8 @@
 See https://archidekt.com/forum/thread/3476605/1 for more on crawling Archidekt.
 """
 from django.core.management.base import BaseCommand, CommandError
+from django.db import transaction
+from django.utils.dateparse import parse_datetime
 import httpx
 from decklist.models import Deck, DataSource
 from crawler.models import CrawlRun, DeckCrawlResult
@@ -11,7 +13,6 @@ from ._api_helpers import HEADERS, ARCHIDEKT_API_BASE
 
 
 # TODO:
-# - stop when reaching the previous high-water mark (by date)
 # - be able to resume failed/incomplete runs
 # - in the commands, target a particular run
 
@@ -39,11 +40,26 @@ class Command(BaseCommand):
         crawl_time = timezone.now()
         continue_crawling = False
 
+        try:
+            latest_deck_update = (
+                Deck.objects
+                .filter(
+                    source=DataSource.ARCHIDEKT,
+                    updated_time__isnull=False,
+                )
+                .latest('updated_time')
+            ).updated_time
+            print(f"we will search back to {latest_deck_update}")
+        except Deck.DoesNotExist:
+            latest_deck_update = None
+            print(f"no date to search back to")
+
         # TODO: search for and resume existing runs
         run = CrawlRun(
             crawl_start_time=crawl_time,
             target=DataSource.ARCHIDEKT,
             state=CrawlRun.State.NOT_STARTED,
+            search_back_to=latest_deck_update,
         )
         run.save()
 
@@ -89,11 +105,16 @@ class Command(BaseCommand):
                     run.save()
                     self.stderr.write(f"Received \"{decks.text}\" accessing {decks.request.url}")
                 else:
-                    self._process_page(run, results)
+                    oldest_deck_update = self._process_page(run, results)
                     retrieved_pages += 1
                     self.stdout.write(f"Seen {retrieved_pages} pages.")
 
-                if next and count > 0 and (retrieved_pages < stop_after or stop_after == 0):
+                if (
+                    next and
+                    count > 0 and
+                    (retrieved_pages < stop_after or stop_after == 0) and
+                    (run.search_back_to is None or oldest_deck_update > run.search_back_to)
+                ):
                     self.stdout.write(f"Sleeping {sleep_time}s.")
                     time.sleep(sleep_time)
                     # Archidekt "next" comes back as http:// so fix that up
@@ -147,8 +168,13 @@ class Command(BaseCommand):
                 updated_time=deck_data['updatedAt'],
                 got_cards=False,
             )
-            deck.save()
-            crawl_result.save()
+            with transaction.atomic():
+                deck.save()
+                crawl_result.save()
+        
+        # the last deck on the page will have the oldest date
+        print(f"oldest update_time is {deck.updated_time}")
+        return parse_datetime(deck.updated_time)
 
     def _request_log(self, request):
         self.stdout.write(f">> {request.method} {request.url}")

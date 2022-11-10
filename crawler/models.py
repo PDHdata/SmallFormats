@@ -15,6 +15,11 @@ class CrawlRun(models.Model):
         ERROR = 99
 
     crawl_start_time = models.DateTimeField()
+    # at the beginning of the run, we'll look for the newest deck
+    # update we have from Archidekt. if we see a timestamp older
+    # than that, since we search from newest to oldest, we know
+    # it's time to stop.
+    search_back_to = models.DateTimeField(null=True, blank=True)
     target = models.IntegerField(choices=DataSource.choices)
     state = models.IntegerField(choices=State.choices)
     note = models.TextField(blank=True)
