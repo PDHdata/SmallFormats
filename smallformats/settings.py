@@ -27,6 +27,15 @@ DEBUG = SECRET_KEY.startswith('django-insecure-')
 SMALLFORMATS_NAME = os.getenv("SMALLFORMATS_NAME", "Nameless Knockoff")
 
 ALLOWED_HOSTS = []
+if not DEBUG:
+    ALLOWED_HOSTS = [
+        'pdhdata.fly.dev',
+        'pdhdata.com',
+    ]
+    CSRF_TRUSTED_ORIGINS = [
+        'https://pdhdata.fly.dev',
+        'https://pdhdata.com',
+    ]
 
 
 # Application definition
