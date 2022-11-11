@@ -10,6 +10,9 @@
   <li class="nav-item">
     <a class="nav-link" href="{% url 'cmdr-decklist' card.id %}">Decks</a>
   </li>
+  <li class="nav-item">
+    <a class="nav-link" href="{% url 'card-single' card.id %}">Card</a>
+  </li>
 </ul>
 <div class="clearfix">
   {% if card.image_uri %}
