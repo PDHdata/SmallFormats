@@ -20,15 +20,4 @@ def main():
 
 if __name__ == '__main__':
     os.environ.setdefault('DJANGO_SECRET_KEY', 'django-insecure-r1ch4rd-g4rf13ld,-p.h.d.')
-
-    try:
-        with open('./.env') as f:
-            for line in f:
-                line = line.strip()
-                key, value = line.split('=', 1)
-                print(f"Read {key} from .env")
-                os.environ.setdefault(key, value)
-    except FileNotFoundError:
-        pass
-
     main()
