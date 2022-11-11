@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+{% load simple_math %}
+{% block title %}Decks commanded by {{ card.name }}{% endblock %}
+{% block body %}
+<h1>{{ card.name }}</h1>
+<p>{{ card.type_line }} ({{ card.color_identity }}) (<a href="{% url 'cmdr-single' card.id %}">Back to commander</a>)</p>
+<div class="container">
+  <table class="table mb-3">
+    <tr><th>Deck name</th><th>Creator</th><th>Source</th><tr>
+    {% for deck in decks %}
+    <tr>
+      <td>{% if deck.source_link %}<a href="{{ deck.source_link }}">{{ deck.name }}</a>{% else %}{{ deck.name }}{% endif %}</td>
+      <td>{{ deck.creator_display_name }}</td>
+      <td>{{ deck.get_source_display }}</td>
+    </tr>
+    {% empty %}
+    <tr><td colspan="3">No decks helmed by {{ card.name }}.</td></tr>
+    {% endfor %}
+  </table>
+  <p>
+    {% if decks.has_previous %}
+    <a href="?page=1">first</a>
+    <a href="?page={{ decks.previous_page_number }}">previous</a>
+    {% endif %}
+    (page {{ decks.number }} of {{ decks.paginator.num_pages }})
+    {% if decks.has_next %}
+    <a href="?page={{ decks.next_page_number }}">next</a>
+    <a href="?page={{ decks.paginator.num_pages }}">last</a>
+    {% endif %}
+  </p>
+</div>
+{% endblock %}

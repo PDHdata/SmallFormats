@@ -401,6 +401,7 @@ def single_cmdr(request, card_id):
     commands = (
         Deck.objects
         .filter(card_list__card=card, card_list__is_pdh_commander=True)
+        .order_by('-updated_time')
     )
 
     context = {}
@@ -417,6 +418,7 @@ def single_cmdr(request, card_id):
     context.update({
         'card': card,
         'commands': commands.count(),
+        'top_decks': commands[:4],
         'could_be_in': could_be_in,
         'links': _LINKS,
     })
@@ -428,13 +430,36 @@ def single_cmdr(request, card_id):
     )
 
 
+def single_cmdr_decklist(request, card_id):
+    card = get_object_or_404(Card, pk=card_id)
+
+    commands = (
+        Deck.objects
+        .filter(card_list__card=card, card_list__is_pdh_commander=True)
+        .order_by('-updated_time')
+    )
+    paginator = Paginator(commands, 20, orphans=3)
+    page_number = request.GET.get('page')
+    cmdrs_page = paginator.get_page(page_number)
+    
+    return render(
+        request,
+        "single_cmdr_decklist.html",
+        context={
+            'card': card,
+            'decks': cmdrs_page,
+            'links': _LINKS,
+        },
+    )
+
+
 def hx_common_cards(request, card_id, card_type, page_number):
     if not request.htmx:
         return HttpResponseNotAllowed("expected HTMX request")
     
     card = get_object_or_404(Card, pk=card_id)
 
-    commands = (
+    commands_count = (
         Deck.objects
         .filter(card_list__card=card, card_list__is_pdh_commander=True)
         .count()
@@ -497,7 +522,7 @@ def hx_common_cards(request, card_id, card_type, page_number):
             'cmdr_id': card_id,
             'card_type': card_type,
             'card_type_plural': card_type_plural,
-            'commands': commands,
+            'commands': commands_count,
             'common_cards': cards_page,
         },
     )
