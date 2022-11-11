@@ -79,7 +79,12 @@ def _get_front_image():
             .order_by('-num_decks')
             .first()
         )
-        return top_cmdr.image_uri
+        if top_cmdr:
+            return top_cmdr.image_uri
+        else:
+            # TODO: understand why this isn't raised automatically
+            # when hitting .first()
+            raise Card.DoesNotExist()
     except Card.DoesNotExist:
         return "https://cards.scryfall.io/normal/front/a/4/a4fab67f-00c2-4125-9262-d21a29411797.jpg?1644853041="
 
