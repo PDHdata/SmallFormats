@@ -38,13 +38,10 @@ class Command(BaseCommand):
                     elif self._want_card(json_card):
                         try:
                             c.save()
-                        except DataError as e:
-                            self.stderr.write(f"Card {c.name} threw {e}")
-
-                        try:
                             p.save()
                         except DataError as e:
-                            self.stderr.write(f"Printing {p} threw {e}")
+                            self.stderr.write(f"Card {c.name} or printing {p} threw {e}")
+
 
         self.stdout.write(f"end: {Card.objects.all().count()} cards, {Printing.objects.all().count()} printings")
 
