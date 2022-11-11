@@ -30,11 +30,13 @@ ALLOWED_HOSTS = [
     '127.0.0.1',
     'pdhdata.fly.dev',
     'pdhdata.com',
+    'www.pdhdata.com',
 ]
 CSRF_TRUSTED_ORIGINS = [
     'http://127.0.0.1',
     'https://pdhdata.fly.dev',
     'https://pdhdata.com',
+    'https://www.pdhdata.com',
 ]
 
 

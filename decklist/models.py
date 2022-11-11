@@ -118,7 +118,8 @@ class Card(models.Model):
     identity_b = models.BooleanField(default=False, verbose_name='is B')
     identity_r = models.BooleanField(default=False, verbose_name='is R')
     identity_g = models.BooleanField(default=False, verbose_name='is G')
-    type_line = models.CharField(max_length=50)
+    # double-sided cards have double-sided type_lines
+    type_line = models.CharField(max_length=100)
     scryfall_uri = models.URLField(max_length=200)
 
     def __str__(self):
@@ -165,7 +166,7 @@ class Printing(models.Model):
         on_delete=models.CASCADE,
         related_name='printings',
     )
-    set_code = models.CharField(max_length=5)
+    set_code = models.CharField(max_length=10)
     rarity = models.CharField(max_length=1, choices=Rarity.choices)
     image_uri = models.URLField(max_length=200, blank=True)
 

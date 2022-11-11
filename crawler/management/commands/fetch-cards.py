@@ -2,6 +2,7 @@
 See https://scryfall.com/docs/api/bulk-data for more on Scryfall data.
 """
 from django.core.management.base import BaseCommand, CommandError
+from django.db.utils import DataError
 import httpx
 import json_stream.httpx
 from decklist.models import Card, Printing
@@ -35,8 +36,12 @@ class Command(BaseCommand):
                         self.stderr.write(f"failed to parse {json_card['name']}")
 
                     elif self._want_card(json_card):
-                        c.save()
-                        p.save()
+                        try:
+                            c.save()
+                            p.save()
+                        except DataError as e:
+                            self.stderr.write(f"Card {c.name} or printing {p} threw {e}")
+
 
         self.stdout.write(f"end: {Card.objects.all().count()} cards, {Printing.objects.all().count()} printings")
 
