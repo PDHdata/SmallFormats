@@ -4,7 +4,11 @@
       <a href="{% url 'index' %}" class="mb-3 me-2 mb-md-0 text-muted text-decoration-none lh-1">
         <svg class="bi" width="24" height="24"><use xlink:href="#card-play"/></svg>
       </a>
-      <span class="mb-3 mb-md-0 text-muted">{{ SITENAME }} | <a class="link-secondary" href="{% url 'about' %}">About</a></span>
+      <span class="mb-3 mb-md-0 text-muted">
+        {{ SITENAME }}
+        | <a class="link-secondary" href="{% url 'about' %}">About</a>
+        | <a class="link-secondary" href="{% url 'privacy' %}">Privacy and terms</a>
+      </span>
     </div>
 
     <ul class="nav col-md-4 justify-content-end list-unstyled d-flex">

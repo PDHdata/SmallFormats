@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+{% block title %}{{ SITENAME }} — Privacy and terms of use{% endblock %}
+{% block body %}
+<div class="container">
+<h1>Privacy and terms of use</h1>
+<h2>Privacy</h2>
+<p>
+  {{ SITENAME }} doesn't want your personal data.
+  We don't store any information about you, and we don't (currently) have personalized features which would require knowing anything about you.
+  We don't even set any cookies unless you log in.
+  And only administrators of the site can log in, so that <i>very</i> likely doesn't apply to you!
+</p>
+<h2>Terms of use</h2>
+<p>
+  {{ SITENAME }} exists for the benefit of the PDH community.
+  Please don't use this site, our GitHub page, or anything else connected to {{ SITENAME }} to harass other people or abuse other sites.
+  Wizards of the Coast makes their IP available under a pretty generous <a href="https://company.wizards.com/fancontentpolicy">Fan Content Policy</a>; don't abuse that either.
+</p>
+<h2>Thanks and credits</h2>
+<p>See the <a href="{% url 'about' %}">About</a> page for these.</p>
+<h2>Updated</h2>
+<p>Last updated 2022-11-11.</p>
+</div>
+{% endblock %}
