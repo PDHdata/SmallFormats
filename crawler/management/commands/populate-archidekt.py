@@ -4,19 +4,11 @@ from decklist.models import DataSource, CardInDeck, Printing
 from crawler.models import CrawlRun, DeckCrawlResult
 import time
 from django.db import transaction
-from ._api_helpers import HEADERS, ARCHIDEKT_API_BASE
+from ._api_helpers import HEADERS, ARCHIDEKT_API_BASE, format_response_error
 
 
 # there is no point in backing off any further than this, just cancel the run
 MAX_SLEEP_TIME = 16
-
-def format_response_error(response):
-    result = f"{response.status_code} accessing {response.request.url}\n\n"
-    for hdr, value in response.headers.items():
-        result += f".. {hdr}: {value}\n"
-    result += f"\n{response.text}"
-
-    return result
 
 class Command(BaseCommand):
     help = 'Populate Archidekt decks retrieved by crawl-archidekt'

@@ -9,16 +9,8 @@ from decklist.models import Deck, DataSource
 from crawler.models import CrawlRun, DeckCrawlResult
 from django.utils import timezone
 import time
-from ._api_helpers import HEADERS, ARCHIDEKT_API_BASE
+from ._api_helpers import HEADERS, ARCHIDEKT_API_BASE, format_response_error
 
-
-def format_response_error(response):
-    result = f"{response.status_code} accessing {response.request.url}\n\n"
-    for hdr, value in response.headers.items():
-        result += f".. {hdr}: {value}\n"
-    result += f"\n{response.text}"
-
-    return result
 
 class Command(BaseCommand):
     help = 'Ask Archidekt for PDH decklists'
