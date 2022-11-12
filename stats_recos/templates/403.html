@@ -1,0 +1,12 @@
+{% extends 'base.html' %}
+{% block title %}{{ SITENAME }} — 403{% endblock %}
+{% block body %}
+<div class="container">
+<h1>Access denied (403)</h1>
+<div>
+  <p>You don't have access to that.</p>
+  <img src="https://cards.scryfall.io/normal/front/1/6/1642df77-6fe8-47cf-b750-ca4dd9b331ba.jpg?1651655225"
+    class="mb-3 ms-md-2 me-md-3" style="border-radius: 10px" width="244" height="340">
+  {% if exception %}<p>The server says: <em>{{ exception }}</em></p>{% endif %}
+  </div>
+{% endblock %}

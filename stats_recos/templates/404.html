@@ -1,0 +1,12 @@
+{% extends 'base.html' %}
+{% block title %}{{ SITENAME }} — 404{% endblock %}
+{% block body %}
+<div class="container">
+<h1>Not found (404)</h1>
+<div>
+  <p>So sorry, but we can't find {% if request_path %}<code>{{ request_path }}</code>{% else %}that page{% endif %}.</p>
+  <img src="https://cards.scryfall.io/normal/front/a/3/a3da3387-454c-4c09-b78f-6fcc36c426ce.jpg?1583542842"
+    class="mb-3 ms-md-2 me-md-3" style="border-radius: 10px" width="244" height="340">
+  {% if exception %}<p>The server says: <em>{{ exception }}</em></p>{% endif %}
+  </div>
+{% endblock %}
