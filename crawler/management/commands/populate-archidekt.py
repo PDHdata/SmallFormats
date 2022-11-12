@@ -7,37 +7,11 @@ from django.db import transaction
 from ._api_helpers import HEADERS, ARCHIDEKT_API_BASE, format_response_error
 
 
-# there is no point in backing off any further than this, just cancel the run
-MAX_SLEEP_TIME = 16
-
 class Command(BaseCommand):
     help = 'Populate Archidekt decks retrieved by crawl-archidekt'
 
-    def add_arguments(self, parser) -> None:
-        parser.add_argument(
-            '--crawl-id',
-            type=int, default=0,
-            help='Retrieve decks for this crawl')
-
     def handle(self, *args, **options):
         sleep_time = 2
-
-        runs = CrawlRun.objects.filter(
-            target=DataSource.ARCHIDEKT,
-            state__in=[
-                CrawlRun.State.DONE_FETCHING_DECKS,
-                CrawlRun.State.FETCHING_DECKLISTS,
-            ],
-        ).order_by('-crawl_start_time')
-        try:
-            run = runs.get(pk=options['crawl_id'])
-        except CrawlRun.DoesNotExist:
-            self.stderr.write(self.style.ERROR(f"Crawl {options['crawl_id']} not found or completed."))
-            if len(runs) > 0:
-                self.stderr.write(f"Perhaps you meant {runs[0].id}?")
-            return
-        
-        self.stdout.write(f"Crawl {run.id} has {run.deck_results.count()} decks to process.")
 
         with httpx.Client(
             headers=HEADERS,
@@ -48,52 +22,34 @@ class Command(BaseCommand):
                 'response': [self._response_log],
             }
         ) as client:
-            run.state = CrawlRun.State.FETCHING_DECKLISTS
-            run.save()
-
-            for crawl_result in run.deck_results.all():
-                if crawl_result.got_cards:
-                    continue
-                
-                if run.state == CrawlRun.State.FETCHING_DECKLISTS:
-                    response = client.get(crawl_result.url)
-                else:
-                    break
+            to_fetch = (
+                DeckCrawlResult.objects
+                .filter(got_cards=False)
+            )
+            for crawl_result in to_fetch:
+                response = client.get(crawl_result.url)
 
                 if 200 <= response.status_code < 300:
                     envelope = response.json()
                     cards = envelope['cards']
                     self._process_deck(crawl_result, cards)
-                elif response.status_code == 429 and sleep_time < MAX_SLEEP_TIME:
-                    sleep_time = sleep_time * 2
-                    self.stdout.write(f"Got 429, slowing to {sleep_time}s.")
                 elif response.status_code == 400:
                     self.stderr.write(f"Got 400, skipping {crawl_result.url}")
+                    crawl_result.delete()
                 else:
-                    run.state = CrawlRun.State.ERROR
-                    run.note = format_response_error(response)
-                    run.save()
                     self.stderr.write(f"HTTP error {response.status_code} accessing {response.request.url}")
+                    return
 
-                if run.state == CrawlRun.State.FETCHING_DECKLISTS:
-                    self.stdout.write(f"Sleeping {sleep_time}s.")
-                    time.sleep(sleep_time)
+                time.sleep(sleep_time)
             
             # made it to the end
-            if run.state == CrawlRun.State.FETCHING_DECKLISTS:
-                run.state = CrawlRun.State.DONE_FETCHING_DECKLISTS
-                run.save()
-                # delete all the DeckCrawlResults for this run where
-                # `got_cards` is True
-                self.stdout.write(self.style.SUCCESS(f"Run {run.id} populated successfully."))
-                count, _ = (
-                    DeckCrawlResult.objects
-                    .filter(run=run, got_cards=True)
-                    .delete()
-                )
-                self.stdout.write(f"Cleaned up {count} records from the run.")
-                run.state = CrawlRun.State.COMPLETE
-                run.save()
+            # delete all the DeckCrawlResults where `got_cards` is True
+            count, _ = (
+                DeckCrawlResult.objects
+                .filter(got_cards=True)
+                .delete()
+            )
+            self.stdout.write(f"Cleaned up {count} records.")
 
     def _process_deck(self, crawl_result, cards):
         # resolve printings to cards
