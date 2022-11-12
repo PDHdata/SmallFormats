@@ -9,37 +9,78 @@ from decklist.models import Deck, DataSource
 from crawler.models import CrawlRun, DeckCrawlResult
 from django.utils import timezone
 import time
-from ._api_helpers import HEADERS, ARCHIDEKT_API_BASE
+from ._api_helpers import HEADERS, ARCHIDEKT_API_BASE, format_response_error
 
-
-# TODO:
-# - be able to resume failed/incomplete runs
-# - in the commands, target a particular run
-
-def format_response_error(response):
-    result = f"{response.status_code} accessing {response.request.url}\n\n"
-    for hdr, value in response.headers.items():
-        result += f".. {hdr}: {value}\n"
-    result += f"\n{response.text}"
-
-    return result
 
 class Command(BaseCommand):
     help = 'Ask Archidekt for PDH decklists'
 
-    def add_arguments(self, parser) -> None:
-        parser.add_argument(
-            '--stop-after',
-            type=int, default=0,
-            help='Stop crawling after this many pages of results')
-
     def handle(self, *args, **options):
+        # TODO: introduce an option for resuming an error'd run
         sleep_time = 2
-        stop_after = options['stop_after']
-        retrieved_pages = 0
-        crawl_time = timezone.now()
-        continue_crawling = False
 
+        stop_after = self._compute_stop_after()
+        run = self._get_or_create_run(stop_after)
+
+        client: httpx.Client = self._create_client()
+        url = (
+            self._initial_url(client) if run.state == CrawlRun.State.NOT_STARTED
+            else run.next_fetch
+        )
+
+        processor = self._process_page
+        crawler = Crawler(url, stop_after, processor)
+        
+        run.state = CrawlRun.State.FETCHING_DECKS
+        run.save()
+        
+        try:
+            while crawler.get_next_page(client):
+                run.next_fetch = crawler.url
+                run.save()
+                time.sleep(sleep_time)
+
+        except CrawlerExit as e:
+            # TODO: check for 429. that's not fatal, it means we need
+            # to slow down.
+            run.state = CrawlRun.State.ERROR
+            run.note = (
+                format_response_error(e.respose) if e.response
+                else str(e)
+            )
+            run.save()
+            self.stderr.write(f"{e}")
+            return
+        
+        # if we got here without exiting, we're done
+        run.state = CrawlRun.State.COMPLETE
+        run.save()
+
+    def _create_client(self):
+        return httpx.Client(
+            headers=HEADERS,
+            base_url=ARCHIDEKT_API_BASE,
+            follow_redirects=True,
+            event_hooks={
+                'request': [self._request_log],
+                'response': [self._response_log],
+            })
+    
+    def _initial_url(self, client: httpx.Client):
+        params = {
+            'formats': 17,
+            'orderBy': '-createdAt',
+            'size': 100,
+            'pageSize': 48,
+        }
+        req = client.build_request(
+            "GET",
+            "decks/cards/",
+            params=params
+        )
+        return req.url
+    
+    def _compute_stop_after(self):
         try:
             latest_deck_update = (
                 Deck.objects
@@ -49,96 +90,33 @@ class Command(BaseCommand):
                 )
                 .latest('updated_time')
             ).updated_time
-            print(f"we will search back to {latest_deck_update}")
         except Deck.DoesNotExist:
             latest_deck_update = None
-            print(f"no date to search back to")
+        
+        return latest_deck_update
 
-        # TODO: search for and resume existing runs
-        run = CrawlRun(
-            crawl_start_time=crawl_time,
-            target=DataSource.ARCHIDEKT,
-            state=CrawlRun.State.NOT_STARTED,
-            search_back_to=latest_deck_update,
-        )
-        run.save()
-
-        params = {
-            'formats': 17,
-            'orderBy': '-createdAt',
-            'size': 100,
-            'pageSize': 48,
-        }
-        with httpx.Client(
-            headers=HEADERS,
-            base_url=ARCHIDEKT_API_BASE,
-            follow_redirects=True,
-            event_hooks={
-                'request': [self._request_log],
-                'response': [self._response_log],
-            }
-        ) as client:
-            run.state = CrawlRun.State.FETCHING_DECKS
+    def _get_or_create_run(self, stop_after):
+        # try to resume an existing run
+        try:
+            run = CrawlRun.objects.filter(
+                target=DataSource.ARCHIDEKT,
+                state__in=(
+                    CrawlRun.State.NOT_STARTED,
+                    CrawlRun.State.FETCHING_DECKS,
+                )
+            ).latest('crawl_start_time')
+        except CrawlRun.DoesNotExist:
+            run = CrawlRun(
+                crawl_start_time=timezone.now(),
+                target=DataSource.ARCHIDEKT,
+                state=CrawlRun.State.NOT_STARTED,
+                search_back_to=stop_after,
+            )
             run.save()
 
-            decks = client.get("decks/cards/", params=params)
-            if 200 <= decks.status_code < 300:
-                continue_crawling = True
-                envelope = decks.json()
-                count, next = envelope['count'], envelope['next']
-                if count > 0:
-                    self.stdout.write(f"There are {count} decks.")
-                results = envelope['results']
-            else:
-                run.state = CrawlRun.State.ERROR
-                run.note = format_response_error(decks)
-                run.save()
-                self.stderr.write(f"HTTP error {decks.status_code} accessing {decks.request.url}")
+        return run
 
-            while continue_crawling:
-                # default to stopping; we'll flip this later if we should continue
-                continue_crawling = False
-                # Archidekt seems to send "count = -1" under some conditions
-                if count <= 0:
-                    run.state = CrawlRun.State.ERROR
-                    run.note = format_response_error(decks)
-                    run.save()
-                    self.stderr.write(f"Received \"{decks.text}\" accessing {decks.request.url}")
-                else:
-                    oldest_deck_update = self._process_page(run, results)
-                    retrieved_pages += 1
-                    self.stdout.write(f"Seen {retrieved_pages} pages.")
-
-                if (
-                    next and
-                    count > 0 and
-                    (retrieved_pages < stop_after or stop_after == 0) and
-                    (run.search_back_to is None or oldest_deck_update > run.search_back_to)
-                ):
-                    self.stdout.write(f"Sleeping {sleep_time}s.")
-                    time.sleep(sleep_time)
-                    # Archidekt "next" comes back as http:// so fix that up
-                    if next[0:5] == 'http:':
-                        next = 'https:' + next[5:]
-                    decks = client.get(next)
-                    if 200 <= decks.status_code < 300:
-                        continue_crawling = True
-                        envelope = decks.json()
-                        count, next = envelope['count'], envelope['next']
-                        results = envelope['results']
-                    else:
-                        run.state = CrawlRun.State.ERROR
-                        run.note = format_response_error(decks)
-                        run.save()
-                        self.stderr.write(f"HTTP error {decks.status_code} accessing {decks.request.url}")
-            
-            # made it to the end
-            if run.state == CrawlRun.State.FETCHING_DECKS:
-                run.state = CrawlRun.State.DONE_FETCHING_DECKS
-                run.save()
-                self.stdout.write(self.style.SUCCESS(f"Fetch completed successfully. Now run `populate-archidekt --crawl-id {run.id}`."))
-
-    def _process_page(self, run, results):
+    def _process_page(self, results):
         self.stdout.write(f"Processing next {len(results)} results.")
         
         # get existing decks for this page
@@ -164,7 +142,7 @@ class Command(BaseCommand):
             crawl_result = DeckCrawlResult(
                 url=ARCHIDEKT_API_BASE + f"decks/{this_id}/",
                 deck=deck,
-                run=run,
+                target=DataSource.ARCHIDEKT,
                 updated_time=deck_data['updatedAt'],
                 got_cards=False,
             )
@@ -173,7 +151,6 @@ class Command(BaseCommand):
                 crawl_result.save()
         
         # the last deck on the page will have the oldest date
-        print(f"oldest update_time is {deck.updated_time}")
         return parse_datetime(deck.updated_time)
 
     def _request_log(self, request):
@@ -189,3 +166,57 @@ class Command(BaseCommand):
             self.stderr.write("")
             self.stderr.write(self.style.ERROR(response.text))
             self.stderr.write("--------")
+
+
+class CrawlerExit(Exception):
+    def __init__(self, *args, response: httpx.Response = None):
+        super().__init__(*args)
+        self.response = response
+
+class Crawler:
+    def __init__(self, initial_url, stop_after, processor):
+        self.stop_after = stop_after
+        self.url = initial_url
+        self.processor = processor
+        self._keep_going = True
+    
+    def get_next_page(self, client: httpx.Client):
+        if not self._keep_going:
+            raise CrawlerExit("this crawler cannot proceed")
+
+        response = client.get(self.url)
+
+        # check errors
+        if response.status_code < 200 or response.status_code >= 300:
+            # report error and bail
+            self._keep_going = False
+            raise CrawlerExit(f"got {response.status_code} from client", response)
+        
+        else:
+            self._process_response(response)
+
+        return self._keep_going
+
+    def _process_response(self, response: httpx.Response):
+        envelope = response.json()
+        count, next = envelope['count'], envelope['next']
+
+        # Archidekt seems to send "count = -1" under some conditions
+        if count <= 0:
+            self._keep_going = False
+            raise CrawlerExit(f"client got: {response.text}", response)
+
+        if next:
+            # Archidekt "next" comes back as http:// so fix that up
+            if next[0:5] == 'http:':
+                next = 'https:' + next[5:]
+            self.url = next
+        else:
+            # reached the end!
+            self.url = None
+            self._keep_going = False
+
+        oldest_seen = self.processor(envelope['results'])
+        if self.stop_after and oldest_seen < self.stop_after:
+            # we're done!
+            self._keep_going = False
