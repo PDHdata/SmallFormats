@@ -1,7 +1,7 @@
 from django.core.management.base import BaseCommand, CommandError
 import httpx
 from decklist.models import DataSource, CardInDeck, Printing
-from crawler.models import CrawlRun, DeckCrawlResult
+from crawler.models import DeckCrawlResult
 import time
 from django.db import transaction
 from ._api_helpers import HEADERS, ARCHIDEKT_API_BASE, format_response_error
@@ -24,7 +24,10 @@ class Command(BaseCommand):
         ) as client:
             to_fetch = (
                 DeckCrawlResult.objects
-                .filter(got_cards=False)
+                .filter(
+                    target=DataSource.ARCHIDEKT,
+                    got_cards=False,
+                )
             )
             for crawl_result in to_fetch:
                 response = client.get(crawl_result.url)

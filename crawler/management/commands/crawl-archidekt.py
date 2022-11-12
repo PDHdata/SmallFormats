@@ -28,7 +28,7 @@ class Command(BaseCommand):
             else run.next_fetch
         )
 
-        processor = lambda result: self._process_page(run, result)
+        processor = self._process_page
         crawler = Crawler(url, stop_after, processor)
         
         run.state = CrawlRun.State.FETCHING_DECKS
@@ -53,7 +53,7 @@ class Command(BaseCommand):
             return
         
         # if we got here without exiting, we're done
-        run.state = CrawlRun.State.DONE_FETCHING_DECKS
+        run.state = CrawlRun.State.COMPLETE
         run.save()
 
     def _create_client(self):
@@ -116,7 +116,7 @@ class Command(BaseCommand):
 
         return run
 
-    def _process_page(self, run, results):
+    def _process_page(self, results):
         self.stdout.write(f"Processing next {len(results)} results.")
         
         # get existing decks for this page
@@ -142,7 +142,7 @@ class Command(BaseCommand):
             crawl_result = DeckCrawlResult(
                 url=ARCHIDEKT_API_BASE + f"decks/{this_id}/",
                 deck=deck,
-                run=run,
+                target=DataSource.ARCHIDEKT,
                 updated_time=deck_data['updatedAt'],
                 got_cards=False,
             )
