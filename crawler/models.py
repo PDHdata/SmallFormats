@@ -23,6 +23,7 @@ class CrawlRun(models.Model):
     target = models.IntegerField(choices=DataSource.choices)
     state = models.IntegerField(choices=State.choices)
     note = models.TextField(blank=True)
+    next_fetch = models.URLField(blank=True)
 
     def __str__(self):
         return f"Run {self.id} [{self.get_target_display()}] ({self.crawl_start_time})"
