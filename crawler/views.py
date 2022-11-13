@@ -5,7 +5,7 @@ from django.utils import timezone
 from django.urls import reverse
 from django.db import transaction
 from django.utils.dateparse import parse_datetime
-from django_htmx.http import HttpResponseClientRefresh, HttpResponseClientRedirect
+from django_htmx.http import HttpResponseClientRefresh, HttpResponseClientRedirect, HTMX_STOP_POLLING
 from crawler.models import DeckCrawlResult, CrawlRun, DataSource
 from decklist.models import Deck
 import httpx
@@ -153,6 +153,8 @@ def run_archidekt_onepage_hx(request, run_id):
         processor = lambda results: _archidekt_page_processor(results, output)
         crawler = ArchidektCrawler(run.next_fetch, run.search_back_to, processor)
 
+        response_status = 200
+
         try:
             if crawler.get_next_page(client):
                 run.next_fetch = crawler.url
@@ -174,6 +176,7 @@ def run_archidekt_onepage_hx(request, run_id):
             )
             run.save()
             output.append(run.note)
+            response_status = HTMX_STOP_POLLING
 
         return render(
             request,
@@ -181,4 +184,15 @@ def run_archidekt_onepage_hx(request, run_id):
             {
                 'output': output,
             },
+            status=response_status,
         )
+
+
+def start_archidekt_poll_hx(request, run_id):
+    return render(
+        request,
+        'crawler/_start_archidekt_poll.html',
+        {
+            'run_id': run_id,
+        },
+    )
