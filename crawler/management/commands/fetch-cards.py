@@ -37,6 +37,9 @@ class Command(BaseCommand):
 
                     elif self._want_card(json_card):
                         try:
+                            if len(c.name) > 100:
+                                # Market Research Elemental 🙄
+                                c.name = c.name[:47] + '...'
                             c.save()
                             p.save()
                         except DataError as e:

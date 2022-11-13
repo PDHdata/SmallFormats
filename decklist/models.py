@@ -109,9 +109,11 @@ class Card(models.Model):
     # because we're mostly dealing in abstract cards here.
     id = models.UUIDField(primary_key=True)
     # at this time, "Asmoranomardicadaistinaculdacar" and
-    # "Infernal Spawn of Infernal Spawn of Evil" are the
-    # longest card names, at 31/40 characters. Padding to 100
+    # "Infernal Spawn of Infernal Spawn of Evil" are the longest
+    # reasonable card names, at 31/40 characters. Padding to 100
     # to account for split cards in "CardA // CardB" format.
+    # Market Research Elemental (not its actual name) will be
+    # truncated in the card-data importer.
     name = models.CharField(max_length=100)
     identity_w = models.BooleanField(default=False, verbose_name='is W')
     identity_u = models.BooleanField(default=False, verbose_name='is U')
