@@ -2,7 +2,7 @@
 {% block title %}Crawler admin — run {{ run.id }}{% endblock %}
 {% block body %}
 <h1>{{ run.get_target_display }} run {{ run.id }}</h1>
-<div class="container">
+<div class="container" hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'>
   <ul class="list-group mb-3">
     <li class="list-group-item d-flex justify-content-between align-items-start">
       <div class="ms-2 me-auto">
@@ -50,7 +50,7 @@
     <li class="list-group-item d-flex justify-content-between align-items-start">
       <div class="ms-2 me-auto">
         <div class="fw-bold">Clear error</div>
-        <a href="#" class="btn btn-outline-danger me-2">Clear error</a>
+        <button class="btn btn-outline-danger me-2" hx-post="{% url 'crawler:run-remove-error' run.id %}">Clear error</button>
       </div>
     </li>
     {% endif %}
