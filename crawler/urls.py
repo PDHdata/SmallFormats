@@ -7,5 +7,5 @@ urlpatterns = [
     path('', views.crawler_index, name="index"),
     path('run/<int:run_id>/', views.run_detail, name="run-detail"),
     path('run/<int:run_id>/clear', views.run_remove_error_hx, name="run-remove-error"),
-    path('run/new/', views.new_run, name="run-new"),
+    path('run/new/archidekt/', views.new_archidekt_run_hx, name="run-new-archidekt"),
 ]

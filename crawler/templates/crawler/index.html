@@ -3,7 +3,9 @@
 {% block body %}
 <h1>Crawler admin</h1>
 <div class="container">
-  <a class="btn btn-primary" href="{% url 'crawler:run-new' %}">Start a new run</a>
+  <div hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'>
+    <button class="btn btn-primary" hx-post="{% url 'crawler:run-new-archidekt' %}">Start a new Archidekt run</button>
+  </div>
   <table class="table">
     <tr><th>Start time</th><th>Target</th><th>State</th><th>Search back to</th></tr>
     {% for run in runs %}
