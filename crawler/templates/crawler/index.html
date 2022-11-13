@@ -2,8 +2,8 @@
 {% block title %}Crawler admin{% endblock %}
 {% block body %}
 <h1>Crawler admin</h1>
-<div class="container">
-  <div hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'>
+<div class="container" hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'>
+  <div>
     <button class="btn btn-primary" hx-post="{% url 'crawler:run-new-archidekt' %}">Start a new Archidekt run</button>
   </div>
   <table class="table">
@@ -19,7 +19,7 @@
     <tr><td colspan="4">No runs found.</td></tr>
     {% endfor %}
   </table>
-  <div>
+  <div class="mb-3">
     {% if runs.has_previous %}
     <a href="?page=1">first</a>
     <a href="?page={{ runs.previous_page_number }}">previous</a>
@@ -30,5 +30,15 @@
     <a href="?page={{ runs.paginator.num_pages }}">last</a>
     {% endif %}   
   </div>
+
+  {% if pending_results %}
+  <hr>
+  <div>
+    There are (up to) {{ pending_results }} decks to crawl.<br>
+    <button hx-post="{% url 'crawler:fetch-deck' %}" hx-target="#fetchResult"
+      hx-swap="beforeend" class="btn btn-outline-primary">Fetch one</button>
+  </div>
+  <div id="fetchResult"></div>
+  {% endif %}
 </div>
 {% endblock %}

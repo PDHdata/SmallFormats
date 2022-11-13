@@ -4,10 +4,11 @@ from django.views.decorators.http import require_POST
 from django.utils import timezone
 from django.urls import reverse
 from django.db import transaction
+from django.db.models import Count
 from django.utils.dateparse import parse_datetime
 from django_htmx.http import HttpResponseClientRefresh, HttpResponseClientRedirect, HTMX_STOP_POLLING
 from crawler.models import DeckCrawlResult, CrawlRun, DataSource
-from decklist.models import Deck
+from decklist.models import Deck, Printing, CardInDeck
 import httpx
 from crawler.management.commands._api_helpers import HEADERS, ARCHIDEKT_API_BASE, format_response_error
 from crawler.crawlers import ArchidektCrawler, CrawlerExit
@@ -19,11 +20,18 @@ def crawler_index(request):
     page_number = request.GET.get('page')
     runs_page = paginator.get_page(page_number)
 
+    pending_results = (
+        DeckCrawlResult.objects
+        .filter(got_cards=False)
+        .count()
+    )
+
     return render(
         request,
         'crawler/index.html',
         {
             'runs': runs_page,
+            'pending_results': pending_results,
         },
     )
 
@@ -194,5 +202,91 @@ def start_archidekt_poll_hx(request, run_id):
         'crawler/_start_archidekt_poll.html',
         {
             'run_id': run_id,
+        },
+    )
+
+
+def _process_deck(crawl_result, cards, output):
+    # resolve printings to cards
+    lookup_printings = set()
+    for card_json in cards:
+        printing_id = card_json['card']['uid']
+        lookup_printings.add(printing_id)
+    print_id_to_card = {
+        str(p.id): p.card
+        for p in Printing.objects.filter(id__in=lookup_printings)
+    }
+
+    # reuse cards where we can
+    # TODO: handle multiple printings of the same card?
+    current_cards = {
+        c.card.id: c for c in CardInDeck.objects.filter(deck=crawl_result.deck)
+    }
+    update_cards = []
+    new_cards = []
+
+    for card_json in cards:
+        printing_id = card_json['card']['uid']
+        if printing_id not in print_id_to_card.keys():
+            output.append(f"skipping printing {printing_id}; did not resolve to a card")
+            continue
+        card_id = print_id_to_card[printing_id].id
+        if card_id in current_cards.keys():
+            reuse_card = current_cards.pop(card_id)
+            reuse_card.is_pdh_commander = "Commander" in card_json['categories']
+            update_cards.append(reuse_card)
+        else:
+            new_cards.append(CardInDeck(
+                deck=crawl_result.deck,
+                card=print_id_to_card[printing_id],
+                is_pdh_commander="Commander" in card_json['categories'],
+            ))
+    
+    with transaction.atomic():
+        (
+            CardInDeck.objects
+            .filter(deck=crawl_result.deck)
+            .filter(card__id__in=current_cards.keys())
+            .delete()
+        )
+        CardInDeck.objects.bulk_create(new_cards)
+        CardInDeck.objects.bulk_update(update_cards, ['is_pdh_commander'])
+        crawl_result.got_cards = True
+        crawl_result.save()
+
+
+@require_POST
+def fetch_deck(request):
+    try:
+        updatable_deck = (
+            DeckCrawlResult.objects
+            .filter(got_cards=False)
+            .first()
+        )
+    except DeckCrawlResult.DoesNotExist:
+        return HttpResponseClientRefresh()
+
+    output = []
+
+    with httpx.Client(
+        headers=HEADERS,
+    ) as client:
+        response = client.get(updatable_deck.url)
+        if 200 <= response.status_code < 300 or response.status_code == 400:
+            envelope = response.json()
+            cards = envelope['cards']
+            _process_deck(updatable_deck, cards, output)
+            output.append(f"Updated \"{updatable_deck.deck.name}\".")
+        else:
+            output.append(f"Got {response.status_code} from server.")
+
+    if updatable_deck.got_cards:
+        updatable_deck.deck.deckcrawlresult_set.all().delete()
+
+    return render(
+        request,
+        'crawler/_continue.html',
+        {
+            'output': output,
         },
     )
