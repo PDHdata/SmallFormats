@@ -71,6 +71,8 @@ def run_detail(request, run_id):
             'run': run,
             'resumable': run.state in (CrawlRun.State.NOT_STARTED, CrawlRun.State.FETCHING_DECKS),
             'errored': run.state == CrawlRun.State.ERROR,
+            'allow_search_infinite': run.state == CrawlRun.State.NOT_STARTED and run.search_back_to,
+            'can_cancel': run.state not in (CrawlRun.State.CANCELLED, CrawlRun.State.COMPLETE),
         },
     )
 
@@ -84,6 +86,28 @@ def run_remove_error_hx(request, run_id):
             run.state = run.State.FETCHING_DECKS
         else:
             run.state = run.State.NOT_STARTED
+        run.save()
+    
+    return HttpResponseClientRefresh()
+
+
+@require_POST
+def run_remove_limit_hx(request, run_id):
+    run = get_object_or_404(CrawlRun, pk=run_id)
+
+    if run.state == run.State.NOT_STARTED:
+        run.search_back_to = None
+        run.save()
+    
+    return HttpResponseClientRefresh()
+
+
+@require_POST
+def run_cancel_hx(request, run_id):
+    run = get_object_or_404(CrawlRun, pk=run_id)
+
+    if run.state != CrawlRun.State.COMPLETE:
+        run.state = CrawlRun.State.CANCELLED
         run.save()
     
     return HttpResponseClientRefresh()

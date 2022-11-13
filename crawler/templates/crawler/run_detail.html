@@ -13,13 +13,21 @@
     <li class="list-group-item d-flex justify-content-between align-items-start">
       <div class="ms-2 me-auto">
         <div class="fw-bold">Search back to</div>
-        {{ run.search_back_to }}
+        {% if run.search_back_to %}{{ run.search_back_to }}{% else %}no limit{% endif %}
+        {% if allow_search_infinite %}
+        <br><button class="btn btn-outline-secondary" hx-post="{% url 'crawler:run-remove-limit' run.id %}">Remove limit</button> (to re-crawl everything)
+        {% endif %}
       </div>
     </li>
     <li class="list-group-item d-flex justify-content-between align-items-start">
       <div class="ms-2 me-auto">
         <div class="fw-bold">State</div>
         {{ run.get_state_display }}
+        {% if can_cancel %}
+        <br><button class="btn btn-outline-danger"
+          hx-post="{% url 'crawler:run-cancel' run.id %}"
+          hx-confirm="Are you sure you want to cancel this run?">Cancel run</button>
+        {% endif %}
       </div>
     </li>
     {% if run.next_fetch %}
