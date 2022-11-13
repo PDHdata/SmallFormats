@@ -1,0 +1,75 @@
+{% extends 'base.html' %}
+{% block title %}Crawler admin — run {{ run.id }}{% endblock %}
+{% block body %}
+<h1>{{ run.get_target_display }} run {{ run.id }}</h1>
+<div class="container" hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'>
+  <ul class="list-group mb-3">
+    <li class="list-group-item d-flex justify-content-between align-items-start">
+      <div class="ms-2 me-auto">
+        <div class="fw-bold">Began</div>
+        {{ run.crawl_start_time }}
+      </div>
+    </li>
+    <li class="list-group-item d-flex justify-content-between align-items-start">
+      <div class="ms-2 me-auto">
+        <div class="fw-bold">Search back to</div>
+        {% if run.search_back_to %}{{ run.search_back_to }}{% else %}no limit{% endif %}
+        {% if allow_search_infinite %}
+        <br><button class="btn btn-outline-secondary" hx-post="{% url 'crawler:run-remove-limit' run.id %}">Remove limit</button> (to re-crawl everything)
+        {% endif %}
+      </div>
+    </li>
+    <li class="list-group-item d-flex justify-content-between align-items-start">
+      <div class="ms-2 me-auto">
+        <div class="fw-bold">State</div>
+        {{ run.get_state_display }}
+        {% if can_cancel %}
+        <br><button class="btn btn-outline-danger"
+          hx-post="{% url 'crawler:run-cancel' run.id %}"
+          hx-confirm="Are you sure you want to cancel this run?">Cancel run</button>
+        {% endif %}
+      </div>
+    </li>
+    {% if run.next_fetch %}
+    <li class="list-group-item d-flex justify-content-between align-items-start">
+      <div class="ms-2 me-auto">
+        <div class="fw-bold">Next URL</div>
+        <code>{{ run.next_fetch }}</code>
+      </div>
+    </li>
+    {% endif %}
+    {% if run.note %}
+    <li class="list-group-item d-flex justify-content-between align-items-start">
+      <div class="ms-2 me-auto">
+        <div class="fw-bold">Note</div>
+        {{ run.note }}
+      </div>
+    </li>
+    {% endif %}
+    {% if resumable %}
+    <li class="list-group-item d-flex justify-content-between align-items-start">
+      <div class="ms-2 me-auto">
+        <div class="fw-bold">Resume crawl</div>
+        <button hx-post="{% url 'crawler:run-archidekt-poll' run.id %}"
+          hx-swap="outerHTML"
+          class="btn btn-outline-primary me-2">All pages</button>
+        <button hx-post="{% url 'crawler:run-archidekt-one' run.id %}"
+          hx-target="#resumeResult" hx-swap="beforeend"
+          class="btn btn-outline-secondary me-2">One page</button>
+        <div id="resumeResult"></div>
+      </div>
+    </li>
+    {% endif %}
+    {% if errored %}
+    <li class="list-group-item d-flex justify-content-between align-items-start">
+      <div class="ms-2 me-auto">
+        <div class="fw-bold">Clear error</div>
+        <button class="btn btn-outline-danger me-2" hx-post="{% url 'crawler:run-remove-error' run.id %}">Clear error</button>
+      </div>
+    </li>
+    {% endif %}
+  </ul>
+
+  <p><a href="{% url 'crawler:index' %}">Back to crawler admin</a></p>
+</div>
+{% endblock %}

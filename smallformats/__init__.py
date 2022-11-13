@@ -1,4 +1,8 @@
+import tomllib
+from pathlib import Path
 
-VERSION = (0, 1, 0)
+pyproject_toml = Path(__file__).parent.parent / "pyproject.toml"
+with open(pyproject_toml, 'rb') as f:
+    project_data = tomllib.load(f)
 
-__version__ = ".".join(str(x) for x in VERSION)
+__version__ = project_data['tool']['poetry']['version']
