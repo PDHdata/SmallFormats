@@ -89,7 +89,7 @@ def _get_front_image():
         return "https://cards.scryfall.io/normal/front/a/4/a4fab67f-00c2-4125-9262-d21a29411797.jpg?1644853041="
 
 
-def stats_index(request, page="index.html"):
+def stats_index(request, page="stats/index.html"):
     return render(
         request,
         page,
@@ -114,7 +114,7 @@ def partner_decks(request):
 
     return render(
         request,
-        "partner_decks.html",
+        "stats/partner_decks.html",
         context={
             'decks': decks_page,
             'links': _LINKS,
@@ -125,7 +125,7 @@ def partner_decks(request):
 def commander_index(request):
     return render(
         request,
-        "commander_index.html",
+        "stats/commander_index.html",
         context={
             'colors': [
                 (c[0], f'cmdr-{c[0]}') for c in COLORS
@@ -149,7 +149,7 @@ def top_commanders(request):
 
     return render(
         request,
-        "commanders.html",
+        "stats/commanders.html",
         context={
             'heading': 'top',
             'cards': cards_page,
@@ -190,7 +190,7 @@ def commanders_by_color(request, w=False, u=False, b=False, r=False, g=False):
 
     return render(
         request,
-        "commanders.html",
+        "stats/commanders.html",
         context={
             'heading': filter_to_name({'W':w,'U':u,'B':b,'R':r,'G':g}),
             'cards': cards_page,
@@ -204,7 +204,7 @@ def commanders_by_color(request, w=False, u=False, b=False, r=False, g=False):
 def land_index(request):
     return render(
         request,
-        "land_index.html",
+        "stats/land_index.html",
         context={
             'colors': [
                 (c[0], f'land-{c[0]}') for c in COLORS
@@ -229,7 +229,7 @@ def top_lands(request):
 
     return render(
         request,
-        "lands.html",
+        "stats/lands.html",
         context={
             'heading': 'top',
             'cards': cards_page,
@@ -260,7 +260,7 @@ def lands_by_color(request, w=False, u=False, b=False, r=False, g=False):
 
     return render(
         request,
-        "lands.html",
+        "stats/lands.html",
         context={
             'heading': filter_to_name({'W':w,'U':u,'B':b,'R':r,'G':g}),
             'cards': cards_page,
@@ -273,7 +273,7 @@ def lands_by_color(request, w=False, u=False, b=False, r=False, g=False):
 def card_index(request):
     return render(
         request,
-        "card_index.html",
+        "stats/card_index.html",
         context={
             'colors': [
                 (c[0], f'card-{c[0]}') for c in COLORS
@@ -297,7 +297,7 @@ def top_cards(request):
 
     return render(
         request,
-        "cards.html",
+        "stats/cards.html",
         context={
             'heading': 'Top',
             'cards': cards_page,
@@ -327,7 +327,7 @@ def cards_by_color(request, w=False, u=False, b=False, r=False, g=False):
 
     return render(
         request,
-        "cards.html",
+        "stats/cards.html",
         context={
             'heading': filter_to_name({'W':w,'U':u,'B':b,'R':r,'G':g}),
             'cards': cards_page,
@@ -380,7 +380,7 @@ def single_card(request, card_id):
 
     return render(
         request,
-        "single_card.html",
+        "stats/single_card.html",
         context={
             'card': card,
             'is_in': is_in.count(),
@@ -430,7 +430,7 @@ def single_cmdr(request, card_id):
 
     return render(
         request,
-        "single_cmdr.html",
+        "stats/single_cmdr.html",
         context=context,
     )
 
@@ -449,7 +449,7 @@ def single_cmdr_decklist(request, card_id):
     
     return render(
         request,
-        "single_cmdr_decklist.html",
+        "stats/single_cmdr_decklist.html",
         context={
             'card': card,
             'decks': cmdrs_page,
@@ -522,7 +522,7 @@ def hx_common_cards(request, card_id, card_type, page_number):
 
     response = render(
         request,
-        "hx_common_cards.html",
+        "stats/hx_common_cards.html",
         context={
             'cmdr_id': card_id,
             'card_type': card_type,
