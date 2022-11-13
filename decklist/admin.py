@@ -3,6 +3,10 @@ from django.contrib.auth.admin import UserAdmin
 from . import models
 
 
+admin.site.site_header = 'SmallFormats admin'
+admin.site.site_title = 'SmallFormats admin'
+admin.site.index_title = "SmallFormats aka PDHdata"
+
 class PrintingInline(admin.StackedInline):
     model = models.Printing
 
