@@ -256,17 +256,20 @@ def _process_deck(crawl_result, cards, output):
 
 
 @require_POST
-def fetch_deck(request):
+def fetch_deck_hx(request):
     try:
         updatable_deck = (
             DeckCrawlResult.objects
             .filter(got_cards=False)
             .first()
         )
+        if not updatable_deck:
+            raise DeckCrawlResult.DoesNotExist()
     except DeckCrawlResult.DoesNotExist:
         return HttpResponseClientRefresh()
 
     output = []
+    response_status = 200
 
     with httpx.Client(
         headers=HEADERS,
@@ -279,6 +282,7 @@ def fetch_deck(request):
             output.append(f"Updated \"{updatable_deck.deck.name}\".")
         else:
             output.append(f"Got {response.status_code} from server.")
+            response_status = HTMX_STOP_POLLING
 
     if updatable_deck.got_cards:
         updatable_deck.deck.deckcrawlresult_set.all().delete()
@@ -289,4 +293,14 @@ def fetch_deck(request):
         {
             'output': output,
         },
+        status=response_status,
+    )
+
+
+@require_POST
+def start_deck_poll_hx(request):
+    return render(
+        request,
+        'crawler/_start_deck_poll.html',
+        {},
     )

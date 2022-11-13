@@ -35,8 +35,11 @@
   <hr>
   <div>
     There are (up to) {{ pending_results }} decks to crawl.<br>
+    <button hx-post="{% url 'crawler:fetch-deck-poll' %}"
+      hx-swap="outerHTML"
+      class="btn btn-outline-primary me-2">Fetch all</button>
     <button hx-post="{% url 'crawler:fetch-deck' %}" hx-target="#fetchResult"
-      hx-swap="beforeend" class="btn btn-outline-primary">Fetch one</button>
+      hx-swap="beforeend" class="btn btn-outline-secondary">Fetch one</button>
   </div>
   <div id="fetchResult"></div>
   {% endif %}
