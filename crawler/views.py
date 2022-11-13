@@ -1,3 +1,4 @@
+from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, get_object_or_404
 from django.core.paginator import Paginator
 from django.views.decorators.http import require_POST
@@ -14,6 +15,7 @@ from crawler.management.commands._api_helpers import HEADERS, ARCHIDEKT_API_BASE
 from crawler.crawlers import ArchidektCrawler, CrawlerExit
 
 
+@login_required
 def crawler_index(request):
     runs = CrawlRun.objects.order_by('-crawl_start_time')
     paginator = Paginator(runs, 25, orphans=3)
@@ -36,6 +38,7 @@ def crawler_index(request):
     )
 
 
+@login_required
 @require_POST
 def new_archidekt_run_hx(request):
     try:
@@ -61,6 +64,7 @@ def new_archidekt_run_hx(request):
     return HttpResponseClientRedirect(reverse('crawler:run-detail', args=(run.id,)))
 
 
+@login_required
 def run_detail(request, run_id):
     run = get_object_or_404(CrawlRun, pk=run_id)
 
@@ -77,6 +81,7 @@ def run_detail(request, run_id):
     )
 
 
+@login_required
 @require_POST
 def run_remove_error_hx(request, run_id):
     run = get_object_or_404(CrawlRun, pk=run_id)
@@ -91,6 +96,7 @@ def run_remove_error_hx(request, run_id):
     return HttpResponseClientRefresh()
 
 
+@login_required
 @require_POST
 def run_remove_limit_hx(request, run_id):
     run = get_object_or_404(CrawlRun, pk=run_id)
@@ -102,6 +108,7 @@ def run_remove_limit_hx(request, run_id):
     return HttpResponseClientRefresh()
 
 
+@login_required
 @require_POST
 def run_cancel_hx(request, run_id):
     run = get_object_or_404(CrawlRun, pk=run_id)
@@ -166,6 +173,7 @@ def _archidekt_page_processor(results, output: list[str]):
     return parse_datetime(deck.updated_time)
 
 
+@login_required
 @require_POST
 def run_archidekt_onepage_hx(request, run_id):
     run = get_object_or_404(CrawlRun, pk=run_id)
@@ -220,6 +228,7 @@ def run_archidekt_onepage_hx(request, run_id):
         )
 
 
+@login_required
 def start_archidekt_poll_hx(request, run_id):
     return render(
         request,
@@ -279,6 +288,7 @@ def _process_deck(crawl_result, cards, output):
         crawl_result.save()
 
 
+@login_required
 @require_POST
 def fetch_deck_hx(request):
     try:
@@ -321,6 +331,7 @@ def fetch_deck_hx(request):
     )
 
 
+@login_required
 @require_POST
 def start_deck_poll_hx(request):
     return render(
