@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+{% block title %}Crawler Admin{% endblock %}
+{% block body %}
+<h1>Crawler admin</h1>
+<div class="container">
+  <table class="table">
+    <tr><th>Target</th><th>State</th><th>Start time</th><th>Search back to</th></tr>
+    {% for run in runs %}
+    <tr>
+      <td>{{ run.get_target_display }}</td>
+      <td>{{ run.get_state_display }}</td>
+      <td>{{ run.crawl_start_time }}</td>
+      <td>{{ run.search_back_to }}</td>
+    </tr>
+    {% empty %}
+    <tr><td colspan="4">No runs found.</td></tr>
+    {% endfor %}
+  </table>
+  <div>
+    {% if runs.has_previous %}
+    <a href="?page=1">first</a>
+    <a href="?page={{ runs.previous_page_number }}">previous</a>
+    {% endif %}
+    (page {{ runs.number }} of {{ runs.paginator.num_pages }})
+    {% if runs.has_next %}
+    <a href="?page={{ runs.next_page_number }}">next</a>
+    <a href="?page={{ runs.paginator.num_pages }}">last</a>
+    {% endif %}   
+  </div>
+</div>
+{% endblock %}
