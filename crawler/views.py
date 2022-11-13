@@ -30,5 +30,7 @@ def run_detail(request, run_id):
         'crawler/run_detail.html',
         {
             'run': run,
+            'resumable': run.state in (CrawlRun.State.NOT_STARTED, CrawlRun.State.FETCHING_DECKS),
+            'errored': run.state == CrawlRun.State.ERROR,
         },
     )

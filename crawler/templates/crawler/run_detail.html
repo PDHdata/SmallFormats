@@ -3,9 +3,59 @@
 {% block body %}
 <h1>{{ run.get_target_display }} run {{ run.id }}</h1>
 <div class="container">
-  <p>Began: {{ run.crawl_start_time }}</p>
-  <p>Search back to: {{ run.search_back_to }}</p>
-  <p>State: {{ run.get_state_display }}</p>
+  <ul class="list-group mb-3">
+    <li class="list-group-item d-flex justify-content-between align-items-start">
+      <div class="ms-2 me-auto">
+        <div class="fw-bold">Began</div>
+        {{ run.crawl_start_time }}
+      </div>
+    </li>
+    <li class="list-group-item d-flex justify-content-between align-items-start">
+      <div class="ms-2 me-auto">
+        <div class="fw-bold">Search back to</div>
+        {{ run.search_back_to }}
+      </div>
+    </li>
+    <li class="list-group-item d-flex justify-content-between align-items-start">
+      <div class="ms-2 me-auto">
+        <div class="fw-bold">State</div>
+        {{ run.get_state_display }}
+      </div>
+    </li>
+    {% if run.next_fetch %}
+    <li class="list-group-item d-flex justify-content-between align-items-start">
+      <div class="ms-2 me-auto">
+        <div class="fw-bold">Next URL</div>
+        <code>{{ run.next_fetch }}</code>
+      </div>
+    </li>
+    {% endif %}
+    {% if run.note %}
+    <li class="list-group-item d-flex justify-content-between align-items-start">
+      <div class="ms-2 me-auto">
+        <div class="fw-bold">Note</div>
+        {{ run.note }}
+      </div>
+    </li>
+    {% endif %}
+    {% if resumable %}
+    <li class="list-group-item d-flex justify-content-between align-items-start">
+      <div class="ms-2 me-auto">
+        <div class="fw-bold">Resume crawl</div>
+        <a href="#" class="btn btn-outline-primary me-2">One page</a> <a href="#" class="btn btn-outline-secondary me-2">Five pages</a> <a href="#" class="btn btn-outline-secondary me-2">Run to completion</a>
+      </div>
+    </li>
+    {% endif %}
+    {% if errored %}
+    <li class="list-group-item d-flex justify-content-between align-items-start">
+      <div class="ms-2 me-auto">
+        <div class="fw-bold">Clear error</div>
+        <a href="#" class="btn btn-outline-danger me-2">Clear error</a>
+      </div>
+    </li>
+    {% endif %}
+  </ul>
+
   <p><a href="{% url 'crawler:index' %}">Back to crawler admin</a></p>
 </div>
 {% endblock %}
