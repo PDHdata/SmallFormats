@@ -1,0 +1,11 @@
+{% extends 'base.html' %}
+{% block title %}Crawler admin — run {{ run.id }}{% endblock %}
+{% block body %}
+<h1>{{ run.get_target_display }} run {{ run.id }}</h1>
+<div class="container">
+  <p>Began: {{ run.crawl_start_time }}</p>
+  <p>Search back to: {{ run.search_back_to }}</p>
+  <p>State: {{ run.get_state_display }}</p>
+  <p><a href="{% url 'crawler:index' %}">Back to crawler admin</a></p>
+</div>
+{% endblock %}

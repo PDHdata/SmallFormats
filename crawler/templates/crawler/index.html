@@ -1,15 +1,16 @@
 {% extends 'base.html' %}
-{% block title %}Crawler Admin{% endblock %}
+{% block title %}Crawler admin{% endblock %}
 {% block body %}
 <h1>Crawler admin</h1>
 <div class="container">
+  <a class="btn btn-primary" href="{% url 'crawler:run-new' %}">Start a new run</a>
   <table class="table">
-    <tr><th>Target</th><th>State</th><th>Start time</th><th>Search back to</th></tr>
+    <tr><th>Start time</th><th>Target</th><th>State</th><th>Search back to</th></tr>
     {% for run in runs %}
     <tr>
+      <td><a href="{% url 'crawler:run-detail' run.id %}">{{ run.crawl_start_time }}</a></td>
       <td>{{ run.get_target_display }}</td>
       <td>{{ run.get_state_display }}</td>
-      <td>{{ run.crawl_start_time }}</td>
       <td>{{ run.search_back_to }}</td>
     </tr>
     {% empty %}

@@ -1,4 +1,4 @@
-from django.shortcuts import render
+from django.shortcuts import render, get_object_or_404
 from django.core.paginator import Paginator
 from crawler.models import DeckCrawlResult, CrawlRun
 
@@ -14,5 +14,21 @@ def crawler_index(request):
         'crawler/index.html',
         {
             'runs': runs_page,
+        },
+    )
+
+
+def new_run(request):
+    raise NotImplementedError()
+
+
+def run_detail(request, run_id):
+    run = get_object_or_404(CrawlRun, pk=run_id)
+
+    return render(
+        request,
+        'crawler/run_detail.html',
+        {
+            'run': run,
         },
     )
