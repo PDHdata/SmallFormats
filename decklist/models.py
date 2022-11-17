@@ -21,6 +21,7 @@ class Deck(models.Model):
     creator_display_name = models.CharField(max_length=50, blank=True)
     ingested_time = models.DateTimeField(auto_now_add=True)
     updated_time = models.DateTimeField(default=timezone.now)
+    pdh_legal = models.BooleanField(default=False, verbose_name='is PDH-legal')
 
     def __str__(self):
         return self.name
