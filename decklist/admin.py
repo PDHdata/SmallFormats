@@ -17,8 +17,16 @@ class CardAdmin(admin.ModelAdmin):
     search_fields = [
         'name',
     ]
-    # BUG: https://github.com/PDHdata/SmallFormats/issues/13
-    exclude = ['editorial_printing']
+    autocomplete_fields = [
+        'editorial_printing',
+    ]
+
+class PrintingAdmin(admin.ModelAdmin):
+    model = models.Printing
+
+    search_fields = [
+        'set_code', 'card__name',
+    ]
 
 class DeckAdmin(admin.ModelAdmin):
     search_fields = [
@@ -34,3 +42,4 @@ admin.site.register(models.User, UserAdmin)
 admin.site.register(models.Deck, DeckAdmin)
 admin.site.register(models.Card, CardAdmin)
 admin.site.register(models.CardInDeck, CardInDeckAdmin)
+admin.site.register(models.Printing, PrintingAdmin)
