@@ -1,0 +1,66 @@
+{% if card.default_printing %}
+<a href="#" data-bs-toggle="modal" data-bs-target="#cardModal">
+  <img src="{{ card.default_printing.image_uri }}" class="card-small float-md-start mb-3 ms-md-2 me-md-3" loading="lazy">
+</a>
+<div class="modal fade" id="cardModal" tabindex="-1" aria-labelledby="cardModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h1 class="modal-title fs-5" id="cardModalLabel">{{ card.name }}</h1>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body mx-auto">
+        <div>
+          <button id="moreLeft" class="btn btn-outline-primary me-2">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-caret-left-fill" viewBox="0 0 16 16">
+            <path d="m3.86 8.753 5.482 4.796c.646.566 1.658.106 1.658-.753V3.204a1 1 0 0 0-1.659-.753l-5.48 4.796a1 1 0 0 0 0 1.506z"/>
+            </svg>
+          </button>
+          <img id="printingImage" src="{{ card.default_printing.image_uri }}" class="card-normal" loading="lazy">
+          <button id="moreRight" class="btn btn-outline-primary ms-2">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-caret-right-fill" viewBox="0 0 16 16">
+            <path d="m12.14 8.753-5.482 4.796c-.646.566-1.658.106-1.658-.753V3.204a1 1 0 0 1 1.659-.753l5.48 4.796a1 1 0 0 1 0 1.506z"/>
+            </svg>
+          </button>
+        </div>
+        <h5 class="text-center">Set: <span id="setCode">{{ card.default_printing.set_code|upper }}</span></h5>
+        {% if request.user.is_superuser %}
+        <div class="mt-1 text-center" hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'>
+          <form hx-post="{% url 'card-setimage' card.id %}">
+            <button class="btn btn-primary">Set editorial image</button>
+            <input type="hidden" id="printingId" name="printing_id" value="{{ card.default_printing.id }}">
+          </form>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+  const images = [
+{% for printing in card.printings.all %}
+    {
+      img: "{{ printing.image_uri }}",
+      set: "{{ printing.set_code|upper }}",
+      id: "{{ printing.id }}",
+    },
+{% endfor %}
+  ];
+  const imgTarget = document.getElementById("printingImage");
+  const setcodeTarget = document.getElementById("setCode");
+  {% if request.user.is_superuser %}const printIdTarget = document.getElementById("printingId");{% endif %}
+  let currentIdx = Math.max(images.findIndex(elem => elem.id == "{{ card.default_printing.id }}"), 0);
+  document.getElementById("moreLeft").addEventListener("click", () => {
+    currentIdx = (currentIdx - 1 + images.length) % images.length;
+    imgTarget.src = images[currentIdx].img;
+    setCode.textContent = images[currentIdx].set;
+    {% if request.user.is_superuser %}printIdTarget.value = images[currentIdx].id;{% endif %}
+  });
+  document.getElementById("moreRight").addEventListener("click", () => {
+    currentIdx = (currentIdx + 1) % images.length;
+    imgTarget.src = images[currentIdx].img;
+    setCode.textContent = images[currentIdx].set;
+    {% if request.user.is_superuser %}printIdTarget.value = images[currentIdx].id;{% endif %}
+  });
+</script>
+{% endif %}

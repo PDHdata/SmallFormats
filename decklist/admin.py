@@ -17,6 +17,8 @@ class CardAdmin(admin.ModelAdmin):
     search_fields = [
         'name',
     ]
+    # BUG: https://github.com/PDHdata/SmallFormats/issues/13
+    exclude = ['editorial_printing']
 
 class DeckAdmin(admin.ModelAdmin):
     search_fields = [
