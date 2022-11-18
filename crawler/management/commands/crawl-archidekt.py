@@ -133,6 +133,7 @@ class Command(BaseCommand):
                 deck = existing_decks[this_id]
             else:
                 deck = Deck()
+                deck.pdh_legal = False # until proven otherwise!
             deck.name = deck_data['name']
             deck.source = DataSource.ARCHIDEKT
             deck.source_id = this_id
