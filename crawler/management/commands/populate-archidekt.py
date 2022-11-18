@@ -101,6 +101,12 @@ class Command(BaseCommand):
             )
             CardInDeck.objects.bulk_create(new_cards)
             CardInDeck.objects.bulk_update(update_cards, ['is_pdh_commander'])
+        
+        # now see if the deck is legal before completing processing
+        crawl_result.deck.pdh_legal, _ = crawl_result.deck.check_deck_legality()
+
+        with transaction.atomic():
+            crawl_result.deck.save()
             crawl_result.got_cards = True
             crawl_result.save()
 

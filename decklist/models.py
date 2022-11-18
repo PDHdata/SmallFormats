@@ -1,5 +1,7 @@
+import operator
+import functools
 from django.db import models
-from django.db.models import Q
+from django.db.models import Q, Count
 from django.contrib.auth.models import AbstractUser
 from django.utils import timezone
 
@@ -21,6 +23,7 @@ class Deck(models.Model):
     creator_display_name = models.CharField(max_length=50, blank=True)
     ingested_time = models.DateTimeField(auto_now_add=True)
     updated_time = models.DateTimeField(default=timezone.now)
+    pdh_legal = models.BooleanField(default=False, verbose_name='is PDH-legal')
 
     def __str__(self):
         return self.name
@@ -102,6 +105,64 @@ class Deck(models.Model):
             .filter(card__identity_g=True)
             .count() > 0
         )
+    
+    def check_deck_legality(self):
+        # deck has cards at all
+        # (TODO: someday, we'll check for 100 cards)
+        if self.card_list.count() == 0:
+            return False, "no cards in deck"
+        
+        # TODO: check the ban list
+
+        # all cards in correct identity
+        q_filters = []
+        identity = self.identity()
+
+        if all([val for _, val in identity.items()]):
+            # 5-color decks exclude no cards
+            pass
+        else:
+            if not identity['white']:
+                q_filters.append(Q(card__identity_w=True))
+            if not identity['blue']:
+                q_filters.append(Q(card__identity_u=True))
+            if not identity['black']:
+                q_filters.append(Q(card__identity_b=True))
+            if not identity['red']:
+                q_filters.append(Q(card__identity_r=True))
+            if not identity['green']:
+                q_filters.append(Q(card__identity_g=True))
+            filterset = functools.reduce(operator.or_, q_filters)
+
+            illegal_card_count = (
+                self.card_list
+                .filter(filterset)
+                .count()
+            )
+            if illegal_card_count > 0:
+                return False, f"{illegal_card_count} cards out of color identity"
+
+        # all commanders printed at uncommon
+        for entry in self.commanders():
+            if not entry.card.ever_uncommon:
+                return False, "commander not printed at uncommon"
+
+        # all other cards printed at common
+        noncommon_count = (
+            self.card_list
+            .select_related('card')
+            .filter(is_pdh_commander=False)
+            .annotate(common_count=Count(
+                'card__printings',
+                filter=Q(card__printings__rarity=Printing.Rarity.COMMON)
+            ))
+            .filter(common_count=0)
+            .count()
+        )
+        if noncommon_count > 0:
+            return False, "non-commander not printed at common"
+
+        return True, None
 
 
 class Card(models.Model):
