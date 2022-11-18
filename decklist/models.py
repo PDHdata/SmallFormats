@@ -184,6 +184,13 @@ class Card(models.Model):
     # double-sided cards have double-sided type_lines
     type_line = models.CharField(max_length=100)
     scryfall_uri = models.URLField(max_length=200)
+    editorial_printing = models.ForeignKey(
+        'Printing',
+        on_delete=models.SET_NULL,
+        blank=True,
+        null=True,
+        related_name='editorial_showings',
+    )
 
     def __str__(self):
         return self.name
@@ -207,6 +214,8 @@ class Card(models.Model):
     
     @property
     def default_printing(self):
+        if self.editorial_printing:
+            return self.editorial_printing
         return self.printings.first()
 
 
