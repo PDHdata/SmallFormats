@@ -1,6 +1,6 @@
-{% if card.image_uri %}
+{% if card.default_printing %}
 <a href="#" data-bs-toggle="modal" data-bs-target="#cardModal">
-  <img src="{{ card.image_uri }}" class="card-small float-md-start mb-3 ms-md-2 me-md-3" loading="lazy">
+  <img src="{{ card.default_printing.image_uri }}" class="card-small float-md-start mb-3 ms-md-2 me-md-3" loading="lazy">
 </a>
 <div class="modal fade" id="cardModal" tabindex="-1" aria-labelledby="cardModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-lg">
@@ -16,14 +16,14 @@
             <path d="m3.86 8.753 5.482 4.796c.646.566 1.658.106 1.658-.753V3.204a1 1 0 0 0-1.659-.753l-5.48 4.796a1 1 0 0 0 0 1.506z"/>
             </svg>
           </button>
-          <img id="printingImage" src="{{ card.image_uri }}" class="card-normal" loading="lazy">
+          <img id="printingImage" src="{{ card.default_printing.image_uri }}" class="card-normal" loading="lazy">
           <button id="moreRight" class="btn btn-outline-primary ms-2">
             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-caret-right-fill" viewBox="0 0 16 16">
             <path d="m12.14 8.753-5.482 4.796c-.646.566-1.658.106-1.658-.753V3.204a1 1 0 0 1 1.659-.753l5.48 4.796a1 1 0 0 1 0 1.506z"/>
             </svg>
           </button>
         </div>
-        <h5 class="text-center">Set: <span id="setCode">{{ card.image_set_code|upper }}</span></h5>
+        <h5 class="text-center">Set: <span id="setCode">{{ card.default_printing.set_code|upper }}</span></h5>
       </div>
     </div>
   </div>

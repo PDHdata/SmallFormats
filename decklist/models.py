@@ -206,20 +206,8 @@ class Card(models.Model):
         ).count() > 0
     
     @property
-    def image_uri(self):
-        try:
-            return self.printings.all()[0].image_uri
-        except IndexError:
-            return None
-    
-    @property
-    def image_set_code(self):
-        # this logic needs to mirror `image_uri` above or else
-        # it will be weird
-        try:
-            return self.printings.all()[0].set_code
-        except IndexError:
-            return None
+    def default_printing(self):
+        return self.printings.first()
 
 
 class Printing(models.Model):

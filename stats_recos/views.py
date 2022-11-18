@@ -77,25 +77,20 @@ def _deck_count_at_least_color(w, u, b, r, g):
 
 @functools.cache
 def _get_front_image():
-    try:
-        top_cmdr = (
-            Card.objects
-            .filter(
-                deck_list__deck__pdh_legal=True,
-                deck_list__is_pdh_commander=True,
-            )
-            .annotate(num_decks=Count('deck_list'))
-            .order_by('-num_decks')
-            .first()
+    top_cmdr = (
+        Card.objects
+        .filter(
+            deck_list__deck__pdh_legal=True,
+            deck_list__is_pdh_commander=True,
         )
-        if top_cmdr:
-            return top_cmdr.image_uri
-        else:
-            # TODO: understand why this isn't raised automatically
-            # when hitting .first()
-            raise Card.DoesNotExist()
-    except Card.DoesNotExist:
-        return "https://cards.scryfall.io/normal/front/a/4/a4fab67f-00c2-4125-9262-d21a29411797.jpg?1644853041="
+        .annotate(num_decks=Count('deck_list'))
+        .order_by('-num_decks')
+        .first()
+    )
+    if top_cmdr and top_cmdr.default_printing:
+        return top_cmdr.default_printing.image_uri
+
+    return "https://cards.scryfall.io/normal/front/a/4/a4fab67f-00c2-4125-9262-d21a29411797.jpg?1644853041="
 
 
 def stats_index(request, page="stats/index.html"):
