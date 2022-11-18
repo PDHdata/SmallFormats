@@ -24,6 +24,14 @@
           </button>
         </div>
         <h5 class="text-center">Set: <span id="setCode">{{ card.default_printing.set_code|upper }}</span></h5>
+        {% if request.user.is_superuser %}
+        <div class="mt-1 text-center" hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'>
+          <form hx-post="{% url 'card-setimage' card.id %}">
+            <button class="btn btn-primary">Set editorial image</button>
+            <input type="hidden" id="printingId" name="printing_id" value="{{ card.default_printing.id }}">
+          </form>
+        </div>
+        {% endif %}
       </div>
     </div>
   </div>
@@ -31,21 +39,28 @@
 <script>
   const images = [
 {% for printing in card.printings.all %}
-    { img: "{{ printing.image_uri }}", set: "{{ printing.set_code|upper }}" },
+    {
+      img: "{{ printing.image_uri }}",
+      set: "{{ printing.set_code|upper }}",
+      id: "{{ printing.id }}",
+    },
 {% endfor %}
   ];
   const imgTarget = document.getElementById("printingImage");
   const setcodeTarget = document.getElementById("setCode");
-  let currentIdx = 0;
+  {% if request.user.is_superuser %}const printIdTarget = document.getElementById("printingId");{% endif %}
+  let currentIdx = Math.max(images.findIndex(elem => elem.id == "{{ card.default_printing.id }}"), 0);
   document.getElementById("moreLeft").addEventListener("click", () => {
     currentIdx = (currentIdx - 1 + images.length) % images.length;
     imgTarget.src = images[currentIdx].img;
     setCode.textContent = images[currentIdx].set;
+    {% if request.user.is_superuser %}printIdTarget.value = images[currentIdx].id;{% endif %}
   });
   document.getElementById("moreRight").addEventListener("click", () => {
     currentIdx = (currentIdx + 1) % images.length;
     imgTarget.src = images[currentIdx].img;
     setCode.textContent = images[currentIdx].set;
+    {% if request.user.is_superuser %}printIdTarget.value = images[currentIdx].id;{% endif %}
   });
 </script>
 {% endif %}

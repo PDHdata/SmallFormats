@@ -3,9 +3,11 @@ from django.http import HttpResponseNotAllowed
 from django.urls import reverse_lazy
 from django.db.models import Count, Q
 from django.core.paginator import Paginator
+from django.contrib.auth.decorators import login_required
+from django.views.decorators.http import require_POST
 from decklist.models import Card, Deck, Printing, CardInDeck
 from .wubrg_utils import COLORS, filter_to_name
-from django_htmx.http import trigger_client_event
+from django_htmx.http import trigger_client_event, HttpResponseClientRefresh
 import operator
 import functools
 
@@ -589,3 +591,25 @@ def hx_common_cards(request, card_id, card_type, page_number):
         },
         after="settle",
     )
+
+
+@login_required
+@require_POST
+def set_editorial_image(request, card_id):
+    if not request.htmx:
+        return HttpResponseNotAllowed("expected HTMX request")
+
+    if not request.user.is_superuser:
+        raise HttpResponseNotAllowed()
+    
+    printing_id = request.POST['printing_id']
+    card = get_object_or_404(Card, pk=card_id)
+    printing = get_object_or_404(Printing, pk=printing_id)
+
+    if printing.card != card:
+        raise HttpResponseNotAllowed("printing must belong to card")
+
+    card.editorial_printing = printing
+    card.save()
+    
+    return HttpResponseClientRefresh()
