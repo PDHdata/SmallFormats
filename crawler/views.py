@@ -142,7 +142,7 @@ def _build_initial_url(client):
     return req.url
 
 
-def _archidekt_page_processor(results, output: list[str]):
+def _archidekt_page_processor(results, stop_after, output: list[str]):
     output.append(f"Processing next {len(results)} results.")
     
     # get existing decks for this page
@@ -153,6 +153,11 @@ def _archidekt_page_processor(results, output: list[str]):
     existing_decks = { d.source_id: d for d in qs }
 
     for deck_data in results:
+        deck_updated_at = parse_datetime(deck_data['updatedAt'])
+        if stop_after and deck_updated_at < stop_after:
+            # break if we've seen everything back to the right time
+            return deck_updated_at
+
         this_id = str(deck_data['id'])
         if this_id in existing_decks.keys():
             deck = existing_decks[this_id]
@@ -164,7 +169,7 @@ def _archidekt_page_processor(results, output: list[str]):
         deck.source_id = this_id
         deck.source_link = f"https://archidekt.com/decks/{this_id}"
         deck.creator_display_name = deck_data['owner']['username']
-        deck.updated_time = deck_data['updatedAt']
+        deck.updated_time = deck_updated_at
 
         crawl_result = DeckCrawlResult(
             url=ARCHIDEKT_API_BASE + f"decks/{this_id}/",
@@ -177,8 +182,8 @@ def _archidekt_page_processor(results, output: list[str]):
             deck.save()
             crawl_result.save()
     
-    # the last deck on the page will have the oldest date
-    return parse_datetime(deck.updated_time)
+    # the last deck we processed will have the oldest date
+    return deck_updated_at
 
 
 @never_cache
@@ -199,7 +204,10 @@ def run_archidekt_onepage_hx(request, run_id):
             run.next_fetch = _build_initial_url(client)
             run.save()
 
-        processor = lambda results: _archidekt_page_processor(results, output)
+        processor = (
+            lambda results, stop_after: 
+                _archidekt_page_processor(results, stop_after, output)
+        )
         crawler = ArchidektCrawler(run.next_fetch, run.search_back_to, processor)
 
         response_status = 200

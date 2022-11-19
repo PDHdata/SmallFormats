@@ -50,7 +50,7 @@ class ArchidektCrawler:
             self.url = None
             self._keep_going = False
 
-        oldest_seen = self.processor(envelope['results'])
+        oldest_seen = self.processor(envelope['results'], self.stop_after)
         if self.stop_after and oldest_seen < self.stop_after:
             # we're done!
             self._keep_going = False
