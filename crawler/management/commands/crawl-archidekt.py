@@ -117,7 +117,7 @@ class Command(BaseCommand):
 
         return run
 
-    def _process_page(self, results):
+    def _process_page(self, results, stop_after):
         self.stdout.write(f"Processing next {len(results)} results.")
         
         # get existing decks for this page
@@ -128,6 +128,11 @@ class Command(BaseCommand):
         existing_decks = { d.source_id: d for d in qs }
 
         for deck_data in results:
+            deck_updated_at = parse_datetime(deck_data['updatedAt'])
+            if stop_after and deck_updated_at < stop_after:
+                # break if we've seen everything back to the right time
+                return deck_updated_at
+
             this_id = str(deck_data['id'])
             if this_id in existing_decks.keys():
                 deck = existing_decks[this_id]
@@ -139,7 +144,7 @@ class Command(BaseCommand):
             deck.source_id = this_id
             deck.source_link = f"https://archidekt.com/decks/{this_id}"
             deck.creator_display_name = deck_data['owner']['username']
-            deck.updated_time = deck_data['updatedAt']
+            deck.updated_time = deck_updated_at
 
             crawl_result = DeckCrawlResult(
                 url=ARCHIDEKT_API_BASE + f"decks/{this_id}/",
@@ -152,8 +157,8 @@ class Command(BaseCommand):
                 deck.save()
                 crawl_result.save()
         
-        # the last deck on the page will have the oldest date
-        return parse_datetime(deck.updated_time)
+        # the last deck we processed will have the oldest date
+        return deck_updated_at
 
     def _request_log(self, request):
         self.stdout.write(f">> {request.method} {request.url}")
