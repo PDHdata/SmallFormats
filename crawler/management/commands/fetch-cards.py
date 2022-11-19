@@ -3,6 +3,7 @@ See https://scryfall.com/docs/api/bulk-data for more on Scryfall data.
 """
 from django.core.management.base import BaseCommand, CommandError
 from django.db.utils import DataError
+from django.utils.dateparse import parse_date
 import httpx
 import json_stream.httpx
 from decklist.models import Card, Printing
@@ -45,7 +46,8 @@ class Command(BaseCommand):
                         except DataError as e:
                             self.stderr.write(f"Card {c.name} or printing {p} threw {e}")
 
-
+        
+        self.stdout.write('')
         self.stdout.write(f"end: {Card.objects.all().count()} cards, {Printing.objects.all().count()} printings")
 
     def _want_card(self, json_card):
@@ -77,6 +79,9 @@ class Command(BaseCommand):
                 card=c,
                 set_code=json_card['set'],
                 rarity=Printing.Rarity[json_card['rarity'].upper()],
+                is_highres=json_card['highres_image'],
+                is_paper="paper" in json_card['games'],
+                release_date=parse_date(json_card['released_at']),
             )
 
             # single-faced card
@@ -113,6 +118,9 @@ class Command(BaseCommand):
                     card=c,
                     set_code=json_card['set'],
                     rarity=Printing.Rarity[json_card['rarity'].upper()],
+                    is_highres=json_card['highres_image'],
+                    is_paper="paper" in json_card['games'],
+                    release_date=parse_date(json_card['released_at']),
                 )
                 if 'image_uris' in face:
                     p.image_uri = face['image_uris'].get('normal')
