@@ -1,5 +1,6 @@
 import operator
 import functools
+import datetime
 from django.db import models
 from django.db.models import Q, Count
 from django.contrib.auth.models import AbstractUser
@@ -216,7 +217,22 @@ class Card(models.Model):
     def default_printing(self):
         if self.editorial_printing:
             return self.editorial_printing
-        return self.printings.first()
+        
+        return (
+            self.printings
+            # this property is mostly used for image-related things,
+            # so let's try to find a printing with a picture
+            .exclude(image_uri='')
+            .order_by(
+                # https://code.djangoproject.com/ticket/19726#comment:8
+                # False orders first, and we want True for both of these
+                '-is_highres',
+                '-is_paper',
+                # let's get the newest printing
+                '-release_date',
+            )
+            .first()
+        )
 
 
 class Printing(models.Model):
@@ -238,6 +254,9 @@ class Printing(models.Model):
     set_code = models.CharField(max_length=10)
     rarity = models.CharField(max_length=1, choices=Rarity.choices)
     image_uri = models.URLField(max_length=200, blank=True)
+    is_highres = models.BooleanField(default=True)
+    is_paper = models.BooleanField(default=False)
+    release_date = models.DateField(default=datetime.date(1993, 8, 5))
 
     def __str__(self):
         return f"{self.card.name} ({self.set_code})"
