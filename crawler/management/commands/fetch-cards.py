@@ -10,6 +10,8 @@ from decklist.models import Card, Printing
 from ._api_helpers import HEADERS, SCRYFALL_API_BASE
 
 
+PROGRESS_EVERY_N_CARDS = 100
+
 class CantParseCardError(Exception): ...
 
 class Command(BaseCommand):
@@ -23,8 +25,14 @@ class Command(BaseCommand):
             download_target = result.json()["download_uri"]
             self.stdout.write(f"Fetching {download_target}")
 
+            card_count = PROGRESS_EVERY_N_CARDS
             with client.stream('GET', download_target) as f:
                 for json_card in json_stream.httpx.load(f).persistent():
+                    card_count -= 1
+                    if card_count <= 0:
+                        self.stdout.write('.', ending='')
+                        self.stdout.flush()
+                        card_count = PROGRESS_EVERY_N_CARDS
                     for parse in [self._extract_card_and_printing, self._extract_verhey_card_and_printing]:
                         try:
                             c, p = parse(json_card)
