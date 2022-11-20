@@ -1,8 +1,9 @@
 {% extends 'base.html' %}
 {% load simple_math %}
+{% load mana %}
 {% block title %}{{ heading|title }} lands{% endblock %}
 {% block body %}
-<h1>{{ heading|title }} lands</h1>
+<h1>{{ heading|title }} lands {{ heading|mana_symbols_by_name|safe }}</h1>
 <div class="container">
   <table class="table">
     <tr>
@@ -16,7 +17,7 @@
     <tr>
       <td>{{ cards.start_index|plus:forloop.counter0 }}</td>
       <td><a href="{% url 'card-single' card.id %}">{{ card.name }}</a></td>
-      <td>{{ card.color_identity }}</td>
+      <td>{{ card.color_identity|mana_symbols|safe }}</td>
       <td>{{ card.num_decks }}</td>
       <td>{{ card.num_decks|percent_of:deck_count }}</td>
     </tr>

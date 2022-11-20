@@ -46,6 +46,8 @@ _COLORS_BASE = [
     ('rainbow',    'WUBRG'),
 ]
 
+_COLORS_MAP = dict(_COLORS_BASE)
+
 COLORS = [_u(name, color_str) for name, color_str in _COLORS_BASE]
 
 # these are not suitable for display, they're for looking up against
@@ -58,9 +60,19 @@ def filter_to_name(filter):
     Examples:
       {W: True} => 'white'
       {W: True, U: True} => 'azorius'
-      {W: True, uU: False} => 'white'"""
+      {W: True, U: False} => 'white'"""
     key = ""
     for letter in 'WUBRG':
         if letter in filter.keys() and filter[letter]:
             key += letter
     return REVERSE_COLORS["".join(sorted(key))]
+
+
+def name_to_symbol(color_name):
+    if color_name == 'colorless':
+        return ('mana/C.svg',)
+    return [f"mana/{c}.svg" for c in _COLORS_MAP[color_name]]
+
+
+def identity_to_symbol(identity):
+    return [f"mana/{c}.svg" for c in identity]
