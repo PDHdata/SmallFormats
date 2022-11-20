@@ -338,7 +338,7 @@ def top_cards(request):
         request,
         "stats/cards.html",
         context={
-            'heading': 'Top',
+            'heading': 'top',
             'cards': cards_page,
             'deck_count': deck_count,
             'links': _LINKS,

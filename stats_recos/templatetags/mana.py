@@ -13,7 +13,7 @@ def mana_symbols(identity):
 
 @register.filter()
 def mana_symbols_by_name(name):
-    if name == 'top': return
+    if name == 'top': return ''
     return "".join(
         [f'<img src="{settings.STATIC_URL}{sym}" class="mana-symbol">' for sym in name_to_symbol(name)]
     )
