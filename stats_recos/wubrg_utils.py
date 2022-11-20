@@ -58,7 +58,7 @@ def filter_to_name(filter):
     Examples:
       {W: True} => 'white'
       {W: True, U: True} => 'azorius'
-      {W: True, uU: False} => 'white'"""
+      {W: True, U: False} => 'white'"""
     key = ""
     for letter in 'WUBRG':
         if letter in filter.keys() and filter[letter]:
