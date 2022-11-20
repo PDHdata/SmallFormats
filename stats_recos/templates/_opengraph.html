@@ -1,0 +1,29 @@
+    {# generated via https://www.opengraph.xyz #}
+    <meta property="og:type" content="website">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta property="twitter:domain" content="pdhdata.com">
+    <meta name="description" content="A place to discover new commanders and see what people are running in Pauper Commander (PDH).">
+    <meta property="og:description" content="Discover new Pauper (PDH) commanders and see what decks are hot.">
+    <meta name="twitter:description" content="Discover new Pauper (PDH) commanders and see what decks are hot.">
+    {% if og_cardname %}
+    <meta property="og:title" content="PDHdata — {{ og_cardname }}">
+    <meta name="twitter:title" content="PDHdata — {{ og_cardname }}">
+    {% else %}
+    <meta property="og:title" content="PDHdata">
+    <meta name="twitter:title" content="PDHdata">
+    {% endif %}
+    {% if og_url %}
+    <meta property="og:url" content="{{ og_url }}m">
+    <meta property="twitter:url" content="{{ og_url }}">
+    {% else %}
+    <meta property="og:url" content="https://pdhdata.com">
+    <meta property="twitter:url" content="https://pdhdata.com">
+    {% endif %}
+    {% if og_image %}
+    <meta property="og:image" content="{{ og_image }}">
+    <meta name="twitter:image" content="{{ og_image }}">
+    {% else %}
+    <meta property="og:image" content="https://pdhdata.com/static/logo/card-play-wide.png">
+    <meta name="twitter:image" content="https://pdhdata.com/static/logo/card-play-wide.png">
+    {% endif %}
+    {# end OpeGraph meta tags #}

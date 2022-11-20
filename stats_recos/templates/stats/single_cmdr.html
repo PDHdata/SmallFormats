@@ -1,6 +1,9 @@
 {% extends 'base.html' %}
 {% load simple_math %}
 {% block title %}{{ card.name }} (commander){% endblock %}
+{% block opengraph %}
+{% include '_opengraph.html' with og_cardname=card.name og_url=request.build_absolute_uri og_image=card.default_printing.image_uri %}
+{% endblock %}
 {% block body %}
 <h1>{{ card.name }}</h1>
 <ul class="nav nav-tabs mb-2">

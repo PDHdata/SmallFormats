@@ -21,6 +21,7 @@
     <link rel="icon" type="image/png" sizes="96x96" href="{% static 'favicon/favicon-96x96.png' %}">
     <link rel="icon" type="image/png" sizes="16x16" href="{% static 'favicon/favicon-16x16.png' %}">
     <link rel="manifest" href="{% static 'favicon/manifest.json' %}">
+    {% block opengraph %}{% include '_opengraph.html' %}{% endblock %}
   </head>
   <body style="padding-top: 3.5rem">
     <svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
