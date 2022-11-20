@@ -21,20 +21,7 @@
     <link rel="icon" type="image/png" sizes="96x96" href="{% static 'favicon/favicon-96x96.png' %}">
     <link rel="icon" type="image/png" sizes="16x16" href="{% static 'favicon/favicon-16x16.png' %}">
     <link rel="manifest" href="{% static 'favicon/manifest.json' %}">
-    {# generated via https://www.opengraph.xyz #}
-    <meta name="description" content="A place to discover new commanders and see what people are running in Pauper Commander (PDH).">
-    <meta property="og:url" content="https://pdhdata.com">
-    <meta property="og:type" content="website">
-    <meta property="og:title" content="PDHdata">
-    <meta property="og:description" content="Discover new Pauper (PDH) commanders and see what decks are hot.">
-    <meta property="og:image" content="https://pdhdata.com/static/logo/card-play-wide.png">
-    <meta name="twitter:card" content="summary_large_image">
-    <meta property="twitter:domain" content="pdhdata.com">
-    <meta property="twitter:url" content="https://pdhdata.com">
-    <meta name="twitter:title" content="PDHdata">
-    <meta name="twitter:description" content="Discover new Pauper (PDH) commanders and see what decks are hot.">
-    <meta name="twitter:image" content="https://pdhdata.com/static/logo/card-play-wide.png">
-    {# end OpeGraph meta tags #}
+    {% block opengraph %}{% include '_opengraph.html' %}{% endblock %}
   </head>
   <body style="padding-top: 3.5rem">
     <svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
