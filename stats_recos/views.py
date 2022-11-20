@@ -6,7 +6,7 @@ from django.core.paginator import Paginator
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_POST
 from decklist.models import Card, Deck, Printing, CardInDeck
-from .wubrg_utils import COLORS, filter_to_name
+from .wubrg_utils import COLORS, filter_to_name, name_to_symbol
 from django_htmx.http import trigger_client_event, HttpResponseClientRefresh
 import operator
 import functools
@@ -130,13 +130,19 @@ def partner_decks(request):
 
 
 def commander_index(request):
+    colors = [
+        [(c[0], name_to_symbol(c[0]), f'cmdr-{c[0]}') for c in COLORS if c[1] == 0],
+        [(c[0], name_to_symbol(c[0]), f'cmdr-{c[0]}') for c in COLORS if c[1] == 1],
+        [(c[0], name_to_symbol(c[0]), f'cmdr-{c[0]}') for c in COLORS if c[1] == 2],
+        [(c[0], name_to_symbol(c[0]), f'cmdr-{c[0]}') for c in COLORS if c[1] == 3],
+        [(c[0], name_to_symbol(c[0]), f'cmdr-{c[0]}') for c in COLORS if c[1] == 4],
+        [(c[0], name_to_symbol(c[0]), f'cmdr-{c[0]}') for c in COLORS if c[1] == 5],
+    ]
     return render(
         request,
         "stats/commander_index.html",
         context={
-            'colors': [
-                (c[0], f'cmdr-{c[0]}') for c in COLORS
-            ],
+            'colors': colors,
             'links': _LINKS,
         },
     )
@@ -213,13 +219,19 @@ def commanders_by_color(request, w=False, u=False, b=False, r=False, g=False):
 
 
 def land_index(request):
+    colors = [
+        [(c[0], name_to_symbol(c[0]), f'land-{c[0]}') for c in COLORS if c[1] == 0],
+        [(c[0], name_to_symbol(c[0]), f'land-{c[0]}') for c in COLORS if c[1] == 1],
+        [(c[0], name_to_symbol(c[0]), f'land-{c[0]}') for c in COLORS if c[1] == 2],
+        [(c[0], name_to_symbol(c[0]), f'land-{c[0]}') for c in COLORS if c[1] == 3],
+        [(c[0], name_to_symbol(c[0]), f'land-{c[0]}') for c in COLORS if c[1] == 4],
+        [(c[0], name_to_symbol(c[0]), f'land-{c[0]}') for c in COLORS if c[1] == 5],
+    ]
     return render(
         request,
         "stats/land_index.html",
         context={
-            'colors': [
-                (c[0], f'land-{c[0]}') for c in COLORS
-            ],
+            'colors': colors,
             'links': _LINKS,
         },
     )
@@ -289,13 +301,19 @@ def lands_by_color(request, w=False, u=False, b=False, r=False, g=False):
 
 
 def card_index(request):
+    colors = [
+        [(c[0], name_to_symbol(c[0]), f'card-{c[0]}') for c in COLORS if c[1] == 0],
+        [(c[0], name_to_symbol(c[0]), f'card-{c[0]}') for c in COLORS if c[1] == 1],
+        [(c[0], name_to_symbol(c[0]), f'card-{c[0]}') for c in COLORS if c[1] == 2],
+        [(c[0], name_to_symbol(c[0]), f'card-{c[0]}') for c in COLORS if c[1] == 3],
+        [(c[0], name_to_symbol(c[0]), f'card-{c[0]}') for c in COLORS if c[1] == 4],
+        [(c[0], name_to_symbol(c[0]), f'card-{c[0]}') for c in COLORS if c[1] == 5],
+    ]
     return render(
         request,
         "stats/card_index.html",
         context={
-            'colors': [
-                (c[0], f'card-{c[0]}') for c in COLORS
-            ],
+            'colors': colors,
             'links': _LINKS,
         },
     )

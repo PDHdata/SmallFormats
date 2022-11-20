@@ -1,12 +1,19 @@
 {% extends 'base.html' %}
+{% load static %}
 {% block title %}Lands by color{% endblock %}
 {% block body %}
 <h1>Lands by color</h1>
 <div class="container">
   <div class="row row-cols-2 row-cols-md-3 row-cols-lg-4 row-cols-xxl-6">
-    <div class="col"><a href="{% url 'land-top' %}">Any color</a></div>
-    {% for color in colors %}
-    <div class="col"><a href="{% url color.1 %}">{{ color.0.title }}</a></div>
+    {% for entry in colors %}
+    <div class="col">
+      {% if forloop.first %}
+      <a href="{% url 'land-top' %}">Top lands, any color</a><br>
+      {% endif %}
+    {% for color in entry %}
+    <a href="{% url color.2 %}">{{ color.0.title }} {% for img in color.1 %}<img src="{% static img %}" class="mana-symbol">{% endfor %}</a><br>
+    {% endfor %}
+    </div>
     {% endfor %}
   </div>
 </div>
