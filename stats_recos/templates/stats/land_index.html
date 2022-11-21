@@ -4,15 +4,18 @@
 {% block body %}
 <h1>Lands by color</h1>
 <div class="container">
-  <div class="row row-cols-2 row-cols-md-3 row-cols-lg-4 row-cols-xxl-6">
+  <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-4 py-3">
     {% for entry in colors %}
-    <div class="col">
+    <div class="col d-flex align-items-start">
+      <h2 class="flex-shrink-0 me-3">{{ forloop.counter0 }}</h2>
+      <div>
       {% if forloop.first %}
-      <a href="{% url 'land-top' %}">Top lands, any color</a><br>
+      <a href="{% url 'card-top' %}">Top lands (any color)</a><br>
       {% endif %}
-    {% for color in entry %}
-    <a href="{% url color.2 %}">{{ color.0.title }} {% for img in color.1 %}<img src="{% static img %}" class="mana-symbol">{% endfor %}</a><br>
-    {% endfor %}
+      {% for color in entry %}
+      <a href="{% url color.2 %}">{{ color.0.title }} {% for img in color.1 %}<img src="{% static img %}" class="mana-symbol">{% endfor %}</a><br>
+      {% endfor %}
+      </div>
     </div>
     {% endfor %}
   </div>

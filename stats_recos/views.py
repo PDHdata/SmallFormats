@@ -78,7 +78,7 @@ def _deck_count_at_least_color(w, u, b, r, g):
 
 
 @functools.cache
-def _get_front_image():
+def _get_face_card():
     top_cmdr = (
         Card.objects
         .filter(
@@ -90,18 +90,22 @@ def _get_front_image():
         .first()
     )
     if top_cmdr and top_cmdr.default_printing:
-        return top_cmdr.default_printing.image_uri
+        return top_cmdr.name, top_cmdr.default_printing.image_uri
 
-    return "https://cards.scryfall.io/normal/front/a/4/a4fab67f-00c2-4125-9262-d21a29411797.jpg?1644853041="
+    # this only happens if we have no cards/printings in the database
+    return "Command Tower", "https://cards.scryfall.io/normal/front/b/f/bf5dafb0-4fb1-470d-85ce-88f3ae32340b.jpg?1568580226"
 
 
 def stats_index(request, page="stats/index.html"):
+    name, image_uri = _get_face_card()
+
     return render(
         request,
         page,
         context={
             'links': _LINKS,
-            'image_uri': _get_front_image(),
+            'image_uri': image_uri,
+            'face_card_name': name,
         },
     )
 
