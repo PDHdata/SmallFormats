@@ -14,12 +14,13 @@ class User(AbstractUser):
 class DataSource(models.IntegerChoices):
     UNKNOWN_OTHER = 0, "Unknown/other"
     ARCHIDEKT = 1
+    MOXFIELD = 2
 
 
 class Deck(models.Model):
     name = models.CharField(max_length=100)
     source = models.IntegerField(choices=DataSource.choices)
-    source_id = models.CharField(max_length=20, blank=True)
+    source_id = models.CharField(max_length=30, blank=True)
     source_link = models.URLField(blank=True)
     creator_display_name = models.CharField(max_length=50, blank=True)
     ingested_time = models.DateTimeField(auto_now_add=True)
