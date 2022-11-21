@@ -1,18 +1,18 @@
 <div class="container">
   <footer class="d-flex flex-wrap justify-content-between align-items-center py-3 my-4 border-top">
-    <div class="col-md-4 d-flex align-items-center">
+    <div class="col-md-6 d-flex align-items-center">
       <a href="{% url 'index' %}" class="mb-3 me-2 mb-md-0 text-muted text-decoration-none lh-1">
         <svg class="bi" width="24" height="24"><use xlink:href="#card-play"/></svg>
       </a>
       <span class="mb-3 mb-md-0 text-muted">
-        {{ SITENAME }}
+        <a class="link-secondary" href="{% url 'index' %}">{{ SITENAME }}</a>
         | <a class="link-secondary" href="{% url 'about' %}">About</a>
         | <a class="link-secondary" href="{% url 'privacy' %}">Privacy and terms</a>
       </span>
     </div>
 
-    <ul class="nav col-md-4 justify-content-end list-unstyled d-flex">
-      <li class="ms-3"><a class="text-muted" href="https://github.com/PDHdata/"><svg class="bi" width="24" height="24"><use xlink:href="#github"/></svg></a></li>
-    </ul>
+    <div class="col-md-4 d-flex justify-content-end">
+      <a class="mb-3 ms-2 mb-md-0 text-muted text-decoration-none lh-1" href="https://github.com/PDHdata/"><svg class="bi" width="24" height="24"><use xlink:href="#github"/></svg></a>
+    </div>
   </footer>
 </div>
