@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {% load simple_math %}
+{% load mana %}
 {% block title %}{{ card.name }} (card){% endblock %}
 {% block body %}
 <h1>{{ card.name }}</h1>
@@ -19,7 +20,7 @@
 
 <div class="clearfix">
   {% include 'stats/_card_image_gallery.html' %}
-  <p>{{ card.type_line }} ({{ card.color_identity }})</p>
+  <p>{{ card.type_line }} {{ card.color_identity|mana_symbols|safe }}</p>
   <p>{% if commands > 0 %}<a href="{% url 'cmdr-single' card.id %}">View as commander</a> | {% endif %}<a href="{{ card.scryfall_uri }}">View on Scryfall</a></p>
   <p>Appears in {{ is_in }} of {{ could_be_in }} decks ({{ is_in|percent_of:could_be_in }}).</p>
   {% if commanders %}
