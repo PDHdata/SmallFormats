@@ -26,10 +26,10 @@ class CrawlerExit(Exception):
 
 
 class _BaseCrawler:
-    def __init__(self, initial_url, stop_after, processor):
+    def __init__(self, initial_url, stop_after, page_processor):
         self.stop_after = stop_after
         self.url = initial_url
-        self.processor = processor
+        self.page_processor = page_processor
         self._keep_going = True
     
     def get_next_page(self, client: httpx.Client):
@@ -48,6 +48,9 @@ class _BaseCrawler:
             self.process_response(response)
 
         return self._keep_going
+
+    def process_response(self, response: httpx.Response):
+        raise NotImplementedError
 
 
 class ArchidektCrawler(_BaseCrawler):
@@ -70,7 +73,7 @@ class ArchidektCrawler(_BaseCrawler):
             self.url = None
             self._keep_going = False
 
-        oldest_seen = self.processor(envelope['results'], self.stop_after)
+        oldest_seen = self.page_processor(envelope['results'], self.stop_after)
         if self.stop_after and oldest_seen < self.stop_after:
             # we're done!
             self._keep_going = False
@@ -93,7 +96,7 @@ class MoxfieldCrawler(_BaseCrawler):
             self._keep_going = False
             raise CrawlerExit(f"client got: {response.text}", response)
 
-        oldest_seen = self.processor(envelope['data'], self.stop_after)
+        oldest_seen = self.page_processor(envelope['data'], self.stop_after)
         if self.stop_after and oldest_seen < self.stop_after:
             # we're done!
             self._keep_going = False
