@@ -6,14 +6,14 @@ from django.views.decorators.http import require_POST
 from django.utils import timezone
 from django.urls import reverse
 from django.db import transaction
-from django.db.models import Count
-from django.utils.dateparse import parse_datetime
 from django.views.decorators.cache import never_cache
 from django_htmx.http import HttpResponseClientRefresh, HttpResponseClientRedirect, HTMX_STOP_POLLING
 from crawler.models import DeckCrawlResult, CrawlRun, DataSource
 from decklist.models import Deck, Printing, CardInDeck
 import httpx
-from crawler.crawlers import ArchidektCrawler, CrawlerExit, HEADERS, ARCHIDEKT_API_BASE, format_response_error
+from crawler.crawlers import CrawlerExit, HEADERS, format_response_error
+from crawler.crawlers import ArchidektCrawler, ARCHIDEKT_API_BASE
+from crawler.crawlers import MoxfieldCrawler, MOXFIELD_API_BASE
 
 
 @never_cache
@@ -140,16 +140,25 @@ def run_cancel_hx(request, run_id):
 @login_required
 @require_POST
 def run_archidekt_onepage_hx(request, run_id):
+    return _onepage_hx(request, ARCHIDEKT_API_BASE, ArchidektCrawler, run_id)
+
+@never_cache
+@login_required
+@require_POST
+def run_moxfield_onepage_hx(request, run_id):
+    return _onepage_hx(request, MOXFIELD_API_BASE, MoxfieldCrawler, run_id)
+
+def _onepage_hx(request, api_base, Crawler, run_id):
     run = get_object_or_404(CrawlRun, pk=run_id)
 
     output = []
 
     with httpx.Client(
         headers=HEADERS,
-        base_url=ARCHIDEKT_API_BASE,
+        base_url=api_base,
     ) as client:
 
-        crawler = ArchidektCrawler(
+        crawler = Crawler(
             client,
             run.next_fetch,
             run.search_back_to,
@@ -202,8 +211,22 @@ def run_archidekt_onepage_hx(request, run_id):
 def start_archidekt_poll_hx(request, run_id):
     return render(
         request,
-        'crawler/_start_archidekt_poll.html',
+        'crawler/_start_crawl_poll.html',
         {
+            'crawl_one': 'crawler:run-archidekt-one',
+            'run_id': run_id,
+        },
+    )
+
+
+@never_cache
+@login_required
+def start_moxfield_poll_hx(request, run_id):
+    return render(
+        request,
+        'crawler/_start_crawl_poll.html',
+        {
+            'crawl_one': 'crawler:run-moxfield-one',
             'run_id': run_id,
         },
     )
