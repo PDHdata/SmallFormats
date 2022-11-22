@@ -128,7 +128,7 @@ class ArchidektCrawler(_BaseCrawler):
     INITIAL_PAGE_ROUTE = "decks/cards/"
     INITIAL_PAGE_PARAMS = {
         'formats': 17,
-        'orderBy': '-createdAt',
+        'orderBy': '-updatedAt',
         'size': 100,
         'pageSize': 48,
     }
