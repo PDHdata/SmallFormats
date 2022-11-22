@@ -2,11 +2,9 @@
 See https://archidekt.com/forum/thread/3476605/1 for more on crawling Archidekt.
 """
 from django.core.management.base import BaseCommand
-from django.db import transaction
-from django.utils.dateparse import parse_datetime
 import httpx
 from decklist.models import Deck
-from crawler.models import CrawlRun, DeckCrawlResult
+from crawler.models import CrawlRun
 from django.utils import timezone
 import time
 from crawler.crawlers import CrawlerExit, HEADERS, format_response_error
@@ -22,19 +20,18 @@ class CrawlCommand(BaseCommand):
         run = self._get_or_create_run(stop_after)
 
         client: httpx.Client = self._create_client()
-        url = (
-            self._initial_url(client) if run.state == CrawlRun.State.NOT_STARTED
-            else run.next_fetch
+        crawler = self.Crawler(
+            client,
+            run.next_fetch,
+            stop_after,
+            self.stdout.write,
         )
-
-        processor = self._process_page
-        crawler = self.CRAWLER_CLASS(url, stop_after, processor)
         
         run.state = CrawlRun.State.FETCHING_DECKS
         run.save()
         
         try:
-            while crawler.get_next_page(client):
+            while crawler.get_next_page():
                 run.next_fetch = crawler.url
                 run.save()
                 time.sleep(sleep_time)
@@ -59,19 +56,10 @@ class CrawlCommand(BaseCommand):
         return httpx.Client(
             headers=HEADERS,
             base_url=self.API_BASE,
-            follow_redirects=True,
             event_hooks={
                 'request': [self._request_log],
                 'response': [self._response_log],
             })
-    
-    def _initial_url(self, client: httpx.Client):
-        req = client.build_request(
-            "GET",
-            self.INITIAL_PAGE_ROUTE,
-            params=self.INITIAL_PAGE_PARAMS,
-        )
-        return req.url
     
     def _compute_stop_after(self):
         try:
@@ -108,50 +96,6 @@ class CrawlCommand(BaseCommand):
             run.save()
 
         return run
-
-    def _process_page(self, results, stop_after):
-        self.stdout.write(f"Processing next {len(results)} results.")
-        
-        # get existing decks for this page
-        ids = [str(r[self.ID_KEY]) for r in results]
-        qs = Deck.objects.filter(
-            source=self.DATASOURCE
-        ).filter(source_id__in=ids)
-        existing_decks = { d.source_id: d for d in qs }
-
-        for deck_data in results:
-            deck_updated_at = parse_datetime(deck_data[self.LAST_UPDATE_KEY])
-            if stop_after and deck_updated_at < stop_after:
-                # break if we've seen everything back to the right time
-                return deck_updated_at
-
-            this_id = str(deck_data[self.ID_KEY])
-            if this_id in existing_decks.keys():
-                deck = existing_decks[this_id]
-            else:
-                deck = Deck()
-                deck.pdh_legal = False # until proven otherwise!
-            deck.name = deck_data[self.NAME_KEY]
-            deck.source = self.DATASOURCE
-            deck.source_id = this_id
-            deck.source_link = self.SOURCE_LINK.format(this_id)
-            # so far, both Archidekt and Moxfield have a fixed 2-level hierarchy
-            deck.creator_display_name = deck_data[self.CREATOR_DISPLAY_KEY_1][self.CREATOR_DISPLAY_KEY_2]
-            deck.updated_time = deck_updated_at
-
-            crawl_result = DeckCrawlResult(
-                url=self.DECK_FETCH_LINK.format(this_id),
-                deck=deck,
-                target=self.DATASOURCE,
-                updated_time=deck_updated_at,
-                got_cards=False,
-            )
-            with transaction.atomic():
-                deck.save()
-                crawl_result.save()
-        
-        # the last deck we processed will have the oldest date
-        return deck_updated_at
 
     def _request_log(self, request):
         self.stdout.write(f">> {request.method} {request.url}")

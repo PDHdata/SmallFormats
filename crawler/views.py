@@ -136,65 +136,6 @@ def run_cancel_hx(request, run_id):
     return HttpResponseClientRefresh()
 
 
-def _build_initial_url(client):
-    params = {
-        'formats': 17,
-        'orderBy': '-createdAt',
-        'size': 100,
-        'pageSize': 48,
-    }
-    req = client.build_request(
-        "GET",
-        "decks/cards/",
-        params=params
-    )
-    return req.url
-
-
-def _archidekt_page_processor(results, stop_after, output: list[str]):
-    output.append(f"Processing next {len(results)} results.")
-    
-    # get existing decks for this page
-    ids = [str(r['id']) for r in results]
-    qs = Deck.objects.filter(
-        source=DataSource.ARCHIDEKT
-    ).filter(source_id__in=ids)
-    existing_decks = { d.source_id: d for d in qs }
-
-    for deck_data in results:
-        deck_updated_at = parse_datetime(deck_data['updatedAt'])
-        if stop_after and deck_updated_at < stop_after:
-            # break if we've seen everything back to the right time
-            return deck_updated_at
-
-        this_id = str(deck_data['id'])
-        if this_id in existing_decks.keys():
-            deck = existing_decks[this_id]
-        else:
-            deck = Deck()
-            deck.pdh_legal = False
-        deck.name = deck_data['name']
-        deck.source = DataSource.ARCHIDEKT
-        deck.source_id = this_id
-        deck.source_link = f"https://archidekt.com/decks/{this_id}"
-        deck.creator_display_name = deck_data['owner']['username']
-        deck.updated_time = deck_updated_at
-
-        crawl_result = DeckCrawlResult(
-            url=ARCHIDEKT_API_BASE + f"decks/{this_id}/",
-            deck=deck,
-            target=DataSource.ARCHIDEKT,
-            updated_time=deck_data['updatedAt'],
-            got_cards=False,
-        )
-        with transaction.atomic():
-            deck.save()
-            crawl_result.save()
-    
-    # the last deck we processed will have the oldest date
-    return deck_updated_at
-
-
 @never_cache
 @login_required
 @require_POST
@@ -208,21 +149,23 @@ def run_archidekt_onepage_hx(request, run_id):
         base_url=ARCHIDEKT_API_BASE,
     ) as client:
 
-        if run.state == run.State.NOT_STARTED or not run.next_fetch:
-            run.state = run.State.FETCHING_DECKS
-            run.next_fetch = _build_initial_url(client)
-            run.save()
-
-        processor = (
-            lambda results, stop_after: 
-                _archidekt_page_processor(results, stop_after, output)
+        crawler = ArchidektCrawler(
+            client,
+            run.next_fetch,
+            run.search_back_to,
+            output.append,
         )
-        crawler = ArchidektCrawler(run.next_fetch, run.search_back_to, processor)
+
+        if run.state == run.State.NOT_STARTED or not run.next_fetch:
+            # if next_fetch was None, the crawler will build the initial URL
+            run.next_fetch = crawler.url
+            run.state = run.State.FETCHING_DECKS
+            run.save()
 
         response_status = 200
 
         try:
-            if crawler.get_next_page(client):
+            if crawler.get_next_page():
                 run.next_fetch = crawler.url
                 output.append("Processed a page.")
                 run.save()
