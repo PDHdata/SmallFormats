@@ -12,8 +12,7 @@ from django_htmx.http import HttpResponseClientRefresh, HttpResponseClientRedire
 from crawler.models import DeckCrawlResult, CrawlRun, DataSource
 from decklist.models import Deck, Printing, CardInDeck
 import httpx
-from crawler.management.commands._api_helpers import HEADERS, ARCHIDEKT_API_BASE, format_response_error
-from crawler.crawlers import ArchidektCrawler, CrawlerExit
+from crawler.crawlers import ArchidektCrawler, CrawlerExit, HEADERS, ARCHIDEKT_API_BASE, format_response_error
 
 
 @never_cache
