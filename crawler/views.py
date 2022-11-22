@@ -44,11 +44,20 @@ def crawler_index(request):
 @login_required
 @require_POST
 def new_archidekt_run_hx(request):
+    return _new_run_hx(request, DataSource.ARCHIDEKT)
+
+@never_cache
+@login_required
+@require_POST
+def new_moxfield_run_hx(request):
+    return _new_run_hx(request, DataSource.MOXFIELD)
+
+def _new_run_hx(request, datasource):
     try:
         latest_deck_update = (
             Deck.objects
             .filter(
-                source=DataSource.ARCHIDEKT,
+                source=datasource,
                 updated_time__isnull=False,
             )
             .latest('updated_time')
@@ -58,7 +67,7 @@ def new_archidekt_run_hx(request):
 
     run = CrawlRun(
         state=CrawlRun.State.NOT_STARTED,
-        target=DataSource.ARCHIDEKT,
+        target=datasource,
         crawl_start_time=timezone.now(),
         search_back_to=latest_deck_update,
     )

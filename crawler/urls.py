@@ -14,4 +14,5 @@ urlpatterns = [
     path('run/<int:run_id>/one', views.run_archidekt_onepage_hx, name="run-archidekt-one"),
     path('run/<int:run_id>/poll', views.start_archidekt_poll_hx, name="run-archidekt-poll"),
     path('run/new/archidekt/', views.new_archidekt_run_hx, name="run-new-archidekt"),
+    path('run/new/moxfield/', views.new_moxfield_run_hx, name="run-new-moxfield"),
 ]

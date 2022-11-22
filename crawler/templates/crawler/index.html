@@ -4,7 +4,8 @@
 <h1>Crawler admin</h1>
 <div class="container" hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'>
   <div>
-    <button class="btn btn-primary" hx-post="{% url 'crawler:run-new-archidekt' %}">Start a new Archidekt run</button>
+    <button class="btn btn-primary" hx-post="{% url 'crawler:run-new-archidekt' %}">New Archidekt run</button>
+    <button class="btn btn-primary" hx-post="{% url 'crawler:run-new-moxfield' %}">New Moxfield run</button>
   </div>
   <table class="table">
     <tr><th>Start time</th><th>Target</th><th>State</th><th>Search back to</th></tr>
