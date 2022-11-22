@@ -1,3 +1,4 @@
+from itertools import chain
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, get_object_or_404
 from django.core.paginator import Paginator
@@ -256,7 +257,7 @@ def start_archidekt_poll_hx(request, run_id):
     )
 
 
-def _process_deck(crawl_result, cards, output):
+def _process_architekt_deck(crawl_result, cards, output):
     # resolve printings to cards
     lookup_printings = set()
     for card_json in cards:
@@ -311,6 +312,64 @@ def _process_deck(crawl_result, cards, output):
         crawl_result.save()
 
 
+def _process_moxfield_deck(crawl_result, envelope, output):
+    # resolve printings to cards
+    cards = envelope['mainboard']
+    cmdrs = envelope['commanders']
+
+    lookup_printings = set()
+    for _, card_json in chain(cards.items(), cmdrs.items()):
+        printing_id = card_json['card']['scryfall_id']
+        lookup_printings.add(printing_id)
+    print_id_to_card = {
+        str(p.id): p.card
+        for p in Printing.objects.filter(id__in=lookup_printings)
+    }
+
+    # reuse cards where we can
+    current_cards = {
+        c.card.id: c for c in CardInDeck.objects.filter(deck=crawl_result.deck)
+    }
+    update_cards = []
+    new_cards = []
+
+    for card_set, is_commander in ((cards, False), (cmdrs, True)):
+        for _, card_json in card_set.items():
+            printing_id = card_json['card']['scryfall_id']
+            if printing_id not in print_id_to_card.keys():
+                output.append(f"skipping printing {printing_id}; did not resolve to a card")
+                continue
+            card_id = print_id_to_card[printing_id].id
+            if card_id in current_cards.keys():
+                reuse_card = current_cards.pop(card_id)
+                reuse_card.is_pdh_commander = is_commander
+                update_cards.append(reuse_card)
+            else:
+                new_cards.append(CardInDeck(
+                    deck=crawl_result.deck,
+                    card=print_id_to_card[printing_id],
+                    is_pdh_commander=is_commander,
+                ))
+    
+    with transaction.atomic():
+        (
+            CardInDeck.objects
+            .filter(deck=crawl_result.deck)
+            .filter(card__id__in=current_cards.keys())
+            .delete()
+        )
+        CardInDeck.objects.bulk_create(new_cards)
+        CardInDeck.objects.bulk_update(update_cards, ['is_pdh_commander'])
+
+    # now see if the deck is legal before completing processing
+    crawl_result.deck.pdh_legal, _ = crawl_result.deck.check_deck_legality()
+
+    with transaction.atomic():
+        crawl_result.deck.save()
+        crawl_result.got_cards = True
+        crawl_result.save()
+
+
 @never_cache
 @login_required
 @require_POST
@@ -335,9 +394,17 @@ def fetch_deck_hx(request):
         response = client.get(updatable_deck.url)
         if 200 <= response.status_code < 300 or response.status_code == 400:
             envelope = response.json()
-            cards = envelope['cards']
-            _process_deck(updatable_deck, cards, output)
-            output.append(f"Updated \"{updatable_deck.deck.name}\".")
+            if updatable_deck.target == DataSource.ARCHIDEKT:
+                _process_architekt_deck(updatable_deck, envelope['cards'], output)
+                output.append(f"Updated \"{updatable_deck.deck.name}\" - Archidekt.")
+            elif updatable_deck.target == DataSource.MOXFIELD:
+                _process_moxfield_deck(updatable_deck, envelope, output)
+                output.append(f"Updated \"{updatable_deck.deck.name}\" - Moxfield.")
+            else:
+                output.append("Can't update \"{updatable_deck.deck.name}\", unimplemented source")
+                # we'd like to proceed, but this deck will just get picked again
+                # so for now, stop polling
+                response_status = HTMX_STOP_POLLING
         else:
             output.append(f"Got {response.status_code} from server.")
             response_status = HTMX_STOP_POLLING
