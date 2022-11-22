@@ -26,6 +26,7 @@ class Command(BaseCommand):
                 DeckCrawlResult.objects
                 .filter(
                     target=DataSource.ARCHIDEKT,
+                    fetchable=True,
                     got_cards=False,
                 )
             )

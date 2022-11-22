@@ -26,7 +26,7 @@ def crawler_index(request):
 
     pending_results = (
         DeckCrawlResult.objects
-        .filter(got_cards=False)
+        .filter(fetchable=True, got_cards=False)
         .count()
     )
 
@@ -352,7 +352,7 @@ def fetch_deck_hx(request):
     try:
         updatable_deck = (
             DeckCrawlResult.objects
-            .filter(got_cards=False)
+            .filter(fetchable=True, got_cards=False)
             .first()
         )
         if not updatable_deck:
@@ -367,19 +367,24 @@ def fetch_deck_hx(request):
         headers=HEADERS,
     ) as client:
         response = client.get(updatable_deck.url)
-        if 200 <= response.status_code < 300 or response.status_code == 400:
+        if 200 <= response.status_code < 300:
             envelope = response.json()
             if updatable_deck.target == DataSource.ARCHIDEKT:
                 _process_architekt_deck(updatable_deck, envelope['cards'], output)
-                output.append(f"Updated \"{updatable_deck.deck.name}\" - Archidekt.")
+                output.append(f"Updated \"{updatable_deck.deck.name}\" (Archidekt).")
             elif updatable_deck.target == DataSource.MOXFIELD:
                 _process_moxfield_deck(updatable_deck, envelope, output)
-                output.append(f"Updated \"{updatable_deck.deck.name}\" - Moxfield.")
+                output.append(f"Updated \"{updatable_deck.deck.name}\" (Moxfield).")
             else:
                 output.append("Can't update \"{updatable_deck.deck.name}\", unimplemented source")
-                # we'd like to proceed, but this deck will just get picked again
-                # so for now, stop polling
-                response_status = HTMX_STOP_POLLING
+                updatable_deck.fetchable = False
+                updatable_deck.save()
+        elif response.status_code == 400:
+            # mark deck as unfetchable and carry on
+            output.append(f"Got error 400 for \"{updatable_deck.deck.name}\" ({updatable_deck.url}).")
+            updatable_deck.fetchable = False
+            updatable_deck.save()
+            response_status = HTMX_STOP_POLLING
         else:
             output.append(f"Got {response.status_code} from server.")
             response_status = HTMX_STOP_POLLING

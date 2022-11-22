@@ -38,6 +38,7 @@ class DeckCrawlResult(models.Model):
     )
     # Last update time according to data source
     updated_time = models.DateTimeField()
+    fetchable = models.BooleanField(default=True)
     got_cards = models.BooleanField(default=False)
 
     def __str__(self):
