@@ -81,11 +81,14 @@ def _new_run_hx(request, datasource):
 def run_detail(request, run_id):
     run = get_object_or_404(CrawlRun, pk=run_id)
 
+    source_str = DataSource(run.target).name.lower()
     return render(
         request,
         'crawler/run_detail.html',
         {
             'run': run,
+            'poll_view': f'crawler:run-{source_str}-poll',
+            'single_view': f'crawler:run-{source_str}-one',
             'resumable': run.state in (CrawlRun.State.NOT_STARTED, CrawlRun.State.FETCHING_DECKS),
             'errored': run.state == CrawlRun.State.ERROR,
             'allow_search_infinite': run.state == CrawlRun.State.NOT_STARTED and run.search_back_to,
