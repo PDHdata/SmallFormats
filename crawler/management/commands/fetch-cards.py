@@ -7,7 +7,7 @@ from django.utils.dateparse import parse_date
 import httpx
 import json_stream.httpx
 from decklist.models import Card, Printing
-from ._api_helpers import HEADERS, SCRYFALL_API_BASE
+from crawler.crawlers import HEADERS, SCRYFALL_API_BASE
 
 
 PROGRESS_EVERY_N_CARDS = 100

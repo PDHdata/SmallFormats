@@ -13,7 +13,7 @@ class CrawlRun(models.Model):
 
     crawl_start_time = models.DateTimeField()
     # at the beginning of the run, we'll look for the newest deck
-    # update we have from Archidekt. if we see a timestamp older
+    # update we have from the source. if we see a timestamp older
     # than that, since we search from newest to oldest, we know
     # it's time to stop.
     search_back_to = models.DateTimeField(null=True, blank=True)
@@ -38,6 +38,7 @@ class DeckCrawlResult(models.Model):
     )
     # Last update time according to data source
     updated_time = models.DateTimeField()
+    fetchable = models.BooleanField(default=True)
     got_cards = models.BooleanField(default=False)
 
     def __str__(self):

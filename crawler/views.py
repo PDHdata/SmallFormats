@@ -1,3 +1,4 @@
+from itertools import chain
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, get_object_or_404
 from django.core.paginator import Paginator
@@ -5,15 +6,14 @@ from django.views.decorators.http import require_POST
 from django.utils import timezone
 from django.urls import reverse
 from django.db import transaction
-from django.db.models import Count
-from django.utils.dateparse import parse_datetime
 from django.views.decorators.cache import never_cache
 from django_htmx.http import HttpResponseClientRefresh, HttpResponseClientRedirect, HTMX_STOP_POLLING
 from crawler.models import DeckCrawlResult, CrawlRun, DataSource
 from decklist.models import Deck, Printing, CardInDeck
 import httpx
-from crawler.management.commands._api_helpers import HEADERS, ARCHIDEKT_API_BASE, format_response_error
-from crawler.crawlers import ArchidektCrawler, CrawlerExit
+from crawler.crawlers import CrawlerExit, HEADERS, format_response_error
+from crawler.crawlers import ArchidektCrawler, ARCHIDEKT_API_BASE
+from crawler.crawlers import MoxfieldCrawler, MOXFIELD_API_BASE
 
 
 @never_cache
@@ -26,7 +26,7 @@ def crawler_index(request):
 
     pending_results = (
         DeckCrawlResult.objects
-        .filter(got_cards=False)
+        .filter(fetchable=True, got_cards=False)
         .count()
     )
 
@@ -44,11 +44,20 @@ def crawler_index(request):
 @login_required
 @require_POST
 def new_archidekt_run_hx(request):
+    return _new_run_hx(request, DataSource.ARCHIDEKT)
+
+@never_cache
+@login_required
+@require_POST
+def new_moxfield_run_hx(request):
+    return _new_run_hx(request, DataSource.MOXFIELD)
+
+def _new_run_hx(request, datasource):
     try:
         latest_deck_update = (
             Deck.objects
             .filter(
-                source=DataSource.ARCHIDEKT,
+                source=datasource,
                 updated_time__isnull=False,
             )
             .latest('updated_time')
@@ -58,7 +67,7 @@ def new_archidekt_run_hx(request):
 
     run = CrawlRun(
         state=CrawlRun.State.NOT_STARTED,
-        target=DataSource.ARCHIDEKT,
+        target=datasource,
         crawl_start_time=timezone.now(),
         search_back_to=latest_deck_update,
     )
@@ -127,93 +136,45 @@ def run_cancel_hx(request, run_id):
     return HttpResponseClientRefresh()
 
 
-def _build_initial_url(client):
-    params = {
-        'formats': 17,
-        'orderBy': '-createdAt',
-        'size': 100,
-        'pageSize': 48,
-    }
-    req = client.build_request(
-        "GET",
-        "decks/cards/",
-        params=params
-    )
-    return req.url
-
-
-def _archidekt_page_processor(results, stop_after, output: list[str]):
-    output.append(f"Processing next {len(results)} results.")
-    
-    # get existing decks for this page
-    ids = [str(r['id']) for r in results]
-    qs = Deck.objects.filter(
-        source=DataSource.ARCHIDEKT
-    ).filter(source_id__in=ids)
-    existing_decks = { d.source_id: d for d in qs }
-
-    for deck_data in results:
-        deck_updated_at = parse_datetime(deck_data['updatedAt'])
-        if stop_after and deck_updated_at < stop_after:
-            # break if we've seen everything back to the right time
-            return deck_updated_at
-
-        this_id = str(deck_data['id'])
-        if this_id in existing_decks.keys():
-            deck = existing_decks[this_id]
-        else:
-            deck = Deck()
-            deck.pdh_legal = False
-        deck.name = deck_data['name']
-        deck.source = DataSource.ARCHIDEKT
-        deck.source_id = this_id
-        deck.source_link = f"https://archidekt.com/decks/{this_id}"
-        deck.creator_display_name = deck_data['owner']['username']
-        deck.updated_time = deck_updated_at
-
-        crawl_result = DeckCrawlResult(
-            url=ARCHIDEKT_API_BASE + f"decks/{this_id}/",
-            deck=deck,
-            target=DataSource.ARCHIDEKT,
-            updated_time=deck_data['updatedAt'],
-            got_cards=False,
-        )
-        with transaction.atomic():
-            deck.save()
-            crawl_result.save()
-    
-    # the last deck we processed will have the oldest date
-    return deck_updated_at
-
-
 @never_cache
 @login_required
 @require_POST
 def run_archidekt_onepage_hx(request, run_id):
+    return _onepage_hx(request, ARCHIDEKT_API_BASE, ArchidektCrawler, run_id)
+
+@never_cache
+@login_required
+@require_POST
+def run_moxfield_onepage_hx(request, run_id):
+    return _onepage_hx(request, MOXFIELD_API_BASE, MoxfieldCrawler, run_id)
+
+def _onepage_hx(request, api_base, Crawler, run_id):
     run = get_object_or_404(CrawlRun, pk=run_id)
 
     output = []
 
     with httpx.Client(
         headers=HEADERS,
-        base_url=ARCHIDEKT_API_BASE,
+        base_url=api_base,
     ) as client:
 
-        if run.state == run.State.NOT_STARTED or not run.next_fetch:
-            run.state = run.State.FETCHING_DECKS
-            run.next_fetch = _build_initial_url(client)
-            run.save()
-
-        processor = (
-            lambda results, stop_after: 
-                _archidekt_page_processor(results, stop_after, output)
+        crawler = Crawler(
+            client,
+            run.next_fetch,
+            run.search_back_to,
+            output.append,
         )
-        crawler = ArchidektCrawler(run.next_fetch, run.search_back_to, processor)
+
+        if run.state == run.State.NOT_STARTED or not run.next_fetch:
+            # if next_fetch was None, the crawler will build the initial URL
+            run.next_fetch = crawler.url
+            run.state = run.State.FETCHING_DECKS
+            run.save()
 
         response_status = 200
 
         try:
-            if crawler.get_next_page(client):
+            if crawler.get_next_page():
                 run.next_fetch = crawler.url
                 output.append("Processed a page.")
                 run.save()
@@ -250,14 +211,28 @@ def run_archidekt_onepage_hx(request, run_id):
 def start_archidekt_poll_hx(request, run_id):
     return render(
         request,
-        'crawler/_start_archidekt_poll.html',
+        'crawler/_start_crawl_poll.html',
         {
+            'crawl_one': 'crawler:run-archidekt-one',
             'run_id': run_id,
         },
     )
 
 
-def _process_deck(crawl_result, cards, output):
+@never_cache
+@login_required
+def start_moxfield_poll_hx(request, run_id):
+    return render(
+        request,
+        'crawler/_start_crawl_poll.html',
+        {
+            'crawl_one': 'crawler:run-moxfield-one',
+            'run_id': run_id,
+        },
+    )
+
+
+def _process_architekt_deck(crawl_result, cards, output):
     # resolve printings to cards
     lookup_printings = set()
     for card_json in cards:
@@ -312,6 +287,64 @@ def _process_deck(crawl_result, cards, output):
         crawl_result.save()
 
 
+def _process_moxfield_deck(crawl_result, envelope, output):
+    # resolve printings to cards
+    cards = envelope['mainboard']
+    cmdrs = envelope['commanders']
+
+    lookup_printings = set()
+    for _, card_json in chain(cards.items(), cmdrs.items()):
+        printing_id = card_json['card']['scryfall_id']
+        lookup_printings.add(printing_id)
+    print_id_to_card = {
+        str(p.id): p.card
+        for p in Printing.objects.filter(id__in=lookup_printings)
+    }
+
+    # reuse cards where we can
+    current_cards = {
+        c.card.id: c for c in CardInDeck.objects.filter(deck=crawl_result.deck)
+    }
+    update_cards = []
+    new_cards = []
+
+    for card_set, is_commander in ((cards, False), (cmdrs, True)):
+        for _, card_json in card_set.items():
+            printing_id = card_json['card']['scryfall_id']
+            if printing_id not in print_id_to_card.keys():
+                output.append(f"skipping printing {printing_id}; did not resolve to a card")
+                continue
+            card_id = print_id_to_card[printing_id].id
+            if card_id in current_cards.keys():
+                reuse_card = current_cards.pop(card_id)
+                reuse_card.is_pdh_commander = is_commander
+                update_cards.append(reuse_card)
+            else:
+                new_cards.append(CardInDeck(
+                    deck=crawl_result.deck,
+                    card=print_id_to_card[printing_id],
+                    is_pdh_commander=is_commander,
+                ))
+    
+    with transaction.atomic():
+        (
+            CardInDeck.objects
+            .filter(deck=crawl_result.deck)
+            .filter(card__id__in=current_cards.keys())
+            .delete()
+        )
+        CardInDeck.objects.bulk_create(new_cards)
+        CardInDeck.objects.bulk_update(update_cards, ['is_pdh_commander'])
+
+    # now see if the deck is legal before completing processing
+    crawl_result.deck.pdh_legal, _ = crawl_result.deck.check_deck_legality()
+
+    with transaction.atomic():
+        crawl_result.deck.save()
+        crawl_result.got_cards = True
+        crawl_result.save()
+
+
 @never_cache
 @login_required
 @require_POST
@@ -319,7 +352,7 @@ def fetch_deck_hx(request):
     try:
         updatable_deck = (
             DeckCrawlResult.objects
-            .filter(got_cards=False)
+            .filter(fetchable=True, got_cards=False)
             .first()
         )
         if not updatable_deck:
@@ -334,11 +367,24 @@ def fetch_deck_hx(request):
         headers=HEADERS,
     ) as client:
         response = client.get(updatable_deck.url)
-        if 200 <= response.status_code < 300 or response.status_code == 400:
+        if 200 <= response.status_code < 300:
             envelope = response.json()
-            cards = envelope['cards']
-            _process_deck(updatable_deck, cards, output)
-            output.append(f"Updated \"{updatable_deck.deck.name}\".")
+            if updatable_deck.target == DataSource.ARCHIDEKT:
+                _process_architekt_deck(updatable_deck, envelope['cards'], output)
+                output.append(f"Updated \"{updatable_deck.deck.name}\" (Archidekt).")
+            elif updatable_deck.target == DataSource.MOXFIELD:
+                _process_moxfield_deck(updatable_deck, envelope, output)
+                output.append(f"Updated \"{updatable_deck.deck.name}\" (Moxfield).")
+            else:
+                output.append("Can't update \"{updatable_deck.deck.name}\", unimplemented source")
+                updatable_deck.fetchable = False
+                updatable_deck.save()
+        elif response.status_code == 400:
+            # mark deck as unfetchable and carry on
+            output.append(f"Got error 400 for \"{updatable_deck.deck.name}\" ({updatable_deck.url}).")
+            updatable_deck.fetchable = False
+            updatable_deck.save()
+            response_status = HTMX_STOP_POLLING
         else:
             output.append(f"Got {response.status_code} from server.")
             response_status = HTMX_STOP_POLLING

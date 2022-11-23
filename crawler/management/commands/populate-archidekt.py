@@ -4,7 +4,7 @@ from decklist.models import DataSource, CardInDeck, Printing
 from crawler.models import DeckCrawlResult
 import time
 from django.db import transaction
-from ._api_helpers import HEADERS, ARCHIDEKT_API_BASE, format_response_error
+from crawler.crawlers import HEADERS, ARCHIDEKT_API_BASE
 
 
 class Command(BaseCommand):
@@ -26,6 +26,7 @@ class Command(BaseCommand):
                 DeckCrawlResult.objects
                 .filter(
                     target=DataSource.ARCHIDEKT,
+                    fetchable=True,
                     got_cards=False,
                 )
             )
