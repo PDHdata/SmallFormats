@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "smallformats"
-version = "0.1.0"
+version = "0.5.0"
 description = "A deck-stats site for smaller MtG formats like PDH"
 authors = ["Matt Cooper <vtbassmatt@gmail.com>"]
 license = "MIT"
