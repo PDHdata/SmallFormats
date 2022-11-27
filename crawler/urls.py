@@ -17,4 +17,5 @@ urlpatterns = [
     path('moxfield/run/<int:run_id>/one', views.run_moxfield_onepage_hx, name="run-moxfield-one"),
     path('moxfield/run/<int:run_id>/poll', views.start_moxfield_poll_hx, name="run-moxfield-poll"),
     path('moxfield/run/new/', views.new_moxfield_run_hx, name="run-new-moxfield"),
+    path('stats/', views.update_stats, name="update-stats"),
 ]

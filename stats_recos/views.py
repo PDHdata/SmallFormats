@@ -5,7 +5,7 @@ from django.db.models import Count, Q
 from django.core.paginator import Paginator
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_POST
-from decklist.models import Card, Deck, Printing, CardInDeck
+from decklist.models import Card, Deck, Printing, CardInDeck, SiteStat
 from .wubrg_utils import COLORS, filter_to_name, name_to_symbol
 from django_htmx.http import trigger_client_event, HttpResponseClientRefresh
 import operator
@@ -98,6 +98,10 @@ def _get_face_card():
 
 def stats_index(request, page="stats/index.html"):
     name, image_uri = _get_face_card()
+    try:
+        stats = SiteStat.objects.latest()
+    except SiteStat.DoesNotExist:
+        stats = None
 
     return render(
         request,
@@ -106,6 +110,7 @@ def stats_index(request, page="stats/index.html"):
             'links': _LINKS,
             'image_uri': image_uri,
             'face_card_name': name,
+            'stats': stats,
         },
     )
 
