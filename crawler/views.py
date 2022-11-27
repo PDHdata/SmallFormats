@@ -9,7 +9,7 @@ from django.db import transaction
 from django.views.decorators.cache import never_cache
 from django_htmx.http import HttpResponseClientRefresh, HttpResponseClientRedirect, HTMX_STOP_POLLING
 from crawler.models import DeckCrawlResult, CrawlRun, DataSource
-from decklist.models import Deck, Printing, CardInDeck
+from decklist.models import Deck, Printing, CardInDeck, SiteStat
 import httpx
 from crawler.crawlers import CrawlerExit, HEADERS, format_response_error
 from crawler.crawlers import ArchidektCrawler, ARCHIDEKT_API_BASE
@@ -20,9 +20,14 @@ from crawler.crawlers import MoxfieldCrawler, MOXFIELD_API_BASE
 @login_required
 def crawler_index(request):
     runs = CrawlRun.objects.order_by('-crawl_start_time')
-    paginator = Paginator(runs, 25, orphans=3)
+    paginator = Paginator(runs, 8, orphans=3)
     page_number = request.GET.get('page')
     runs_page = paginator.get_page(page_number)
+
+    try:
+        stats = SiteStat.objects.latest()
+    except SiteStat.DoesNotExist:
+        stats = None
 
     pending_results = (
         DeckCrawlResult.objects
@@ -36,6 +41,7 @@ def crawler_index(request):
         {
             'runs': runs_page,
             'pending_results': pending_results,
+            'stats': stats,
         },
     )
 
@@ -420,3 +426,19 @@ def start_deck_poll_hx(request):
         'crawler/_start_deck_poll.html',
         {},
     )
+
+
+@never_cache
+@login_required
+@require_POST
+def update_stats(request):
+    legal_decks = (
+        Deck.objects
+        .filter(pdh_legal=True)
+        .count()
+    )
+
+    s = SiteStat(legal_decks=legal_decks)
+    s.save()
+    
+    return HttpResponseClientRefresh()

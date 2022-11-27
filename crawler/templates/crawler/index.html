@@ -44,5 +44,12 @@
   </div>
   <div id="fetchResult"></div>
   {% endif %}
+
+  <hr>
+  <div>
+    <button hx-post="{% url 'crawler:update-stats' %}" class="btn btn-outline-primary mb-2">Update site stats</button>
+    Last update: {{ stats.timestamp|default:"--" }} //
+    Legal decks: {{ stats.legal_decks|default:"--" }}
+  </div>
 </div>
 {% endblock %}
