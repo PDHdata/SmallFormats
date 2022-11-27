@@ -77,7 +77,9 @@ class Command(BaseCommand):
         for card_json in cards:
             printing_id = card_json['card']['uid']
             if printing_id not in print_id_to_card.keys():
-                self.stderr.write(f"skipping printing {printing_id}; did not resolve to a card")
+                name = card_json['card']['oracleCard']['name']
+                edition = card_json['card']['edition']['editioncode']
+                self.stderr.write(f"could not resolve printing {printing_id}; should be \"{name}\" ({edition})")
                 continue
             card_id = print_id_to_card[printing_id].id
             if card_id in current_cards.keys():

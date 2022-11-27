@@ -257,7 +257,9 @@ def _process_architekt_deck(crawl_result, cards, output):
     for card_json in cards:
         printing_id = card_json['card']['uid']
         if printing_id not in print_id_to_card.keys():
-            output.append(f"skipping printing {printing_id}; did not resolve to a card")
+            name = card_json['card']['oracleCard']['name']
+            edition = card_json['card']['edition']['editioncode']
+            output.append(f"could not resolve printing {printing_id}; should be \"{name}\" ({edition})")
             continue
         card_id = print_id_to_card[printing_id].id
         if card_id in current_cards.keys():
@@ -315,7 +317,9 @@ def _process_moxfield_deck(crawl_result, envelope, output):
         for _, card_json in card_set.items():
             printing_id = card_json['card']['scryfall_id']
             if printing_id not in print_id_to_card.keys():
-                output.append(f"skipping printing {printing_id}; did not resolve to a card")
+                name = card_json['card']['name']
+                edition = card_json['card']['set']
+                output.append(f"could not resolve printing {printing_id}; should be \"{name}\" ({edition})")
                 continue
             card_id = print_id_to_card[printing_id].id
             if card_id in current_cards.keys():
@@ -371,15 +375,18 @@ def fetch_deck_hx(request):
     ) as client:
         response = client.get(updatable_deck.url)
         if 200 <= response.status_code < 300:
+            deck_name = updatable_deck.deck.name
+            new_deck = True if updatable_deck.deck.card_list.count() == 0 else False
+            verb = "Creating" if new_deck else "Updating"
             envelope = response.json()
             if updatable_deck.target == DataSource.ARCHIDEKT:
+                output.append(f"{verb} \"{deck_name}\" (Archidekt)")
                 _process_architekt_deck(updatable_deck, envelope['cards'], output)
-                output.append(f"Updated \"{updatable_deck.deck.name}\" (Archidekt).")
             elif updatable_deck.target == DataSource.MOXFIELD:
+                output.append(f"{verb} \"{deck_name}\" (Moxfield)")
                 _process_moxfield_deck(updatable_deck, envelope, output)
-                output.append(f"Updated \"{updatable_deck.deck.name}\" (Moxfield).")
             else:
-                output.append("Can't update \"{updatable_deck.deck.name}\", unimplemented source")
+                output.append(f"Can't update \"{deck_name}\", unimplemented source")
                 updatable_deck.fetchable = False
                 updatable_deck.save()
         elif response.status_code == 400:
@@ -387,7 +394,6 @@ def fetch_deck_hx(request):
             output.append(f"Got error 400 for \"{updatable_deck.deck.name}\" ({updatable_deck.url}).")
             updatable_deck.fetchable = False
             updatable_deck.save()
-            response_status = HTMX_STOP_POLLING
         else:
             output.append(f"Got {response.status_code} from server.")
             response_status = HTMX_STOP_POLLING
