@@ -99,6 +99,7 @@ TEMPLATES = [
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
                 'smallformats.context_processors.sitename',
+                'smallformats.context_processors.links',
             ],
         },
     },
