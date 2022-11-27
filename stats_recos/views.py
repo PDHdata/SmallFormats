@@ -12,26 +12,6 @@ import operator
 import functools
 
 
-_CARDS_LINKS = (
-    ('Top cards', reverse_lazy('card-top')),
-    ('Cards by color', reverse_lazy('card')),
- )
-_CMDRS_LINKS = (
-    ('Top commanders', reverse_lazy('cmdr-top')),
-    ('Commanders by color', reverse_lazy('cmdr')),
- )
-_LANDS_LINKS = (
-    ('Top lands', reverse_lazy('land-top')),
-    ('Lands by color', reverse_lazy('land')),
- )
-_LINKS = (
-    # menu? title    link or menu items
-    (True,  'Cards', _CARDS_LINKS),
-    (True,  'Commanders', _CMDRS_LINKS),
-    (True,  'Lands', _LANDS_LINKS),
-    (False, 'Partner decks', reverse_lazy('partner-decks')),
-)
-
 def _deck_count_exact_color(w, u, b, r, g):
     return (
         CardInDeck.objects
@@ -107,7 +87,6 @@ def stats_index(request, page="stats/index.html"):
         request,
         page,
         context={
-            'links': _LINKS,
             'image_uri': image_uri,
             'face_card_name': name,
             'stats': stats,
@@ -133,7 +112,6 @@ def partner_decks(request):
         "stats/partner_decks.html",
         context={
             'decks': decks_page,
-            'links': _LINKS,
         },
     )
 
@@ -152,7 +130,6 @@ def commander_index(request):
         "stats/commander_index.html",
         context={
             'colors': colors,
-            'links': _LINKS,
         },
     )
 
@@ -179,7 +156,6 @@ def top_commanders(request):
             'heading': 'top',
             'cards': cards_page,
             'deck_count': deck_count,
-            'links': _LINKS,
         },
     )
 
@@ -222,7 +198,6 @@ def commanders_by_color(request, w=False, u=False, b=False, r=False, g=False):
             'cards': cards_page,
             # TODO: probably fails to account for partners
             'deck_count': _deck_count_exact_color(w, u, b, r, g),
-            'links': _LINKS,
         },
     )
 
@@ -241,7 +216,6 @@ def land_index(request):
         "stats/land_index.html",
         context={
             'colors': colors,
-            'links': _LINKS,
         },
     )
 
@@ -269,7 +243,6 @@ def top_lands(request):
             'heading': 'top',
             'cards': cards_page,
             'deck_count': deck_count,
-            'links': _LINKS,
         },
     )
 
@@ -304,7 +277,6 @@ def lands_by_color(request, w=False, u=False, b=False, r=False, g=False):
             'heading': filter_to_name({'W':w,'U':u,'B':b,'R':r,'G':g}),
             'cards': cards_page,
             'deck_count': _deck_count_at_least_color(w, u, b, r, g),
-            'links': _LINKS,
         },
     )
 
@@ -323,7 +295,6 @@ def card_index(request):
         "stats/card_index.html",
         context={
             'colors': colors,
-            'links': _LINKS,
         },
     )
 
@@ -350,7 +321,6 @@ def top_cards(request):
             'heading': 'top',
             'cards': cards_page,
             'deck_count': deck_count,
-            'links': _LINKS,
         },
     )
 
@@ -384,7 +354,6 @@ def cards_by_color(request, w=False, u=False, b=False, r=False, g=False):
             'heading': filter_to_name({'W':w,'U':u,'B':b,'R':r,'G':g}),
             'cards': cards_page,
             'deck_count': _deck_count_at_least_color(w, u, b, r, g),
-            'links': _LINKS,
         },
     )
 
@@ -449,7 +418,6 @@ def single_card(request, card_id):
             'commands': commands.count(),
             'could_be_in': could_be_in,
             'commanders': cmdrs_page,
-            'links': _LINKS,
         },
     )
 
@@ -491,7 +459,6 @@ def single_cmdr(request, card_id):
         'commands': commands.count(),
         'top_decks': commands[:4],
         'could_be_in': could_be_in,
-        'links': _LINKS,
     })
 
     return render(
@@ -523,7 +490,6 @@ def single_cmdr_decklist(request, card_id):
         context={
             'card': card,
             'decks': cmdrs_page,
-            'links': _LINKS,
         },
     )
 
@@ -640,3 +606,37 @@ def set_editorial_image(request, card_id):
     card.save()
     
     return HttpResponseClientRefresh()
+
+
+def search(request):
+    query = request.GET.get('q', '')
+
+    results = (
+        Card.objects
+        .filter(name__icontains=query)
+        .annotate(
+            in_decks=Count('deck_list'),
+            ninetynine_decks=Count(
+                'deck_list',
+                filter=Q(deck_list__is_pdh_commander=False),
+            ),
+            helms_decks=Count(
+                'deck_list',
+                filter=Q(deck_list__is_pdh_commander=True),
+            ),
+        )
+        .filter(in_decks__gt=0)
+        .order_by('-in_decks', 'name')
+    )
+    paginator = Paginator(results, 25, orphans=3)
+    page_number = request.GET.get('page')
+    results_page = paginator.get_page(page_number)
+
+    return render(
+        request,
+        'search/results.html',
+        {
+            'results': results_page,
+            'query': query,
+        }
+    )
