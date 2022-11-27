@@ -23,7 +23,7 @@
       </div>{#/navbar-nav#}
       <form class="d-flex" role="search" method="get" action="{% url 'search' %}">
         <div class="input-group mx-sm-2">
-          <input class="form-control" name="q" type="search" placeholder="Search">
+          <input class="form-control" name="q" type="search" placeholder="Search"{% if query %} value="{{ query }}"{% endif %}>
           <button type="submit" class="btn btn-secondary">🔎</button>
         </div>
       </form>

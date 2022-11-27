@@ -27,6 +27,11 @@ _LINKS = (
 )
 
 def links(request):
-    return {
+    context = {
         'links': _LINKS,
     }
+
+    if 'q' in request.GET:
+        context['query'] = request.GET.get('q', '')
+
+    return context
