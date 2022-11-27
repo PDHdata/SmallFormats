@@ -21,6 +21,12 @@
           {% endif %}
         {% endfor %}
       </div>{#/navbar-nav#}
+      <form class="d-flex" role="search" method="get" action="{% url 'search' %}">
+        <div class="input-group mx-sm-2">
+          <input class="form-control" name="q" type="search" placeholder="Search">
+          <button type="submit" class="btn btn-secondary">🔎</button>
+        </div>
+      </form>
     </div>{#/topNav#}
     {% endif %}
   </div>

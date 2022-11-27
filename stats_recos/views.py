@@ -640,3 +640,25 @@ def set_editorial_image(request, card_id):
     card.save()
     
     return HttpResponseClientRefresh()
+
+
+def search(request):
+    query = request.GET.get('q', '')
+
+    results = (
+        Card.objects
+        .filter(name__icontains=query)
+        .order_by('name')
+    )
+    paginator = Paginator(results, 25, orphans=3)
+    page_number = request.GET.get('page')
+    results_page = paginator.get_page(page_number)
+
+    return render(
+        request,
+        'search/results.html',
+        {
+            'results': results_page,
+            'query': query,
+        }
+    )
