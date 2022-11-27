@@ -648,7 +648,19 @@ def search(request):
     results = (
         Card.objects
         .filter(name__icontains=query)
-        .order_by('name')
+        .annotate(
+            in_decks=Count('deck_list'),
+            ninetynine_decks=Count(
+                'deck_list',
+                filter=Q(deck_list__is_pdh_commander=False),
+            ),
+            helms_decks=Count(
+                'deck_list',
+                filter=Q(deck_list__is_pdh_commander=True),
+            ),
+        )
+        .filter(in_decks__gt=0)
+        .order_by('-in_decks', 'name')
     )
     paginator = Paginator(results, 25, orphans=3)
     page_number = request.GET.get('page')
