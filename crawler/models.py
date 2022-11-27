@@ -32,10 +32,6 @@ class DeckCrawlResult(models.Model):
         Deck,
         on_delete=models.CASCADE,
     )
-    target = models.IntegerField(
-        choices=DataSource.choices,
-        default=DataSource.UNKNOWN_OTHER,
-    )
     # Last update time according to data source
     updated_time = models.DateTimeField()
     fetchable = models.BooleanField(default=True)

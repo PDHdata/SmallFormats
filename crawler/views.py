@@ -379,10 +379,10 @@ def fetch_deck_hx(request):
             new_deck = True if updatable_deck.deck.card_list.count() == 0 else False
             verb = "Creating" if new_deck else "Updating"
             envelope = response.json()
-            if updatable_deck.target == DataSource.ARCHIDEKT:
+            if updatable_deck.deck.source == DataSource.ARCHIDEKT:
                 output.append(f"{verb} \"{deck_name}\" (Archidekt)")
                 _process_architekt_deck(updatable_deck, envelope['cards'], output)
-            elif updatable_deck.target == DataSource.MOXFIELD:
+            elif updatable_deck.deck.source == DataSource.MOXFIELD:
                 output.append(f"{verb} \"{deck_name}\" (Moxfield)")
                 _process_moxfield_deck(updatable_deck, envelope, output)
             else:

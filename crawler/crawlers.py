@@ -111,7 +111,6 @@ class _BaseCrawler:
             crawl_result = DeckCrawlResult(
                 url=self.DECK_FETCH_LINK.format(this_id),
                 deck=deck,
-                target=self.DATASOURCE,
                 updated_time=deck_updated_at,
                 got_cards=False,
             )
