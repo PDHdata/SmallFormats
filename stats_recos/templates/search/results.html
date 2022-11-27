@@ -1,25 +1,32 @@
 {% extends 'base.html' %}
-{% block title %}Search{% endblock %}
+{% block title %}Search{% if query %}: {{ query }}{% endif %}{% endblock %}
 {% block body %}
-<h1>Search: {{ query }}</h1>
-<div>
-  {% for result in results %}
-  <a href="{% url 'card-single' result.id %}">
-    {{ result.name }}
-    {% if result.helms_decks %}<abbr title="commands {{ result.helms_decks }} deck{{ result.helms_decks|pluralize }}"><span class="badge bg-success">{{ result.helms_decks }}</span></abbr>{% endif %}
-    {% if result.ninetynine_decks %}<abbr title="part of the 99 in {{ result.ninetynine_decks }} deck{{ result.ninetynine_decks|pluralize }}"><span class="badge bg-secondary">{{ result.ninetynine_decks }}</span></abbr>{% endif %}
-  </a><br>
-  {% endfor %}
+<h1>Search results for <q>{{ query }}</q></h1>
+<div class="container">
+  <table class="table">
+    <tr>
+      <th>Card</th><th>Commands</th><th>Included</th>
+    </tr>
+    {% for result in results %}
+    <tr>
+      <td><a href="{% if result.helms_decks %}{% url 'cmdr-single' result.id %}{% else %}{% url 'card-single' result.id %}{% endif %}">{{ result.name }}</a></td>
+      <td>{% if result.helms_decks %}{{ result.helms_decks }}{% endif %}</td>
+      <td>{% if result.ninetynine_decks %}{{ result.ninetynine_decks }}{% endif %}</td>
+    </tr>
+    {% endfor %}
+    <tr>
+      <td colspan="3">
+        {% if results.has_previous %}
+        <a href="?page=1">first</a>
+        <a href="?page={{ results.previous_page_number }}">previous</a>
+        {% endif %}
+        (page {{ results.number }} of {{ results.paginator.num_pages }})
+        {% if results.has_next %}
+        <a href="?page={{ results.next_page_number }}">next</a>
+        <a href="?page={{ results.paginator.num_pages }}">last</a>
+        {% endif %}
+      </td>
+    </tr>
+  </table>
 </div>
-<p>
-  {% if results.has_previous %}
-  <a href="?page=1">first</a>
-  <a href="?page={{ results.previous_page_number }}">previous</a>
-  {% endif %}
-  (page {{ results.number }} of {{ results.paginator.num_pages }})
-  {% if results.has_next %}
-  <a href="?page={{ results.next_page_number }}">next</a>
-  <a href="?page={{ results.paginator.num_pages }}">last</a>
-  {% endif %}
-</p>
 {% endblock %}

@@ -672,5 +672,6 @@ def search(request):
         {
             'results': results_page,
             'query': query,
+            'links': _LINKS,
         }
     )
