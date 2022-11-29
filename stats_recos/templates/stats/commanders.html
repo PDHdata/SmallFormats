@@ -16,7 +16,7 @@
     {% for card in cards %}
     <tr>
       <td>{{ cards.start_index|plus:forloop.counter0 }}</td>
-      <td><a href="{% url 'cmdr-single' card.id %}">{{ card.name }}</a></td>
+      <td><a href="{% url 'cmdr-single' card.id %}">{{ card.name }}{% if "Background" in card.type_line %} <span class="badge bg-primary">Background</span>{% endif %}{% if "Adventure" in card.type_line %} <span class="badge bg-secondary">Adventure</span>{% endif %}</a></td>
       <td>{{ card.color_identity|mana_symbols|safe }}</td>
       <td>{{ card.num_decks }}</td>
       <td>{{ card.num_decks|percent_of:deck_count }}</td>
