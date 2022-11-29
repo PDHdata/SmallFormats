@@ -13,7 +13,13 @@
       <td>{% if result.helms_decks %}{{ result.helms_decks }}{% endif %}</td>
       <td>{% if result.ninetynine_decks %}{{ result.ninetynine_decks }}{% endif %}</td>
     </tr>
+    {% empty %}
+    <tr><td colspan="3" class="text-center">
+      No results.<br><br>
+      <i>An empty canvas holds infinite possibilities.</i> —<a href="https://scryfall.com/search?q=ft%253A%22an+empty+canvas%22+!Glimmervoid">Glimmervoid</a>
+    </td></tr>
     {% endfor %}
+    {% if results %}
     <tr>
       <td colspan="3">
         {% if results.has_previous %}
@@ -27,6 +33,7 @@
         {% endif %}
       </td>
     </tr>
+    {% endif %}
   </table>
 </div>
 {% endblock %}
