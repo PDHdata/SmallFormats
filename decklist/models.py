@@ -132,6 +132,15 @@ class Deck(models.Model):
         ) > 0:
             return False, "contains banned card"
 
+        # deck has a commander
+        if self.commanders().count() == 0:
+            return False, "no commander"
+            
+        # all commanders printed at uncommon
+        for entry in self.commanders():
+            if not entry.card.ever_uncommon:
+                return False, "commander not printed at uncommon"
+
         # all cards in correct identity
         q_filters = []
         identity = self.identity()
@@ -159,11 +168,6 @@ class Deck(models.Model):
             )
             if illegal_card_count > 0:
                 return False, f"{illegal_card_count} cards out of color identity"
-
-        # all commanders printed at uncommon
-        for entry in self.commanders():
-            if not entry.card.ever_uncommon:
-                return False, "commander not printed at uncommon"
 
         # all other cards printed at common
         noncommon_count = (
