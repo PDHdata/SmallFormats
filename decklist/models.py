@@ -114,7 +114,23 @@ class Deck(models.Model):
         if self.card_list.count() == 0:
             return False, "no cards in deck"
         
-        # TODO: check the ban list
+        # check the ban list
+        if (
+            self.card_list
+            .filter(
+                # PDH ban list
+                Q(card__name='Mystic Remora')
+                | Q(card__name='Rhystic Study')
+                # not strictly banned, but not allowed as commander
+                # and never printed at common
+                | Q(card__name='Dryad Arbor')
+                # WotC inclusiveness bans ever printed at C or U
+                | Q(card__name='Pradesh Gypsies')
+                | Q(card__name='Stone-Throwing Devils')
+            )
+            .count()
+        ) > 0:
+            return False, "contains banned card"
 
         # all cards in correct identity
         q_filters = []
