@@ -160,6 +160,32 @@ def top_commanders(request):
     )
 
 
+def top_commanders_background(request):
+    cmdr_cards = (
+        Card.objects
+        .filter(
+            deck_list__deck__pdh_legal=True,
+            deck_list__is_pdh_commander=True,
+            type_line__contains='Background',
+        )
+        .annotate(num_decks=Count('deck_list'))
+        .order_by('-num_decks')
+    )
+    deck_count = Deck.objects.filter(pdh_legal=True).count()
+    paginator = Paginator(cmdr_cards, 25, orphans=3)
+    page_number = request.GET.get('page')
+    cards_page = paginator.get_page(page_number)
+
+    return render(
+        request,
+        "stats/commanders_backgrounds.html",
+        context={
+            'cards': cards_page,
+            'deck_count': deck_count,
+        },
+    )
+
+
 def commanders_by_color(request, w=False, u=False, b=False, r=False, g=False):
     cmdrs = (
         Card.objects
@@ -172,10 +198,7 @@ def commanders_by_color(request, w=False, u=False, b=False, r=False, g=False):
             identity_g=g,
         )
         .filter(
-            # TODO: banlist? silver cards which say "Summon"?
-            # TODO: backgrounds
-            type_line__contains='Creature',
-            printings__rarity=Printing.Rarity.UNCOMMON,
+            deck_list__is_pdh_commander=True,
         )
         .annotate(num_decks=Count(
             'deck_list',
