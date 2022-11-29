@@ -172,10 +172,7 @@ def commanders_by_color(request, w=False, u=False, b=False, r=False, g=False):
             identity_g=g,
         )
         .filter(
-            # TODO: banlist? silver cards which say "Summon"?
-            # TODO: backgrounds
-            type_line__contains='Creature',
-            printings__rarity=Printing.Rarity.UNCOMMON,
+            deck_list__is_pdh_commander=True,
         )
         .annotate(num_decks=Count(
             'deck_list',
