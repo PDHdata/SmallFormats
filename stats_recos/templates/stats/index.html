@@ -8,7 +8,7 @@
       <p class="lead">
         {{ SITENAME }} provides a place to discover new commanders and see what people are running in Pauper Commander (PDH).
         {% if stats %}
-        Covering {{ stats.legal_decks }} decks; last updated <abbr data-tip="{{ stats.timestamp|date:"Y-m-d G:i:s" }} (UTC)">{{ stats.timestamp|naturaltime }}</abbr>.
+        Covering {{ stats.legal_decks|intcomma }} decks; last updated <abbr data-tip="{{ stats.timestamp|date:"Y-m-d G:i:s" }} (UTC)">{{ stats.timestamp|naturaltime }}</abbr>.
         {% else %}
         EDH has plenty of tools, why shouldn't PDH have one, too?
         {% endif %}

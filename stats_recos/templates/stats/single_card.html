@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load humanize %}
 {% load simple_math %}
 {% load mana %}
 {% block title %}{{ card.name }} (card){% endblock %}
@@ -22,7 +23,7 @@
   {% include 'stats/_card_image_gallery.html' %}
   <p>{{ card.type_line }} {{ card.color_identity|mana_symbols|safe }}</p>
   <p>{% if commands > 0 %}<a href="{% url 'cmdr-single' card.id %}">View as commander</a> | {% endif %}<a href="{{ card.scryfall_uri }}">View on Scryfall</a></p>
-  <p>Appears in {{ is_in }} of {{ could_be_in }} decks ({{ is_in|percent_of:could_be_in }}).</p>
+  <p>Appears in {{ is_in|intcomma }} of {{ could_be_in|intcomma }} decks ({{ is_in|percent_of:could_be_in }}).</p>
   {% if commanders %}
   <p>Appears with these commanders:</p>
   <ul class="list-group mb-3 ms-sm-3 me-sm-3">
