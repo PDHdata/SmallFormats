@@ -638,14 +638,19 @@ def search(request):
         Card.objects
         .filter(name__icontains=query)
         .annotate(
-            in_decks=Count('deck_list'),
+            in_decks=Count(
+                'deck_list',
+                filter=Q(deck_list__deck__pdh_legal=True),
+            ),
             ninetynine_decks=Count(
                 'deck_list',
-                filter=Q(deck_list__is_pdh_commander=False),
+                filter=Q(deck_list__is_pdh_commander=False)
+                     & Q(deck_list__deck__pdh_legal=True),
             ),
             helms_decks=Count(
                 'deck_list',
-                filter=Q(deck_list__is_pdh_commander=True),
+                filter=Q(deck_list__is_pdh_commander=True)
+                     & Q(deck_list__deck__pdh_legal=True),
             ),
         )
         .filter(in_decks__gt=0)
