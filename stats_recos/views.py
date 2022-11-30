@@ -1,15 +1,18 @@
 from django.shortcuts import render, get_object_or_404
 from django.http import HttpResponseNotAllowed
-from django.urls import reverse_lazy
 from django.db.models import Count, Q
 from django.core.paginator import Paginator
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_POST
+from django.utils import timezone
 from decklist.models import Card, Deck, Printing, CardInDeck, SiteStat
 from .wubrg_utils import COLORS, filter_to_name, name_to_symbol
 from django_htmx.http import trigger_client_event, HttpResponseClientRefresh
 import operator
 import functools
+
+
+FRONT_PAGE_TOP_COMMANDERS_TO_ROTATE = 25
 
 
 def _deck_count_exact_color(w, u, b, r, g):
@@ -57,27 +60,32 @@ def _deck_count_at_least_color(w, u, b, r, g):
     )['count']
 
 
-@functools.cache
-def _get_face_card():
-    top_cmdr = (
-        Card.objects
-        .filter(
-            deck_list__deck__pdh_legal=True,
-            deck_list__is_pdh_commander=True,
-        )
-        .annotate(num_decks=Count('deck_list'))
-        .order_by('-num_decks')
-        .first()
-    )
+@functools.lru_cache(maxsize=2)
+def _get_face_card(index):
+    try:
+        top_cmdr = (
+            Card.objects
+            .filter(
+                deck_list__deck__pdh_legal=True,
+                deck_list__is_pdh_commander=True,
+            )
+            .annotate(num_decks=Count('deck_list'))
+            .order_by('-num_decks')
+        )[index]
+    except IndexError:
+        top_cmdr = None
+
     if top_cmdr and top_cmdr.default_printing:
         return top_cmdr.name, top_cmdr.default_printing.image_uri
 
-    # this only happens if we have no cards/printings in the database
+    # this happens if we have no cards/printings in the database, or
+    # if we're asked for an index that's too large
     return "Command Tower", "https://cards.scryfall.io/normal/front/b/f/bf5dafb0-4fb1-470d-85ce-88f3ae32340b.jpg?1568580226"
 
 
 def stats_index(request, page="stats/index.html"):
-    name, image_uri = _get_face_card()
+    date_ord = timezone.now().toordinal()
+    name, image_uri = _get_face_card(date_ord % FRONT_PAGE_TOP_COMMANDERS_TO_ROTATE)
     try:
         stats = SiteStat.objects.latest()
     except SiteStat.DoesNotExist:
