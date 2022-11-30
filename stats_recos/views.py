@@ -1,5 +1,6 @@
 from django.shortcuts import render, get_object_or_404
 from django.http import HttpResponseNotAllowed
+from django.urls import reverse
 from django.db.models import Count, Q
 from django.core.paginator import Paginator
 from django.contrib.auth.decorators import login_required
@@ -76,16 +77,25 @@ def _get_face_card(index):
         top_cmdr = None
 
     if top_cmdr and top_cmdr.default_printing:
-        return top_cmdr.name, top_cmdr.default_printing.image_uri
+        return (
+            top_cmdr.name,
+            top_cmdr.default_printing.image_uri,
+            reverse('cmdr-single', args=(top_cmdr.id,)),
+        )
 
     # this happens if we have no cards/printings in the database, or
-    # if we're asked for an index that's too large
-    return "Command Tower", "https://cards.scryfall.io/normal/front/b/f/bf5dafb0-4fb1-470d-85ce-88f3ae32340b.jpg?1568580226"
+    # if we're asked for an index that's too large, or if we don't
+    # have a printing for a card for some reason
+    return (
+        "Command Tower",
+        "https://cards.scryfall.io/normal/front/b/f/bf5dafb0-4fb1-470d-85ce-88f3ae32340b.jpg?1568580226",
+        "https://scryfall.com/search?q=%21%22Command+Tower%22",
+    )
 
 
 def stats_index(request, page="stats/index.html"):
     date_ord = timezone.now().toordinal()
-    name, image_uri = _get_face_card(date_ord % FRONT_PAGE_TOP_COMMANDERS_TO_ROTATE)
+    name, image_uri, link = _get_face_card(date_ord % FRONT_PAGE_TOP_COMMANDERS_TO_ROTATE)
     try:
         stats = SiteStat.objects.latest()
     except SiteStat.DoesNotExist:
@@ -97,6 +107,7 @@ def stats_index(request, page="stats/index.html"):
         context={
             'image_uri': image_uri,
             'face_card_name': name,
+            'face_card_link': link,
             'stats': stats,
         },
     )
