@@ -7,6 +7,7 @@ from django.utils.dateparse import parse_date
 import httpx
 import json_stream.httpx
 from decklist.models import Card, Printing
+from crawler.models import LogEntry
 from crawler.crawlers import HEADERS, SCRYFALL_API_BASE
 
 
@@ -17,13 +18,27 @@ class CantParseCardError(Exception): ...
 class Command(BaseCommand):
     help = 'Ask Scryfall for card data'
 
+    def _err(self, text):
+        last_log = getattr(self, 'last_log', None)
+        log = LogEntry(text=f"!!! {text}", follows=last_log)
+        log.save()
+        self.last_log = log
+        self.stderr.write(log.text)
+    
+    def _log(self, text):
+        last_log = getattr(self, 'last_log', None)
+        log = LogEntry(text=text, follows=last_log)
+        log.save()
+        self.last_log = log
+        self.stdout.write(log.text)
+
     def handle(self, *args, **options):
-        self.stdout.write(f"begin: {Card.objects.all().count()} cards, {Printing.objects.all().count()} printings")
+        self._log(f"Fetch cards begin: {Card.objects.all().count()} cards, {Printing.objects.all().count()} printings")
         with httpx.Client(base_url=SCRYFALL_API_BASE, headers=HEADERS) as client:
             result = client.get("bulk-data/default-cards")
             result.raise_for_status()
             download_target = result.json()["download_uri"]
-            self.stdout.write(f"Fetching {download_target}")
+            self._log(f"Fetching {download_target}")
 
             card_count = PROGRESS_EVERY_N_CARDS
             with client.stream('GET', download_target) as f:
@@ -42,7 +57,7 @@ class Command(BaseCommand):
                         if c and p: break
                     
                     if not c or not p:
-                        self.stderr.write(f"failed to parse {json_card['name']}")
+                        self._err(f"failed to parse {json_card['name']}")
 
                     elif self._want_card(json_card):
                         try:
@@ -52,11 +67,11 @@ class Command(BaseCommand):
                             c.save()
                             p.save()
                         except DataError as e:
-                            self.stderr.write(f"Card {c.name} or printing {p} threw {e}")
+                            self._log(f"Card {c.name} or printing {p} threw {e}")
 
         
         self.stdout.write('')
-        self.stdout.write(f"end: {Card.objects.all().count()} cards, {Printing.objects.all().count()} printings")
+        self._log(f"end: {Card.objects.all().count()} cards, {Printing.objects.all().count()} printings")
 
     def _want_card(self, json_card):
         # we want to exclude some non-playable cards but aren't entirely
