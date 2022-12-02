@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+{% block title %}Crawler admin - logs{% endblock %}
+{% block body %}
+<h1>Crawler admin - logs</h1>
+<div class="container">
+  <table class="table">
+    <tr><th>Timestamp</th><th>Line</th></tr>
+    {% for log in logs %}
+    <tr>
+      <td>{{ log.created }}</a></td>
+      <td>{{ log.text }}</td>
+    </tr>
+    {% if forloop.last %}
+    {% if log.logentry_set.count > 0 %}
+    <tr>
+      <td colspan="2"><a href="{% url 'crawler:log-from' log.next.id %}">More...</a></td>
+    </tr>
+    {% endif %}
+    {% endif %}
+    {% empty %}
+    <tr><td colspan="2">No logs found.</td></tr>
+    {% endfor %}
+  </table>
+</div>
+{% endblock %}

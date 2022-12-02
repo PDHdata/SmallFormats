@@ -57,3 +57,6 @@ class LogEntry(models.Model):
 
     def __str__(self):
         return self.text
+
+    def next(self):
+        return self.logentry_set.first()

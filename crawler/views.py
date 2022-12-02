@@ -6,6 +6,7 @@ from django.views.decorators.http import require_POST
 from django.utils import timezone
 from django.urls import reverse
 from django.db import transaction
+from django.db.models import Q
 from django.views.decorators.cache import never_cache
 from django_htmx.http import HttpResponseClientRefresh, HttpResponseClientRedirect, HTMX_STOP_POLLING
 from crawler.models import DeckCrawlResult, CrawlRun, LogEntry
@@ -459,5 +460,29 @@ def log_index(request):
         'crawler/log_index.html',
         {
             'logs': logs_page,
+        },
+    )
+
+
+@login_required
+def log_from(request, start_log):
+    # brute force is best force
+    logs = (
+        LogEntry.objects
+        .filter(
+            Q(id=start_log) |
+            Q(follows__id=start_log) |
+            Q(follows__follows__id=start_log) |
+            Q(follows__follows__follows__id=start_log) |
+            Q(follows__follows__follows__follows__id=start_log)
+        )
+        .order_by('created')
+    )
+
+    return render(
+        request,
+        'crawler/log.html',
+        {
+            'logs': logs,
         },
     )
