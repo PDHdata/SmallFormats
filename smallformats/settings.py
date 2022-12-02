@@ -54,8 +54,6 @@ INSTALLED_APPS = [
     'django.contrib.humanize',
     'debug_toolbar',
     'django_htmx',
-    'rest_framework',
-    'django_filters',
     'decklist.apps.DecklistConfig',
     'crawler.apps.CrawlerConfig',
     'stats_recos.apps.StatsRecosConfig',
@@ -132,22 +130,6 @@ AUTH_PASSWORD_VALIDATORS = [
 AUTH_USER_MODEL = 'decklist.User'
 
 LOGIN_URL = reverse_lazy('admin:login')
-
-
-# Django REST Framework
-REST_FRAMEWORK = {
-    # Use Django's standard `django.contrib.auth` permissions,
-    # or allow read-only access for unauthenticated users.
-    'DEFAULT_PERMISSION_CLASSES': [
-        'rest_framework.permissions.DjangoModelPermissionsOrAnonReadOnly'
-    ],
-    'DEFAULT_FILTER_BACKENDS': [
-        'django_filters.rest_framework.DjangoFilterBackend',
-    ],
-    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
-    'PAGE_SIZE': 10,
-    'DEFAULT_METADATA_CLASS': 'rest_framework.metadata.SimpleMetadata',
-}
 
 
 # Internationalization
