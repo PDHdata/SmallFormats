@@ -24,7 +24,6 @@ _LINKS = (
     (True,  'Cards', _CARDS_LINKS),
     (True,  'Commanders', _CMDRS_LINKS),
     (True,  'Lands', _LANDS_LINKS),
-    (False, 'Partner decks', reverse_lazy('partner-decks')),
 )
 
 def links(request):

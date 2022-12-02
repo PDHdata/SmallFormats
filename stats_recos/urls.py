@@ -29,11 +29,11 @@ urlpatterns = (
     path('cmdr/bg/', views.top_commanders_background, name="cmdr-background"),
     path('cmdr/<uuid:card_id>', views.single_cmdr, name="cmdr-single"),
     path('cmdr/<uuid:card_id>/decks', views.single_cmdr_decklist, name="cmdr-decklist"),
+    path('cmdr/<uuid:card_id>/partners', views.single_cmdr_partners, name="cmdr-partners"),
     path('card/top/', views.top_cards, name="card-top"),
     path('card/<uuid:card_id>', views.single_card, name="card-single"),
     path('card/<uuid:card_id>/setimage', views.set_editorial_image, name="card-setimage"),
     path('land/top/', views.top_lands, name="land-top"),
-    path('partner_decks/', views.partner_decks, name="partner-decks"),
     path('hx/cmdr/<uuid:card_id>/<card_type>/<int:page_number>', views.hx_common_cards, name="hx-common-cards"),
     path('search/', views.search, name="search"),
 ])

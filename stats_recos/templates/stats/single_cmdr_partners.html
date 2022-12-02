@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+{% load simple_math %}
+{% block title %}Partners of {{ card.name }}{% endblock %}
+{% block body %}
+<h1>{{ card.name }}</h1>
+<ul class="nav nav-tabs mb-2">
+  <li class="nav-item">
+    <a class="nav-link" href="{% url 'cmdr-single' card.id %}">Commander</a>
+  </li>
+  <li class="nav-item">
+    <a class="nav-link active" href="{% url 'cmdr-partners' card.id %}">Partners</a>
+  </li>
+  <li class="nav-item">
+    <a class="nav-link" href="{% url 'cmdr-decklist' card.id %}">Decks</a>
+  </li>
+  <li class="nav-item">
+    <a class="nav-link" href="{% url 'card-single' card.id %}">Card</a>
+  </li>
+</ul>
+<div class="container">
+  <table class="table mb-3">
+    <tr><th>Partner</th><th>Shared decks</th><tr>
+    {% for partner in partners %}
+    <tr>
+      <td><a href="{% url 'cmdr-single' partner.id %}">{{ partner.name }}{% if "Background" in partner.type_line %} <span class="badge bg-primary">Background</span>{% endif %}{% if "Adventure" in partner.type_line %} <span class="badge bg-secondary">Adventure</span>{% endif %}</a></td>
+      <td>{{ partner.paired_count }}</td>
+    </tr>
+    {% empty %}
+    <tr><td colspan="3">No partner decks helmed by {{ card.name }}.</td></tr>
+    {% endfor %}
+  </table>
+  <p>
+    {% if partners.has_previous %}
+    <a href="?page=1">first</a>
+    <a href="?page={{ partners.previous_page_number }}">previous</a>
+    {% endif %}
+    (page {{ partners.number }} of {{ partners.paginator.num_pages }})
+    {% if partners.has_next %}
+    <a href="?page={{ partners.next_page_number }}">next</a>
+    <a href="?page={{ partners.paginator.num_pages }}">last</a>
+    {% endif %}
+  </p>
+</div>
+{% endblock %}

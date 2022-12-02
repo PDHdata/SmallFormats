@@ -13,6 +13,9 @@
     <a class="nav-link active" href="{% url 'cmdr-single' card.id %}">Commander</a>
   </li>
   <li class="nav-item">
+    <a class="nav-link" href="{% url 'cmdr-partners' card.id %}">Partners</a>
+  </li>
+  <li class="nav-item">
     <a class="nav-link" href="{% url 'cmdr-decklist' card.id %}">Decks</a>
   </li>
   <li class="nav-item">
@@ -26,7 +29,10 @@
   <p>Commands {{ commands|intcomma }} of {{ could_be_in|intcomma }} decks ({{ commands|percent_of:could_be_in }}).</p>
   <ul class="list-group mb-3 ms-sm-3 me-sm-3">
     {% for deck in top_decks %}
-    <li class="list-group-item">{% if deck.source_link %}<a href="{{ deck.source_link }}">{{ deck.name }}</a>{% else %}{{ deck.name }}{% endif %} by {{ deck.creator_display_name }}</li>
+    <li class="list-group-item">
+      {% if deck.source_link %}<a href="{{ deck.source_link }}">{{ deck.name }}</a>{% else %}{{ deck.name }}{% endif %} by {{ deck.creator_display_name }}
+      {% for cmdr in deck.commanders %}{% if cmdr.card != card %}<small>(with <a href="{% url 'cmdr-single' cmdr.card.id %}">{{ cmdr.card.name }}</a>)</small>{% endif %}{% endfor %}
+    </li>
     {% endfor %}
     {% if top_decks|length < commands %}
       <li class="list-group-item"><a href="{% url 'cmdr-decklist' card.id %}">More decks commanded by {{ card.name }}</a></li>

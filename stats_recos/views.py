@@ -113,28 +113,6 @@ def stats_index(request, page="stats/index.html"):
     )
 
 
-def partner_decks(request):
-    partner_decks = (
-        Deck.objects
-        .filter(pdh_legal=True)
-        .annotate(num_cmdrs=Count(
-            'card_list', filter=Q(card_list__is_pdh_commander=True)
-        ))
-        .filter(num_cmdrs__gt=1)
-    )
-    paginator = Paginator(partner_decks, 25, orphans=3)
-    page_number = request.GET.get('page')
-    decks_page = paginator.get_page(page_number)
-
-    return render(
-        request,
-        "stats/partner_decks.html",
-        context={
-            'decks': decks_page,
-        },
-    )
-
-
 def commander_index(request):
     colors = [
         [(c[0], name_to_symbol(c[0]), f'cmdr-{c[0]}') for c in COLORS if c[1] == 0],
@@ -451,6 +429,8 @@ def single_card(request, card_id):
     page_number = request.GET.get('page')
     cmdrs_page = paginator.get_page(page_number)
 
+    partners = _partners_with_query(card)
+
     return render(
         request,
         "stats/single_card.html",
@@ -458,9 +438,46 @@ def single_card(request, card_id):
             'card': card,
             'is_in': is_in.count(),
             'commands': commands.count(),
+            'has_partners': partners.count() > 0,
             'could_be_in': could_be_in,
             'commanders': cmdrs_page,
         },
+    )
+
+
+def _partners_with_query(card):
+    multiple_commanders = (
+        Deck.objects
+        .filter(pdh_legal=True)
+        .annotate(cmdr_count=Count(
+            'card_list', 
+            filter=Q(card_list__is_pdh_commander=True),
+        ))
+        .filter(cmdr_count__gt=1)
+        .values_list('id')
+    )
+
+    helmed_decks = (
+        Deck.objects
+        .filter(
+            pdh_legal=True,
+            card_list__card=card,
+            card_list__is_pdh_commander=True,
+        )
+        .values_list('id')
+    )
+
+    partnered_decks = multiple_commanders.intersection(helmed_decks)
+
+    return (
+        Card.objects
+        .filter(
+            deck_list__deck__in=partnered_decks,
+            deck_list__is_pdh_commander=True
+        )
+        .exclude(deck_list__card=card)
+        .annotate(paired_count=Count('deck_list__id'))
+        .order_by('-paired_count')
     )
 
 
@@ -485,6 +502,8 @@ def single_cmdr(request, card_id):
         .order_by('-updated_time')
     )
 
+    partners = _partners_with_query(card)
+
     context = {}
     # card type codes, see `hx_common_cards`
     for letter in 'caeisplg':
@@ -500,6 +519,7 @@ def single_cmdr(request, card_id):
         'card': card,
         'commands': commands.count(),
         'top_decks': commands[:4],
+        'has_partners': partners.count() > 0,
         'could_be_in': could_be_in,
     })
 
@@ -507,6 +527,26 @@ def single_cmdr(request, card_id):
         request,
         "stats/single_cmdr.html",
         context=context,
+    )
+
+
+def single_cmdr_partners(request, card_id):
+    card = get_object_or_404(Card, pk=card_id)
+
+    partners = _partners_with_query(card)
+    paginator = Paginator(partners, 20, orphans=3)
+    page_number = request.GET.get('page')
+    partners_page = paginator.get_page(page_number)
+
+    partners = _partners_with_query(card)
+    
+    return render(
+        request,
+        "stats/single_cmdr_partners.html",
+        context={
+            'card': card,
+            'partners': partners_page,
+        },
     )
 
 
@@ -525,6 +565,8 @@ def single_cmdr_decklist(request, card_id):
     paginator = Paginator(commands, 20, orphans=3)
     page_number = request.GET.get('page')
     cmdrs_page = paginator.get_page(page_number)
+
+    partners = _partners_with_query(card)
     
     return render(
         request,
@@ -532,6 +574,7 @@ def single_cmdr_decklist(request, card_id):
         context={
             'card': card,
             'decks': cmdrs_page,
+            'has_partners': partners.count() > 0,
         },
     )
 
