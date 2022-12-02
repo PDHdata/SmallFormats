@@ -5,6 +5,7 @@ from django.urls import path
 app_name = 'crawler'
 urlpatterns = [
     path('', views.crawler_index, name="index"),
+    path('logs/', views.log_index, name="log_index"),
     path('fetchdeck/', views.fetch_deck_hx, name="fetch-deck"),
     path('fetchdeck/poll', views.start_deck_poll_hx, name="fetch-deck-poll"),
     path('run/<int:run_id>/', views.run_detail, name="run-detail"),

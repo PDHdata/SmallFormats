@@ -8,8 +8,8 @@ from django.urls import reverse
 from django.db import transaction
 from django.views.decorators.cache import never_cache
 from django_htmx.http import HttpResponseClientRefresh, HttpResponseClientRedirect, HTMX_STOP_POLLING
-from crawler.models import DeckCrawlResult, CrawlRun, DataSource
-from decklist.models import Deck, Printing, CardInDeck, SiteStat
+from crawler.models import DeckCrawlResult, CrawlRun, LogEntry
+from decklist.models import Deck, Printing, CardInDeck, SiteStat, DataSource
 import httpx
 from crawler.crawlers import CrawlerExit, HEADERS, format_response_error
 from crawler.crawlers import ArchidektCrawler, ARCHIDEKT_API_BASE
@@ -442,3 +442,22 @@ def update_stats(request):
     s.save()
     
     return HttpResponseClientRefresh()
+
+
+@login_required
+def log_index(request):
+    logs = (
+        LogEntry.objects
+        .filter(follows=None)
+    )
+    paginator = Paginator(logs, 10, orphans=3)
+    page_number = request.GET.get('page')
+    logs_page = paginator.get_page(page_number)
+
+    return render(
+        request,
+        'crawler/log_index.html',
+        {
+            'logs': logs_page,
+        },
+    )
