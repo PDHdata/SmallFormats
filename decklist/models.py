@@ -132,9 +132,15 @@ class Deck(models.Model):
         ) > 0:
             return False, "contains banned card"
 
+        cmdr_count = self.commanders().count()
+
         # deck has a commander
-        if self.commanders().count() == 0:
+        if cmdr_count < 1:
             return False, "no commander"
+        
+        # deck has a plausible number of commanders
+        if cmdr_count > 2:
+            return False, "too many commanders"
             
         # all commanders printed at uncommon
         for entry in self.commanders():
