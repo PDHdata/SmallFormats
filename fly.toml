@@ -12,6 +12,10 @@ processes = []
 [deploy]
   release_command = "poetry run python _manage.py migrate"
 
+[processes]
+  app = "poetry run daphne -b 0.0.0.0 -p 8080 smallformats.asgi:application"
+  cron = "supercronic /app/scheduled/crontab"
+
 [[statics]]
   guest_path = "/app/static"
   url_prefix = "/static"
