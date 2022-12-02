@@ -113,28 +113,6 @@ def stats_index(request, page="stats/index.html"):
     )
 
 
-def partner_decks(request):
-    partner_decks = (
-        Deck.objects
-        .filter(pdh_legal=True)
-        .annotate(num_cmdrs=Count(
-            'card_list', filter=Q(card_list__is_pdh_commander=True)
-        ))
-        .filter(num_cmdrs__gt=1)
-    )
-    paginator = Paginator(partner_decks, 25, orphans=3)
-    page_number = request.GET.get('page')
-    decks_page = paginator.get_page(page_number)
-
-    return render(
-        request,
-        "stats/partner_decks.html",
-        context={
-            'decks': decks_page,
-        },
-    )
-
-
 def commander_index(request):
     colors = [
         [(c[0], name_to_symbol(c[0]), f'cmdr-{c[0]}') for c in COLORS if c[1] == 0],
