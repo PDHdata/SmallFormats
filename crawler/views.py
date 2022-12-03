@@ -7,7 +7,6 @@ from django.utils import timezone
 from django.urls import reverse
 from django.db import transaction
 from django.db.models import Q
-from django.views.decorators.cache import never_cache
 from django_htmx.http import HttpResponseClientRefresh, HttpResponseClientRedirect, HTMX_STOP_POLLING
 from crawler.models import DeckCrawlResult, CrawlRun, LogEntry
 from decklist.models import Deck, Printing, CardInDeck, SiteStat, DataSource
@@ -17,7 +16,6 @@ from crawler.crawlers import ArchidektCrawler, ARCHIDEKT_API_BASE
 from crawler.crawlers import MoxfieldCrawler, MOXFIELD_API_BASE
 
 
-@never_cache
 @login_required
 def crawler_index(request):
     runs = CrawlRun.objects.order_by('-crawl_start_time')
@@ -47,13 +45,11 @@ def crawler_index(request):
     )
 
 
-@never_cache
 @login_required
 @require_POST
 def new_archidekt_run_hx(request):
     return _new_run_hx(request, DataSource.ARCHIDEKT)
 
-@never_cache
 @login_required
 @require_POST
 def new_moxfield_run_hx(request):
@@ -83,7 +79,6 @@ def _new_run_hx(request, datasource):
     return HttpResponseClientRedirect(reverse('crawler:run-detail', args=(run.id,)))
 
 
-@never_cache
 @login_required
 def run_detail(request, run_id):
     run = get_object_or_404(CrawlRun, pk=run_id)
@@ -104,7 +99,6 @@ def run_detail(request, run_id):
     )
 
 
-@never_cache
 @login_required
 @require_POST
 def run_remove_error_hx(request, run_id):
@@ -120,7 +114,6 @@ def run_remove_error_hx(request, run_id):
     return HttpResponseClientRefresh()
 
 
-@never_cache
 @login_required
 @require_POST
 def run_remove_limit_hx(request, run_id):
@@ -133,7 +126,6 @@ def run_remove_limit_hx(request, run_id):
     return HttpResponseClientRefresh()
 
 
-@never_cache
 @login_required
 @require_POST
 def run_cancel_hx(request, run_id):
@@ -146,13 +138,11 @@ def run_cancel_hx(request, run_id):
     return HttpResponseClientRefresh()
 
 
-@never_cache
 @login_required
 @require_POST
 def run_archidekt_onepage_hx(request, run_id):
     return _onepage_hx(request, ARCHIDEKT_API_BASE, ArchidektCrawler, run_id)
 
-@never_cache
 @login_required
 @require_POST
 def run_moxfield_onepage_hx(request, run_id):
@@ -216,7 +206,6 @@ def _onepage_hx(request, api_base, Crawler, run_id):
         )
 
 
-@never_cache
 @login_required
 def start_archidekt_poll_hx(request, run_id):
     return render(
@@ -229,7 +218,6 @@ def start_archidekt_poll_hx(request, run_id):
     )
 
 
-@never_cache
 @login_required
 def start_moxfield_poll_hx(request, run_id):
     return render(
@@ -359,7 +347,6 @@ def _process_moxfield_deck(crawl_result, envelope, output):
         crawl_result.save()
 
 
-@never_cache
 @login_required
 @require_POST
 def fetch_deck_hx(request):
@@ -418,7 +405,6 @@ def fetch_deck_hx(request):
     )
 
 
-@never_cache
 @login_required
 @require_POST
 def start_deck_poll_hx(request):
@@ -429,7 +415,6 @@ def start_deck_poll_hx(request):
     )
 
 
-@never_cache
 @login_required
 @require_POST
 def update_stats(request):
