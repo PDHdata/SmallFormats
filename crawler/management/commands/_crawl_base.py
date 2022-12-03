@@ -1,16 +1,17 @@
 """
 See https://archidekt.com/forum/thread/3476605/1 for more on crawling Archidekt.
 """
-from django.core.management.base import BaseCommand
+from django.core.management.base import BaseCommand, CommandError
 import httpx
 from decklist.models import Deck
 from crawler.models import CrawlRun
 from django.utils import timezone
 import time
 from crawler.crawlers import CrawlerExit, HEADERS, format_response_error
+from ._mixins import LoggingMixin
 
 
-class CrawlCommand(BaseCommand):
+class CrawlCommand(BaseCommand, LoggingMixin):
     help = f'Ask source for PDH decklists'
 
     def handle(self, *args, **options):
@@ -19,12 +20,14 @@ class CrawlCommand(BaseCommand):
         stop_after = self._compute_stop_after()
         run = self._get_or_create_run(stop_after)
 
+        self._log(f"Starting run {run}")
+
         client: httpx.Client = self._create_client()
         crawler = self.Crawler(
             client,
             run.next_fetch,
             stop_after,
-            self.stdout.write,
+            self._log,
         )
         
         run.state = CrawlRun.State.FETCHING_DECKS
@@ -45,10 +48,11 @@ class CrawlCommand(BaseCommand):
                 else str(e)
             )
             run.save()
-            self.stderr.write(f"{e}")
-            return
+            self._err(f"{e}")
+            raise CommandError(str(e))
         
         # if we got here without exiting, we're done
+        self._log("Done!")
         run.state = CrawlRun.State.COMPLETE
         run.save()
 
