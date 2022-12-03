@@ -383,13 +383,13 @@ def fetch_deck_hx(request):
                 output.append(f"Can't update \"{deck_name}\", unimplemented source")
                 updatable_deck.fetchable = False
                 updatable_deck.save()
-        elif response.status_code == 400:
+        elif response.status_code in (400, 404):
             # mark deck as unfetchable and carry on
-            output.append(f"Got error 400 for \"{updatable_deck.deck.name}\" ({updatable_deck.url}).")
+            output.append(f"Got error {response.status_code} for \"{updatable_deck.deck.name}\" ({updatable_deck.url}).")
             updatable_deck.fetchable = False
             updatable_deck.save()
         else:
-            output.append(f"Got {response.status_code} from server.")
+            output.append(f"Got {response.status_code} from server. ({response.url})")
             response_status = HTMX_STOP_POLLING
 
     if updatable_deck.got_cards:

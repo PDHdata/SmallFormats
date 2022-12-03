@@ -9,28 +9,15 @@ import json_stream.httpx
 from decklist.models import Card, Printing
 from crawler.models import LogEntry
 from crawler.crawlers import HEADERS, SCRYFALL_API_BASE
+from ._mixins import LoggingMixin
 
 
 PROGRESS_EVERY_N_CARDS = 100
 
 class CantParseCardError(Exception): ...
 
-class Command(BaseCommand):
+class Command(BaseCommand, LoggingMixin):
     help = 'Ask Scryfall for card data'
-
-    def _err(self, text):
-        last_log = getattr(self, 'last_log', None)
-        log = LogEntry(text=f"!!! {text}", follows=last_log)
-        log.save()
-        self.last_log = log
-        self.stderr.write(log.text)
-    
-    def _log(self, text):
-        last_log = getattr(self, 'last_log', None)
-        log = LogEntry(text=text, follows=last_log)
-        log.save()
-        self.last_log = log
-        self.stdout.write(log.text)
 
     def handle(self, *args, **options):
         self._log(f"Fetch cards begin: {Card.objects.all().count()} cards, {Printing.objects.all().count()} printings")
