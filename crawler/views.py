@@ -451,7 +451,9 @@ def log_index(request):
 
 @login_required
 def log_from(request, start_log):
-    # brute force is best force
+    # brute force is best force 💪
+    # yes this is gross, but "reversing a linked list" in SQL
+    # turns out to be a bad idea.
     logs = (
         LogEntry.objects
         .filter(
@@ -459,14 +461,23 @@ def log_from(request, start_log):
             Q(follows__id=start_log) |
             Q(follows__follows__id=start_log) |
             Q(follows__follows__follows__id=start_log) |
-            Q(follows__follows__follows__follows__id=start_log)
+            Q(follows__follows__follows__follows__id=start_log) |
+            Q(follows__follows__follows__follows__follows__id=start_log) |
+            Q(follows__follows__follows__follows__follows__follows__id=start_log) |
+            Q(follows__follows__follows__follows__follows__follows__follows__id=start_log) |
+            Q(follows__follows__follows__follows__follows__follows__follows__follows__id=start_log) |
+            Q(follows__follows__follows__follows__follows__follows__follows__follows__follows__id=start_log)
         )
         .order_by('created')
     )
 
+    template = 'crawler/log.html'
+    if request.htmx:
+        template = 'crawler/log_partial.html'
+
     return render(
         request,
-        'crawler/log.html',
+        template,
         {
             'logs': logs,
         },
