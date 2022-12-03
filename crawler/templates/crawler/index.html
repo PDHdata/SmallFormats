@@ -1,9 +1,14 @@
 {% extends 'base.html' %}
 {% block title %}Crawler admin{% endblock %}
 {% block body %}
-<h1>Crawler admin</h1>
 <div class="container" hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'>
-  <div>
+  <nav aria-label="breadcrumb" class="mt-3">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item active" aria-current="page">Crawler admin</li>
+    </ol>
+  </nav>
+  <div class="mb-3">
+    <a href="{% url 'crawler:log-index' %}" class="btn btn-secondary">Go to logs</a>
     <button class="btn btn-primary" hx-post="{% url 'crawler:run-new-archidekt' %}">New Archidekt run</button>
     <button class="btn btn-primary" hx-post="{% url 'crawler:run-new-moxfield' %}">New Moxfield run</button>
   </div>
