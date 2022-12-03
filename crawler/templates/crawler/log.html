@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+{% block title %}Crawler admin - logs{% endblock %}
+{% block body %}
+<div class="container">
+  <nav aria-label="breadcrumb" class="mt-3">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item"><a href="{% url 'crawler:index' %}">Crawler admin</a></li>
+      <li class="breadcrumb-item"><a href="{% url 'crawler:log-index' %}">Logs</a></li>
+      <li class="breadcrumb-item active" aria-current="page">#{{ logs.0.id }}</li>
+    </ol>
+  </nav>
+  <table class="table">
+    <tr><th>Timestamp</th><th>Line</th></tr>
+    {% for log in logs %}
+    <tr>
+      <td>{{ log.created }}</a></td>
+      <td>{{ log.text }}</td>
+    </tr>
+    {% if forloop.last %}
+    {% if log.logentry_set.count > 0 %}
+    <tr>
+      <td colspan="2"><a href="{% url 'crawler:log-from' log.next.id %}">More...</a></td>
+    </tr>
+    {% endif %}
+    {% endif %}
+    {% empty %}
+    <tr><td colspan="2">No logs found.</td></tr>
+    {% endfor %}
+  </table>
+</div>
+{% endblock %}

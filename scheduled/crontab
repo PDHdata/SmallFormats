@@ -1,0 +1,2 @@
+# at 3am, run daily stuff
+0 3 * * * bash /app/scheduled/daily.sh
