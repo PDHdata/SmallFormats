@@ -52,6 +52,8 @@ class Command(BaseCommand, LoggingMixin):
                     updatable_deck.deck.deckcrawlresult_set.all().delete()
                 
                 time.sleep(sleep_time)
+        
+        self._log("Done!")
 
     def _process_architekt_deck(self, crawl_result, cards):
         # resolve printings to cards
