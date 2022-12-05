@@ -6,6 +6,8 @@ class Command(LoggingBaseCommand):
     help = 'Update site stats'
 
     def handle(self, *args, **options):
+        super().handle(self, *args, **options)
+
         legal_decks = (
             Deck.objects
             .filter(pdh_legal=True)

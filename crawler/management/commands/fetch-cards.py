@@ -19,6 +19,8 @@ class Command(LoggingBaseCommand):
     help = 'Ask Scryfall for card data'
 
     def handle(self, *args, **options):
+        super().handle(self, *args, **options)
+
         self._log(f"Fetch cards begin: {Card.objects.all().count()} cards, {Printing.objects.all().count()} printings")
         with httpx.Client(base_url=SCRYFALL_API_BASE, headers=HEADERS) as client:
             result = client.get("bulk-data/default-cards")

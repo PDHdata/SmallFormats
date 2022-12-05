@@ -15,6 +15,8 @@ class CrawlCommand(LoggingBaseCommand):
     help = f'Ask source for PDH decklists'
 
     def handle(self, *args, **options):
+        super().handle(self, *args, **options)
+
         sleep_time = 2
 
         stop_after = self._compute_stop_after()
