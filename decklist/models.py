@@ -140,12 +140,14 @@ class Deck(models.Model):
         
         # deck has a plausible number of commanders
         if cmdr_count > 2:
-            return False, "too many commanders"
+            return False, f"{cmdr_count} is too many commanders"
             
-        # all commanders printed at uncommon
+        # all commanders printed at uncommon and have correct types
         for entry in self.commanders():
             if not entry.card.ever_uncommon:
-                return False, "commander not printed at uncommon"
+                return False, f"commander {entry.card.name} not printed at uncommon"
+            if not 'Creature' in entry.card.type_line and not 'Background' in entry.card.type_line:
+                return False, f"commander {entry.card.name} is neither Creature nor Background"
 
         # all cards in correct identity
         q_filters = []
