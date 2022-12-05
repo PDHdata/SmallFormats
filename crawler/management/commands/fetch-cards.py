@@ -1,7 +1,6 @@
 """
 See https://scryfall.com/docs/api/bulk-data for more on Scryfall data.
 """
-from django.core.management.base import BaseCommand, CommandError
 from django.db.utils import DataError
 from django.utils.dateparse import parse_date
 import httpx
@@ -9,17 +8,19 @@ import json_stream.httpx
 from decklist.models import Card, Printing
 from crawler.models import LogEntry
 from crawler.crawlers import HEADERS, SCRYFALL_API_BASE
-from ._mixins import LoggingMixin
+from ._command_base import LoggingBaseCommand
 
 
 PROGRESS_EVERY_N_CARDS = 100
 
 class CantParseCardError(Exception): ...
 
-class Command(BaseCommand, LoggingMixin):
+class Command(LoggingBaseCommand):
     help = 'Ask Scryfall for card data'
 
     def handle(self, *args, **options):
+        super().handle(self, *args, **options)
+
         self._log(f"Fetch cards begin: {Card.objects.all().count()} cards, {Printing.objects.all().count()} printings")
         with httpx.Client(base_url=SCRYFALL_API_BASE, headers=HEADERS) as client:
             result = client.get("bulk-data/default-cards")
