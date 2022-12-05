@@ -1,9 +1,8 @@
-from django.core.management.base import BaseCommand, CommandError
 from decklist.models import Deck, SiteStat
-from ._mixins import LoggingMixin
+from ._command_base import LoggingBaseCommand
 
 
-class Command(BaseCommand, LoggingMixin):
+class Command(LoggingBaseCommand):
     help = 'Update site stats'
 
     def handle(self, *args, **options):

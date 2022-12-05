@@ -1,7 +1,8 @@
+from django.core.management.base import BaseCommand
 from crawler.models import LogEntry
 
 
-class LoggingMixin():
+class LoggingBaseCommand(BaseCommand):
     def _err(self, text):
         last_log = getattr(self, 'last_log', None)
         log = LogEntry(text=f"!!! {text}", follows=last_log)

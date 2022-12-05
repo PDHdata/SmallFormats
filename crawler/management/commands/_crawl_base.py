@@ -1,17 +1,17 @@
 """
 See https://archidekt.com/forum/thread/3476605/1 for more on crawling Archidekt.
 """
-from django.core.management.base import BaseCommand, CommandError
+from django.core.management.base import CommandError
 import httpx
 from decklist.models import Deck
 from crawler.models import CrawlRun
 from django.utils import timezone
 import time
 from crawler.crawlers import CrawlerExit, HEADERS, format_response_error
-from ._mixins import LoggingMixin
+from ._command_base import LoggingBaseCommand
 
 
-class CrawlCommand(BaseCommand, LoggingMixin):
+class CrawlCommand(LoggingBaseCommand):
     help = f'Ask source for PDH decklists'
 
     def handle(self, *args, **options):

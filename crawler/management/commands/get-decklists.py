@@ -1,15 +1,14 @@
-from django.core.management.base import BaseCommand, CommandError
 from django.db import transaction
 import httpx
 from decklist.models import DataSource, Printing, CardInDeck
 from crawler.models import DeckCrawlResult
-from ._mixins import LoggingMixin
+from ._command_base import LoggingBaseCommand
 import time
 from itertools import chain
 from crawler.crawlers import HEADERS
 
 
-class Command(BaseCommand, LoggingMixin):
+class Command(LoggingBaseCommand):
     help = 'Populate any decks retrieved by the crawlers'
 
     def handle(self, *args, **options):
