@@ -21,6 +21,8 @@ class Command(LoggingBaseCommand):
             .filter(fetchable=True, got_cards=False)
         )
 
+        self._log(f"Fetching up to {len(updatable_decks)} decks")
+
         with httpx.Client(headers=HEADERS) as client:
             for updatable_deck in updatable_decks:
                 response = client.get(updatable_deck.url)
