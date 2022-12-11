@@ -33,7 +33,7 @@ class Command(LoggingBaseCommand):
                     envelope = response.json()
                     if updatable_deck.deck.source == DataSource.ARCHIDEKT:
                         self._log(f"{verb} \"{deck_name}\" (Archidekt)")
-                        self._process_architekt_deck(updatable_deck, envelope['cards'])
+                        self._process_archidekt_deck(updatable_deck, envelope['cards'])
                     elif updatable_deck.deck.source == DataSource.MOXFIELD:
                         self._log(f"{verb} \"{deck_name}\" (Moxfield)")
                         self._process_moxfield_deck(updatable_deck, envelope)
@@ -58,7 +58,7 @@ class Command(LoggingBaseCommand):
         
         self._log("Done!")
 
-    def _process_architekt_deck(self, crawl_result, cards):
+    def _process_archidekt_deck(self, crawl_result, cards):
         # resolve printings to cards
         lookup_printings = set()
         for card_json in cards:
