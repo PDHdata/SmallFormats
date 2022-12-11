@@ -10,11 +10,6 @@ from decklist.models import Deck, SiteStat
 
 @login_required
 def crawler_index(request):
-    runs = CrawlRun.objects.order_by('-crawl_start_time')
-    paginator = Paginator(runs, 8, orphans=3)
-    page_number = request.GET.get('page')
-    runs_page = paginator.get_page(page_number)
-
     try:
         stats = SiteStat.objects.latest()
     except SiteStat.DoesNotExist:
@@ -24,8 +19,23 @@ def crawler_index(request):
         request,
         'crawler/index.html',
         {
-            'runs': runs_page,
             'stats': stats,
+        },
+    )
+
+
+@login_required
+def run_index(request):
+    runs = CrawlRun.objects.order_by('-crawl_start_time')
+    paginator = Paginator(runs, 8, orphans=3)
+    page_number = request.GET.get('page')
+    runs_page = paginator.get_page(page_number)
+
+    return render(
+        request,
+        'crawler/run_index.html',
+        {
+            'runs': runs_page,
         },
     )
 
