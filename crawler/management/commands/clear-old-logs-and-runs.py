@@ -1,7 +1,7 @@
 from ._command_base import LoggingBaseCommand
 from django.utils import timezone
 from datetime import timedelta
-from crawler.models import LogEntry, CrawlRun
+from crawler.models import LogStart, CrawlRun
 
 
 class Command(LoggingBaseCommand):
@@ -19,7 +19,7 @@ class Command(LoggingBaseCommand):
         precise_before_date = before_datetime.replace(hour=0, minute=0, second=0, microsecond=0)
         self._log(f"Clearing logs/runs before {before_date} ({age_days} days).")
         log_records, _ = (
-            LogEntry.objects
+            LogStart.objects
             .filter(created__lt=precise_before_date)
             .delete()
         )
