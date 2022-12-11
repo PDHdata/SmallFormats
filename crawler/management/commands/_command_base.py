@@ -1,5 +1,5 @@
 from django.core.management.base import BaseCommand
-from crawler.models import LogEntry
+from crawler.models import LogStart, LogEntry
 
 
 class LoggingBaseCommand(BaseCommand):
@@ -13,18 +13,22 @@ class LoggingBaseCommand(BaseCommand):
 
     def _err(self, text):
         if not self._no_db:
-            last_log = getattr(self, 'last_log', None)
-            log = LogEntry(text=f"!!! {text}", follows=last_log)
+            log_start = getattr(self, 'log_start', None)
+            if log_start is None:
+                log_start = self.log_start = LogStart(text=text)
+                log_start.save()
+            log = LogEntry(text=text, is_stderr=True, parent=log_start)
             log.save()
-            self.last_log = log
         if not self._no_stdout:
             self.stderr.write(text)
     
     def _log(self, text):
         if not self._no_db:
-            last_log = getattr(self, 'last_log', None)
-            log = LogEntry(text=text, follows=last_log)
+            log_start = getattr(self, 'log_start', None)
+            if log_start is None:
+                log_start = self.log_start = LogStart(text=text)
+                log_start.save()
+            log = LogEntry(text=text, parent=log_start)
             log.save()
-            self.last_log = log
         if not self._no_stdout:
             self.stdout.write(text)

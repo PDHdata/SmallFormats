@@ -2,9 +2,8 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, get_object_or_404
 from django.core.paginator import Paginator
 from django.views.decorators.http import require_POST
-from django.db.models import Q
 from django_htmx.http import HttpResponseClientRefresh
-from crawler.models import CrawlRun, LogEntry
+from crawler.models import CrawlRun, LogEntry, LogStart
 from decklist.models import Deck, SiteStat
 
 
@@ -112,10 +111,7 @@ def update_stats(request):
 
 @login_required
 def log_index(request):
-    logs = (
-        LogEntry.objects
-        .filter(follows=None)
-    )
+    logs = LogStart.objects.all()
     paginator = Paginator(logs, 10, orphans=3)
     page_number = request.GET.get('page')
     logs_page = paginator.get_page(page_number)
@@ -130,35 +126,22 @@ def log_index(request):
 
 
 @login_required
-def log_from(request, start_log):
-    # brute force is best force 💪
-    # yes this is gross, but "reversing a linked list" in SQL
-    # turns out to be a bad idea.
+def log_one(request, logstart_id):
+    log_start = get_object_or_404(LogStart, pk=logstart_id)
     logs = (
         LogEntry.objects
-        .filter(
-            Q(id=start_log) |
-            Q(follows__id=start_log) |
-            Q(follows__follows__id=start_log) |
-            Q(follows__follows__follows__id=start_log) |
-            Q(follows__follows__follows__follows__id=start_log) |
-            Q(follows__follows__follows__follows__follows__id=start_log) |
-            Q(follows__follows__follows__follows__follows__follows__id=start_log) |
-            Q(follows__follows__follows__follows__follows__follows__follows__id=start_log) |
-            Q(follows__follows__follows__follows__follows__follows__follows__follows__id=start_log) |
-            Q(follows__follows__follows__follows__follows__follows__follows__follows__follows__id=start_log)
-        )
+        .filter(parent=log_start)
         .order_by('created')
     )
-
-    template = 'crawler/log.html'
-    if request.htmx:
-        template = 'crawler/log_partial.html'
+    paginator = Paginator(logs, 40, orphans=3)
+    page_number = request.GET.get('page')
+    logs_page = paginator.get_page(page_number)
 
     return render(
         request,
-        template,
+        'crawler/log.html',
         {
-            'logs': logs,
+            'log_start': log_start,
+            'logs': logs_page,
         },
     )

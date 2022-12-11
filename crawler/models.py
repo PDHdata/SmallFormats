@@ -41,15 +41,27 @@ class DeckCrawlResult(models.Model):
         return f"{self.url}"
 
 
+class LogStart(models.Model):
+    created = models.DateTimeField(auto_now_add=True)
+    text = models.TextField(blank=True)
+
+    def __str__(self):
+        return self.text
+
+    class Meta:
+        ordering = ('-created',)
+
+
 class LogEntry(models.Model):
     created = models.DateTimeField(auto_now_add=True)
     text = models.TextField()
-    follows = models.ForeignKey(
-        'LogEntry',
+    parent = models.ForeignKey(
+        LogStart,
         on_delete=models.CASCADE,
         null=True,
         blank=True,
     )
+    is_stderr = models.BooleanField(default=False)
 
     class Meta:
         ordering = ('-created',)

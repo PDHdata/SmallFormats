@@ -6,12 +6,30 @@
     <ol class="breadcrumb">
       <li class="breadcrumb-item"><a href="{% url 'crawler:index' %}">Crawler admin</a></li>
       <li class="breadcrumb-item"><a href="{% url 'crawler:log-index' %}">Logs</a></li>
-      <li class="breadcrumb-item active" aria-current="page">#{{ logs.0.id }}</li>
+      <li class="breadcrumb-item active" aria-current="page">#{{ log_start.id }}</li>
     </ol>
   </nav>
   <table class="table">
     <tr><th>Timestamp</th><th>Line</th></tr>
-    {% include 'crawler/log_partial.html' %}
+    {% for log in logs %}
+    <tr{% if log.is_stderr %} class="text-bg-danger"{% endif %}>
+      <td>{{ log.created }}</a></td>
+      <td>{{ log.text }}</td>
+    </tr>
+    {% empty %}
+    <tr><td colspan="2">No logs found.</td></tr>
+    {% endfor %}
   </table>
+  <div class="mb-3">
+    {% if logs.has_previous %}
+    <a href="?page=1">first</a>
+    <a href="?page={{ logs.previous_page_number }}">previous</a>
+    {% endif %}
+    (page {{ logs.number }} of {{ logs.paginator.num_pages }})
+    {% if logs.has_next %}
+    <a href="?page={{ logs.next_page_number }}">next</a>
+    <a href="?page={{ logs.paginator.num_pages }}">last</a>
+    {% endif %}   
+  </div>
 </div>
 {% endblock %}

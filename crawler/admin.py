@@ -5,4 +5,5 @@ from . import models
 admin.site.register(models.CrawlRun)
 # this would be a nice inline if it were paginated
 admin.site.register(models.DeckCrawlResult)
+admin.site.register(models.LogStart)
 admin.site.register(models.LogEntry)

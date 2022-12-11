@@ -12,7 +12,7 @@
     <tr><th>Start time</th><th>First line</th></tr>
     {% for log in logs %}
     <tr>
-      <td><a href="{% url 'crawler:log-from' log.id %}">{{ log.created }}</a></td>
+      <td><a href="{% url 'crawler:log-one' log.id %}">{{ log.created }}</a></td>
       <td>{{ log.text|truncatechars:100 }}</td>
     </tr>
     {% empty %}
