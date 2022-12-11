@@ -33,7 +33,7 @@ class Command(LoggingBaseCommand):
                     envelope = response.json()
                     if updatable_deck.deck.source == DataSource.ARCHIDEKT:
                         self._log(f"{verb} \"{deck_name}\" (Archidekt)")
-                        self._process_archidekt_deck(updatable_deck, envelope['cards'])
+                        self._process_archidekt_deck(updatable_deck, envelope)
                     elif updatable_deck.deck.source == DataSource.MOXFIELD:
                         self._log(f"{verb} \"{deck_name}\" (Moxfield)")
                         self._process_moxfield_deck(updatable_deck, envelope)
@@ -58,8 +58,9 @@ class Command(LoggingBaseCommand):
         
         self._log("Done!")
 
-    def _process_archidekt_deck(self, crawl_result, cards):
+    def _process_archidekt_deck(self, crawl_result, envelope):
         # resolve printings to cards
+        cards = envelope['cards']
         lookup_printings = set()
         for card_json in cards:
             printing_id = card_json['card']['uid']
@@ -68,6 +69,16 @@ class Command(LoggingBaseCommand):
             str(p.id): p.card
             for p in Printing.objects.filter(id__in=lookup_printings)
         }
+
+        # determine categories to skip, categories which are commander
+        skip_categories = frozenset([
+            cat['name'] for cat in envelope['categories']
+            if not cat['includedInDeck']
+        ])
+        premier_categories = frozenset([
+            cat['name'] for cat in envelope['categories']
+            if cat['isPremier']
+        ])
 
         # reuse cards where we can
         # TODO: handle multiple printings of the same card?
@@ -78,22 +89,32 @@ class Command(LoggingBaseCommand):
         new_cards = []
 
         for card_json in cards:
+            card_categories = set(card_json['categories'])
+            # if card is in a non-included category, skip it
+            if not card_categories.isdisjoint(skip_categories):
+                continue
+            
+            # if card is in a premier category, it is a commander
+            is_commander = not card_categories.isdisjoint(premier_categories)
+
             printing_id = card_json['card']['uid']
             if printing_id not in print_id_to_card.keys():
                 name = card_json['card']['oracleCard']['name']
                 edition = card_json['card']['edition']['editioncode']
                 self._err(f"could not resolve printing {printing_id}; should be \"{name}\" ({edition})")
                 continue
+            
             card_id = print_id_to_card[printing_id].id
+            
             if card_id in current_cards.keys():
                 reuse_card = current_cards.pop(card_id)
-                reuse_card.is_pdh_commander = "Commander" in card_json['categories']
+                reuse_card.is_pdh_commander = is_commander
                 update_cards.append(reuse_card)
             else:
                 new_cards.append(CardInDeck(
                     deck=crawl_result.deck,
                     card=print_id_to_card[printing_id],
-                    is_pdh_commander="Commander" in card_json['categories'],
+                    is_pdh_commander=is_commander,
                 ))
         
         with transaction.atomic():
