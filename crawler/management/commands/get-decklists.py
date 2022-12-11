@@ -12,7 +12,7 @@ class Command(LoggingBaseCommand):
     help = 'Populate any decks retrieved by the crawlers'
 
     def handle(self, *args, **options):
-        super().handle(self, *args, **options)
+        super().handle(*args, **options)
 
         sleep_time = 2
 
