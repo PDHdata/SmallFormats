@@ -1,0 +1,746 @@
+{
+	"id": 0,
+	"name": "test deck",
+	"createdAt": "2022-12-11T17:29:45.809219Z",
+	"updatedAt": "2022-12-11T17:32:37.112600Z",
+	"deckFormat": 17,
+	"description": "",
+	"featured": "https://storage.googleapis.com/archidekt-card-images/clb/1c3c779b-d1d8-4b1e-bb06-ed7071a5ec0b_art_crop.jpg",
+	"customFeatured": "",
+	"game": null,
+	"private": true,
+	"viewCount": 1,
+	"cards": [
+		{
+			"id": 1322165126,
+			"categories": [
+				"Maybeboard", // <-- if ANY category is not included in the deck, the card is not
+				"Creature"
+			],
+			"companion": false,
+			"label": ",#656565",
+			"modifier": "Normal",
+			"quantity": 1,
+			"customCmc": null,
+			"removedCategories": null,
+			"createdAt": "2022-12-11T17:32:21.910611Z",
+			"updatedAt": "2022-12-11T17:32:37.069022Z",
+			"deletedAt": null,
+			"card": {
+				"id": 47128,
+				"artist": "Johann Bodin",
+				"tcgProductId": 67347,
+				"ckFoilId": 189156,
+				"ckNormalId": 188852,
+				"cmEd": "gatecrash",
+				"collectorNumber": "157",
+				"multiverseid": 366292,
+				"mtgoFoilId": 47590,
+				"mtgoNormalId": 47589,
+				"uid": "016d1d17-ba5c-4168-9a3d-232bdcc98c80",
+				"edition": {
+					"editioncode": "gtc",
+					"editionname": "Gatecrash",
+					"editiondate": "2013-02-01",
+					"editiontype": "expansion",
+					"mtgoCode": "gtc"
+				},
+				"flavor": "Cautious not to repeat Vig's mistakes, the Simic fuse life essences using magic alone. Each result is called a krasis.",
+				"games": [],
+				"options": [
+					"Normal",
+					"Foil"
+				],
+				"oracleCard": {
+					"id": 4445,
+					"cmc": 3,
+					"colorIdentity": [
+						"Blue",
+						"Green"
+					],
+					"colors": [
+						"Blue",
+						"Green"
+					],
+					"faces": [],
+					"layout": "normal",
+					"legalities": {
+						"alchemy": "not_legal",
+						"legacy": "legal",
+						"oldschool": "not_legal",
+						"modern": "legal",
+						"vintage": "legal",
+						"oathbreaker": "legal",
+						"1v1": "legal",
+						"historicbrawl": "not_legal",
+						"premodern": "not_legal",
+						"historic": "not_legal",
+						"commander": "legal",
+						"paupercommander": "legal",
+						"gladiator": "not_legal",
+						"explorer": "not_legal",
+						"brawl": "not_legal",
+						"penny": "legal",
+						"pioneer": "legal",
+						"duel": "legal",
+						"pauper": "legal",
+						"standard": "not_legal",
+						"future": "not_legal"
+					},
+					"manaCost": "{1}{G}{U}",
+					"manaProduction": {
+						"W": null,
+						"U": null,
+						"B": null,
+						"R": null,
+						"G": null,
+						"C": null
+					},
+					"name": "Drakewing Krasis",
+					"power": "3",
+					"salt": 0.24,
+					"subTypes": [
+						"Lizard",
+						"Drake"
+					],
+					"superTypes": [],
+					"text": "Flying, trample",
+					"tokens": [],
+					"toughness": "1",
+					"types": [
+						"Creature"
+					],
+					"loyalty": null
+				},
+				"owned": 0,
+				"prices": {
+					"ck": 0.25,
+					"ckfoil": 0.25,
+					"cm": 0.06,
+					"cmfoil": 0.2,
+					"mtgo": 0.02,
+					"mtgofoil": 0.02,
+					"tcg": 0.06,
+					"tcgfoil": 0.19
+				},
+				"rarity": "common"
+			}
+		},
+		{
+			"id": 1322165028,
+			"categories": [
+				"Maybeboard"
+			],
+			"companion": false,
+			"label": ",#656565",
+			"modifier": "Normal",
+			"quantity": 1,
+			"customCmc": null,
+			"removedCategories": null,
+			"createdAt": "2022-12-11T17:31:46.391865Z",
+			"updatedAt": "2022-12-11T17:32:32.350452Z",
+			"deletedAt": null,
+			"card": {
+				"id": 77332,
+				"artist": "Simon Dominic",
+				"tcgProductId": 182213,
+				"ckFoilId": 223445,
+				"ckNormalId": 223120,
+				"cmEd": "ravnica allegiance",
+				"collectorNumber": "152",
+				"multiverseid": 457296,
+				"mtgoFoilId": 71305,
+				"mtgoNormalId": 71304,
+				"uid": "671c94c1-df52-4985-ad78-3e1c9c78df18",
+				"edition": {
+					"editioncode": "rna",
+					"editionname": "Ravnica Allegiance",
+					"editiondate": "2019-01-25",
+					"editiontype": "expansion",
+					"mtgoCode": "rna"
+				},
+				"flavor": "\"The absence of binocular vision imposes certain challenges for a flying creature, which are overcome via echolocation.\"\n—Simic research notes",
+				"games": [],
+				"options": [
+					"Normal",
+					"Foil"
+				],
+				"oracleCard": {
+					"id": 163,
+					"cmc": 3,
+					"colorIdentity": [
+						"Blue",
+						"Green"
+					],
+					"colors": [
+						"Blue",
+						"Green"
+					],
+					"faces": [],
+					"layout": "normal",
+					"legalities": {
+						"alchemy": "not_legal",
+						"legacy": "legal",
+						"oldschool": "not_legal",
+						"modern": "legal",
+						"vintage": "legal",
+						"oathbreaker": "legal",
+						"1v1": "legal",
+						"historicbrawl": "legal",
+						"premodern": "not_legal",
+						"historic": "legal",
+						"commander": "legal",
+						"paupercommander": "legal",
+						"gladiator": "legal",
+						"explorer": "legal",
+						"brawl": "not_legal",
+						"penny": "legal",
+						"pioneer": "legal",
+						"duel": "legal",
+						"pauper": "legal",
+						"standard": "not_legal",
+						"future": "not_legal"
+					},
+					"manaCost": "{1}{G}{U}",
+					"manaProduction": {
+						"W": null,
+						"U": null,
+						"B": null,
+						"R": null,
+						"G": null,
+						"C": null
+					},
+					"name": "Aeromunculus",
+					"power": "2",
+					"salt": 0.07,
+					"subTypes": [
+						"Mutant",
+						"Homunculus"
+					],
+					"superTypes": [],
+					"text": "Flying\n{2}{G}{U}: Adapt 1. (If this creature has no +1/+1 counters on it, put a +1/+1 counter on it.)",
+					"tokens": [],
+					"toughness": "3",
+					"types": [
+						"Creature"
+					],
+					"loyalty": null
+				},
+				"owned": 0,
+				"prices": {
+					"ck": 0.25,
+					"ckfoil": 0.25,
+					"cm": 0.04,
+					"cmfoil": 0.22,
+					"mtgo": 0.03,
+					"mtgofoil": 0.02,
+					"tcg": 0.02,
+					"tcgfoil": 0.21
+				},
+				"rarity": "common"
+			}
+		},
+		{
+			"id": 1322164945,
+			"categories": [
+				"Sideboard",
+				"Creature"
+			],
+			"companion": false,
+			"label": ",#656565",
+			"modifier": "Normal",
+			"quantity": 1,
+			"customCmc": null,
+			"removedCategories": null,
+			"createdAt": "2022-12-11T17:31:34.763874Z",
+			"updatedAt": "2022-12-11T17:32:21.894380Z",
+			"deletedAt": null,
+			"card": {
+				"id": 47084,
+				"artist": "Tomasz Jedruszek",
+				"tcgProductId": 67471,
+				"ckFoilId": 189357,
+				"ckNormalId": 189078,
+				"cmEd": "gatecrash",
+				"collectorNumber": "113",
+				"multiverseid": 366290,
+				"mtgoFoilId": 47572,
+				"mtgoNormalId": 47571,
+				"uid": "0d3c0c43-2d6d-49b8-a112-07611a23ae69",
+				"edition": {
+					"editioncode": "gtc",
+					"editionname": "Gatecrash",
+					"editiondate": "2013-02-01",
+					"editiontype": "expansion",
+					"mtgoCode": "gtc"
+				},
+				"flavor": "\"Eh, needs more toad.\"\n—Gulistan, Simic biomancer",
+				"games": [],
+				"options": [
+					"Normal",
+					"Foil"
+				],
+				"oracleCard": {
+					"id": 107,
+					"cmc": 5,
+					"colorIdentity": [
+						"Green"
+					],
+					"colors": [
+						"Green"
+					],
+					"faces": [],
+					"layout": "normal",
+					"legalities": {
+						"alchemy": "not_legal",
+						"legacy": "legal",
+						"oldschool": "not_legal",
+						"modern": "legal",
+						"vintage": "legal",
+						"oathbreaker": "legal",
+						"1v1": "legal",
+						"historicbrawl": "legal",
+						"premodern": "not_legal",
+						"historic": "legal",
+						"commander": "legal",
+						"paupercommander": "legal",
+						"gladiator": "legal",
+						"explorer": "legal",
+						"brawl": "not_legal",
+						"penny": "legal",
+						"pioneer": "legal",
+						"duel": "legal",
+						"pauper": "legal",
+						"standard": "not_legal",
+						"future": "not_legal"
+					},
+					"manaCost": "{4}{G}",
+					"manaProduction": {
+						"W": null,
+						"U": null,
+						"B": null,
+						"R": null,
+						"G": null,
+						"C": null
+					},
+					"name": "Adaptive Snapjaw",
+					"power": "6",
+					"salt": 0,
+					"subTypes": [
+						"Beast",
+						"Lizard"
+					],
+					"superTypes": [],
+					"text": "Evolve (Whenever a creature enters the battlefield under your control, if that creature has greater power or toughness than this creature, put a +1/+1 counter on this creature.)",
+					"tokens": [],
+					"toughness": "2",
+					"types": [
+						"Creature"
+					],
+					"loyalty": null
+				},
+				"owned": 0,
+				"prices": {
+					"ck": 0.25,
+					"ckfoil": 0.25,
+					"cm": 0.02,
+					"cmfoil": 0.09,
+					"mtgo": 0.03,
+					"mtgofoil": 0.01,
+					"tcg": 0.04,
+					"tcgfoil": 0.17
+				},
+				"rarity": "common"
+			}
+		},
+		{
+			"id": 1322164912,
+			"categories": [
+				"Sideboard"
+			],
+			"companion": false,
+			"label": ",#656565",
+			"modifier": "Normal",
+			"quantity": 1,
+			"customCmc": null,
+			"removedCategories": null,
+			"createdAt": "2022-12-11T17:31:21.596409Z",
+			"updatedAt": "2022-12-11T17:32:21.894270Z",
+			"deletedAt": null,
+			"card": {
+				"id": 73227,
+				"artist": "Svetlin Velinov",
+				"tcgProductId": 162788,
+				"ckFoilId": 218085,
+				"ckNormalId": 217698,
+				"cmEd": "dominaria",
+				"collectorNumber": "40",
+				"multiverseid": 442928,
+				"mtgoFoilId": 67546,
+				"mtgoNormalId": 67545,
+				"uid": "f8bacb12-da46-4b00-804f-9ff6bff452bc",
+				"edition": {
+					"editioncode": "dom",
+					"editionname": "Dominaria",
+					"editiondate": "2018-04-27",
+					"editiontype": "expansion",
+					"mtgoCode": "dar"
+				},
+				"flavor": "",
+				"games": [],
+				"options": [
+					"Normal",
+					"Foil"
+				],
+				"oracleCard": {
+					"id": 61,
+					"cmc": 3,
+					"colorIdentity": [
+						"Blue"
+					],
+					"colors": [
+						"Blue"
+					],
+					"faces": [],
+					"layout": "normal",
+					"legalities": {
+						"alchemy": "not_legal",
+						"legacy": "legal",
+						"oldschool": "not_legal",
+						"modern": "legal",
+						"vintage": "legal",
+						"oathbreaker": "legal",
+						"1v1": "legal",
+						"historicbrawl": "legal",
+						"premodern": "not_legal",
+						"historic": "legal",
+						"commander": "legal",
+						"paupercommander": "legal",
+						"gladiator": "legal",
+						"explorer": "legal",
+						"brawl": "not_legal",
+						"penny": "legal",
+						"pioneer": "legal",
+						"duel": "legal",
+						"pauper": "legal",
+						"standard": "not_legal",
+						"future": "not_legal"
+					},
+					"manaCost": "{2}{U}",
+					"manaProduction": {
+						"W": null,
+						"U": null,
+						"B": null,
+						"R": null,
+						"G": null,
+						"C": null
+					},
+					"name": "Academy Drake",
+					"power": "2",
+					"salt": 0.1,
+					"subTypes": [
+						"Drake"
+					],
+					"superTypes": [],
+					"text": "Kicker {4} (You may pay an additional {4} as you cast this spell.)\nFlying\nIf Academy Drake was kicked, it enters the battlefield with two +1/+1 counters on it.",
+					"tokens": [],
+					"toughness": "2",
+					"types": [
+						"Creature"
+					],
+					"loyalty": null
+				},
+				"owned": 1,
+				"prices": {
+					"ck": 0.25,
+					"ckfoil": 0.35,
+					"cm": 0.02,
+					"cmfoil": 0.05,
+					"mtgo": 0.04,
+					"mtgofoil": 0.01,
+					"tcg": 0.03,
+					"tcgfoil": 0.21
+				},
+				"rarity": "common"
+			}
+		},
+		{
+			"id": 1322164729,
+			"categories": [
+				"Commander"
+			],
+			"companion": false,
+			"label": ",#656565",
+			"modifier": "Normal",
+			"quantity": 1,
+			"customCmc": null,
+			"removedCategories": null,
+			"createdAt": "2022-12-11T17:30:40.672812Z",
+			"updatedAt": "2022-12-11T17:30:50.424750Z",
+			"deletedAt": null,
+			"card": {
+				"id": 103864,
+				"artist": "Kai Carpenter",
+				"tcgProductId": 272604,
+				"ckFoilId": 261424,
+				"ckNormalId": 260767,
+				"cmEd": "commander legends battle for baldur's gate",
+				"collectorNumber": "221",
+				"multiverseid": 563104,
+				"mtgoFoilId": 0,
+				"mtgoNormalId": 0,
+				"uid": "4bd8689d-a0c1-4041-bead-7b512fe25663",
+				"edition": {
+					"editioncode": "clb",
+					"editionname": "Commander Legends: Battle for Baldur's Gate",
+					"editiondate": "2022-06-10",
+					"editiontype": "draft_innovation",
+					"mtgoCode": null
+				},
+				"flavor": "You've always preferred the company of animals to people.",
+				"games": [],
+				"options": [
+					"Normal",
+					"Foil"
+				],
+				"oracleCard": {
+					"id": 26864,
+					"cmc": 3,
+					"colorIdentity": [
+						"Green"
+					],
+					"colors": [
+						"Green"
+					],
+					"faces": [],
+					"layout": "normal",
+					"legalities": {
+						"alchemy": "not_legal",
+						"legacy": "legal",
+						"oldschool": "not_legal",
+						"modern": "not_legal",
+						"vintage": "legal",
+						"oathbreaker": "legal",
+						"1v1": "legal",
+						"historicbrawl": "not_legal",
+						"premodern": "not_legal",
+						"historic": "not_legal",
+						"commander": "legal",
+						"paupercommander": "restricted",
+						"gladiator": "not_legal",
+						"explorer": "not_legal",
+						"brawl": "not_legal",
+						"penny": "not_legal",
+						"pioneer": "not_legal",
+						"duel": "legal",
+						"pauper": "not_legal",
+						"standard": "not_legal",
+						"future": "not_legal"
+					},
+					"manaCost": "{2}{G}",
+					"manaProduction": {
+						"W": null,
+						"U": null,
+						"B": null,
+						"R": null,
+						"G": null,
+						"C": null
+					},
+					"name": "Cloakwood Hermit",
+					"power": "",
+					"salt": null,
+					"subTypes": [
+						"Background"
+					],
+					"superTypes": [
+						"Legendary"
+					],
+					"text": "Commander creatures you own have \"At the beginning of your end step, if a creature card was put into your graveyard from anywhere this turn, create two tapped 1/1 green Squirrel creature tokens.\"",
+					"tokens": [
+						"15816"
+					],
+					"toughness": "",
+					"types": [
+						"Enchantment"
+					],
+					"loyalty": null
+				},
+				"owned": 0,
+				"prices": {
+					"ck": 0.35,
+					"ckfoil": 0.35,
+					"cm": 0.13,
+					"cmfoil": 0.16,
+					"mtgo": 0,
+					"mtgofoil": 0,
+					"tcg": 0.12,
+					"tcgfoil": 0.45
+				},
+				"rarity": "uncommon"
+			}
+		},
+		{
+			"id": 1322164684,
+			"categories": [
+				"Commander"
+			],
+			"companion": false,
+			"label": ",#656565",
+			"modifier": "Normal",
+			"quantity": 1,
+			"customCmc": null,
+			"removedCategories": null,
+			"createdAt": "2022-12-11T17:30:23.363162Z",
+			"updatedAt": "2022-12-11T17:30:46.813648Z",
+			"deletedAt": null,
+			"card": {
+				"id": 103909,
+				"artist": "Aaron Miller",
+				"tcgProductId": 272652,
+				"ckFoilId": 261461,
+				"ckNormalId": 260874,
+				"cmEd": "commander legends battle for baldur's gate",
+				"collectorNumber": "55",
+				"multiverseid": 562938,
+				"mtgoFoilId": 0,
+				"mtgoNormalId": 0,
+				"uid": "1c3c779b-d1d8-4b1e-bb06-ed7071a5ec0b",
+				"edition": {
+					"editioncode": "clb",
+					"editionname": "Commander Legends: Battle for Baldur's Gate",
+					"editiondate": "2022-06-10",
+					"editiontype": "draft_innovation",
+					"mtgoCode": null
+				},
+				"flavor": "",
+				"games": [],
+				"options": [
+					"Normal",
+					"Foil"
+				],
+				"oracleCard": {
+					"id": 26881,
+					"cmc": 3,
+					"colorIdentity": [
+						"Blue"
+					],
+					"colors": [
+						"Blue"
+					],
+					"faces": [],
+					"layout": "normal",
+					"legalities": {
+						"alchemy": "not_legal",
+						"legacy": "legal",
+						"oldschool": "not_legal",
+						"modern": "not_legal",
+						"vintage": "legal",
+						"oathbreaker": "legal",
+						"1v1": "legal",
+						"historicbrawl": "not_legal",
+						"premodern": "not_legal",
+						"historic": "not_legal",
+						"commander": "legal",
+						"paupercommander": "restricted",
+						"gladiator": "not_legal",
+						"explorer": "not_legal",
+						"brawl": "not_legal",
+						"penny": "not_legal",
+						"pioneer": "not_legal",
+						"duel": "legal",
+						"pauper": "not_legal",
+						"standard": "not_legal",
+						"future": "not_legal"
+					},
+					"manaCost": "{2}{U}",
+					"manaProduction": {
+						"W": null,
+						"U": null,
+						"B": null,
+						"R": null,
+						"G": null,
+						"C": null
+					},
+					"name": "Alora, Merry Thief",
+					"power": "3",
+					"salt": null,
+					"subTypes": [
+						"Rogue",
+						"Halfling"
+					],
+					"superTypes": [
+						"Legendary"
+					],
+					"text": "Whenever you attack, up to one target attacking creature can't be blocked this turn. Return that creature to its owner's hand at the beginning of the next end step.\nChoose a Background (You can have a Background as a second commander.)",
+					"tokens": [],
+					"toughness": "2",
+					"types": [
+						"Creature"
+					],
+					"loyalty": null
+				},
+				"owned": 0,
+				"prices": {
+					"ck": 0.35,
+					"ckfoil": 0.35,
+					"cm": 0.11,
+					"cmfoil": 0.21,
+					"mtgo": 0,
+					"mtgofoil": 0,
+					"tcg": 0.08,
+					"tcgfoil": 0.24
+				},
+				"rarity": "uncommon"
+			}
+		}
+	],
+	"points": 0,
+	"userInput": 0,
+	"owner": {
+		"id": 0,
+		"username": "",
+		"avatar": "https://storage.googleapis.com/topdekt-user/avatars/default/avatar_colorless.svg",
+		"frame": null,
+		"ckAffiliate": "",
+		"tcgAffiliate": ""
+	},
+	"categories": [
+		{
+			"id": 31427954,
+			"name": "Maybeboard",
+			"includedInDeck": false, // <-- this is the relevant field
+			"includedInPrice": false,
+			"isPremier": false
+		},
+		{
+			"id": 31427941,
+			"name": "Sideboard",
+			"includedInDeck": true,
+			"includedInPrice": true,
+			"isPremier": false
+		},
+		{
+			"id": 31427910,
+			"name": "Commander",
+			"includedInDeck": true,
+			"includedInPrice": true,
+			"isPremier": true
+		},
+		{
+			"id": 31427896,
+			"name": "Enchantment",
+			"includedInDeck": true,
+			"includedInPrice": true,
+			"isPremier": false
+		},
+		{
+			"id": 31427891,
+			"name": "Creature",
+			"includedInDeck": true,
+			"includedInPrice": true,
+			"isPremier": false
+		}
+	],
+	"commentRoot": 3659285,
+	"editors": []
+}
