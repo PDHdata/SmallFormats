@@ -1,6 +1,7 @@
 #!/bin/bash
 
 cd /app
+./manage clear-old-logs-and-runs --no-stdout
 set -e
 ./manage fetch-cards
 set +e
