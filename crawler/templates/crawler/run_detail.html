@@ -5,8 +5,8 @@
   <nav aria-label="breadcrumb" class="mt-3">
     <ol class="breadcrumb">
       <li class="breadcrumb-item"><a href="{% url 'crawler:index' %}">Crawler admin</a></li>
-      <li class="breadcrumb-item">{{ run.get_target_display }}</li>
-      <li class="breadcrumb-item active" aria-current="page">Run {{ run.id }}</li>
+      <li class="breadcrumb-item"><a href="{% url 'crawler:run-index' %}">Runs</a></li>
+      <li class="breadcrumb-item active" aria-current="page">Run {{ run.id }} ({{ run.get_target_display }})</li>
     </ol>
   </nav>
   <ul class="list-group mb-3">
@@ -36,6 +36,7 @@
         {% endif %}
       </div>
     </li>
+
     {% if run.next_fetch %}
     <li class="list-group-item d-flex justify-content-between align-items-start">
       <div class="ms-2 me-auto">
@@ -44,6 +45,7 @@
       </div>
     </li>
     {% endif %}
+
     {% if run.note %}
     <li class="list-group-item d-flex justify-content-between align-items-start">
       <div class="ms-2 me-auto">
@@ -52,20 +54,7 @@
       </div>
     </li>
     {% endif %}
-    {% if resumable %}
-    <li class="list-group-item d-flex justify-content-between align-items-start">
-      <div class="ms-2 me-auto">
-        <div class="fw-bold">Resume crawl</div>
-        <button hx-post="{% url poll_view run.id %}"
-          hx-swap="outerHTML"
-          class="btn btn-outline-primary me-2">All pages</button>
-        <button hx-post="{% url single_view run.id %}"
-          hx-target="#resumeResult" hx-swap="beforeend"
-          class="btn btn-outline-secondary me-2">One page</button>
-        <div id="resumeResult"></div>
-      </div>
-    </li>
-    {% endif %}
+
     {% if errored %}
     <li class="list-group-item d-flex justify-content-between align-items-start">
       <div class="ms-2 me-auto">

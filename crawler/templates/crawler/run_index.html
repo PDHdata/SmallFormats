@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+{% block title %}Crawler admin — runs{% endblock %}
+{% block body %}
+<div class="container" hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'>
+  <nav aria-label="breadcrumb" class="mt-3">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item"><a href="{% url 'crawler:index' %}">Crawler admin</a></li>
+      <li class="breadcrumb-item active" aria-current="page">Runs</li>
+    </ol>
+  </nav>
+  <table class="table">
+    <tr><th>Start time</th><th>Target</th><th>State</th><th>Search back to</th></tr>
+    {% for run in runs %}
+    <tr>
+      <td><a href="{% url 'crawler:run-detail' run.id %}">{{ run.crawl_start_time }}</a></td>
+      <td>{{ run.get_target_display }}</td>
+      <td>{{ run.get_state_display }}</td>
+      <td>{% if run.search_back_to %}{{ run.search_back_to }}{% else %}no limit{% endif %}</td>
+    </tr>
+    {% empty %}
+    <tr><td colspan="4">No runs found.</td></tr>
+    {% endfor %}
+  </table>
+  <div class="mb-3">
+    {% if runs.has_previous %}
+    <a href="?page=1">first</a>
+    <a href="?page={{ runs.previous_page_number }}">previous</a>
+    {% endif %}
+    (page {{ runs.number }} of {{ runs.paginator.num_pages }})
+    {% if runs.has_next %}
+    <a href="?page={{ runs.next_page_number }}">next</a>
+    <a href="?page={{ runs.paginator.num_pages }}">last</a>
+    {% endif %}   
+  </div>
+</div>
+{% endblock %}

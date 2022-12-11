@@ -8,47 +8,9 @@
     </ol>
   </nav>
   <div class="mb-3">
-    <a href="{% url 'crawler:log-index' %}" class="btn btn-secondary">Go to logs</a>
-    <button class="btn btn-primary" hx-post="{% url 'crawler:run-new-archidekt' %}">New Archidekt run</button>
-    <button class="btn btn-primary" hx-post="{% url 'crawler:run-new-moxfield' %}">New Moxfield run</button>
+    <a href="{% url 'crawler:log-index' %}" class="btn btn-primary">Logs</a>
+    <a href="{% url 'crawler:run-index' %}" class="btn btn-secondary">Runs</a>
   </div>
-  <table class="table">
-    <tr><th>Start time</th><th>Target</th><th>State</th><th>Search back to</th></tr>
-    {% for run in runs %}
-    <tr>
-      <td><a href="{% url 'crawler:run-detail' run.id %}">{{ run.crawl_start_time }}</a></td>
-      <td>{{ run.get_target_display }}</td>
-      <td>{{ run.get_state_display }}</td>
-      <td>{% if run.search_back_to %}{{ run.search_back_to }}{% else %}no limit{% endif %}</td>
-    </tr>
-    {% empty %}
-    <tr><td colspan="4">No runs found.</td></tr>
-    {% endfor %}
-  </table>
-  <div class="mb-3">
-    {% if runs.has_previous %}
-    <a href="?page=1">first</a>
-    <a href="?page={{ runs.previous_page_number }}">previous</a>
-    {% endif %}
-    (page {{ runs.number }} of {{ runs.paginator.num_pages }})
-    {% if runs.has_next %}
-    <a href="?page={{ runs.next_page_number }}">next</a>
-    <a href="?page={{ runs.paginator.num_pages }}">last</a>
-    {% endif %}   
-  </div>
-
-  {% if pending_results %}
-  <hr>
-  <div>
-    There are (up to) {{ pending_results }} decks to crawl.<br>
-    <button hx-post="{% url 'crawler:fetch-deck-poll' %}"
-      hx-swap="outerHTML"
-      class="btn btn-outline-primary me-2">Fetch all</button>
-    <button hx-post="{% url 'crawler:fetch-deck' %}" hx-target="#fetchResult"
-      hx-swap="beforeend" class="btn btn-outline-secondary">Fetch one</button>
-  </div>
-  <div id="fetchResult"></div>
-  {% endif %}
 
   <hr>
   <div>
