@@ -19,6 +19,7 @@ processes = []
 [[statics]]
   guest_path = "/app/static"
   url_prefix = "/static"
+  cache_key = "cachebust-202212131139"
 
 [experimental]
   allowed_public_ports = []
