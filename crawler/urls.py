@@ -13,4 +13,6 @@ urlpatterns = [
     path('runs/<int:run_id>/clear', views.run_remove_error_hx, name="run-remove-error"),
     path('runs/<int:run_id>/infinite', views.run_remove_limit_hx, name="run-remove-limit"),
     path('stats/', views.update_stats, name="update-stats"),
+    path('tappedout/', views.tapped_out_page, name="tappedout_page"),
+    path('tappedout/<int:page_number>/', views.tapped_out_page, name="tappedout_page"),
 ]

@@ -6,6 +6,9 @@ from django_htmx.http import HttpResponseClientRefresh
 from crawler.models import CrawlRun, LogEntry, LogStart
 from decklist.models import Deck, SiteStat
 
+# importing into views.py so Django can find this
+from .views_tappedout import tapped_out_page
+
 
 @login_required
 def crawler_index(request):

@@ -17,6 +17,7 @@ httpx = "^0.23.0"
 json-stream = "^2.1.0"
 django-debug-toolbar = "^3.7.0"
 django-htmx = "^1.12.2"
+beautifulsoup4 = "^4.11.1"
 
 
 [build-system]
