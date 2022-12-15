@@ -28,16 +28,17 @@ DEBUG = SECRET_KEY.startswith('django-insecure-')
 SMALLFORMATS_NAME = os.getenv("SMALLFORMATS_NAME", "Nameless Knockoff")
 
 ALLOWED_HOSTS = [
-    '127.0.0.1',
-    'pdhdata.fly.dev',
     'pdhdata.com',
     'www.pdhdata.com',
+    'pdhdata.fly.dev',
+    '127.0.0.1',
 ]
+# first item in this list will be used by the TappedOut crawler
 CSRF_TRUSTED_ORIGINS = [
-    'http://127.0.0.1',
-    'https://pdhdata.fly.dev',
     'https://pdhdata.com',
     'https://www.pdhdata.com',
+    'https://pdhdata.fly.dev',
+    'http://127.0.0.1',
 ]
 
 

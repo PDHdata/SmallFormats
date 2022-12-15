@@ -4,11 +4,15 @@ from decklist.models import DataSource, Deck
 from crawler.models import DeckCrawlResult
 from django.utils.dateparse import parse_datetime
 from django.db import transaction
+from django.conf import settings
 
 ARCHIDEKT_API_BASE = "https://archidekt.com/api/"
 MOXFIELD_API_BASE = "https://api2.moxfield.com/v2/"
 SCRYFALL_API_BASE = "https://api.scryfall.com/"
-TAPPEDOUT_API_BASE = "http://127.0.0.1:8000/crawler/"
+if settings.DEBUG:
+    TAPPEDOUT_API_BASE = "http://127.0.0.1:8000/crawler/"
+else:
+    TAPPEDOUT_API_BASE = settings.CSRF_TRUSTED_ORIGINS[0] + "/crawler/"
 
 HEADERS = {
     'User-agent': f'SmallFormats/{__version__}',
