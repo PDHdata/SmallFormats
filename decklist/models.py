@@ -15,6 +15,7 @@ class DataSource(models.IntegerChoices):
     UNKNOWN_OTHER = 0, "Unknown/other"
     ARCHIDEKT = 1
     MOXFIELD = 2
+    TAPPED_OUT = 3, "TappedOut"
 
 
 class Deck(models.Model):

@@ -8,6 +8,7 @@ from django.db import transaction
 ARCHIDEKT_API_BASE = "https://archidekt.com/api/"
 MOXFIELD_API_BASE = "https://api2.moxfield.com/v2/"
 SCRYFALL_API_BASE = "https://api.scryfall.com/"
+TAPPEDOUT_API_BASE = "http://127.0.0.1:8000/crawler/"
 
 HEADERS = {
     'User-agent': f'SmallFormats/{__version__}',
@@ -201,6 +202,36 @@ class MoxfieldCrawler(_BaseCrawler):
         if count <= 0:
             self._keep_going = False
             raise CrawlerExit(f"client got: {response.text}", response)
+
+        oldest_seen = self._process_page(envelope['data'], self.stop_after)
+        if self.stop_after and oldest_seen < self.stop_after:
+            # we're done!
+            self._keep_going = False
+
+
+class TappedOutCrawler(_BaseCrawler):
+    API_BASE = TAPPEDOUT_API_BASE
+    INITIAL_PAGE_ROUTE = "tappedout/"
+    INITIAL_PAGE_PARAMS = {}
+    SOURCE_LINK = 'https://tappedout.net/mtg-decks/{0}/'
+    DECK_FETCH_LINK = "https://tappedout.net/api/collection:deck/{0}/board/"
+
+    DATASOURCE = DataSource.TAPPED_OUT
+    ID_KEY = 'id'
+    LAST_UPDATE_KEY = 'lastUpdated'
+    NAME_KEY = 'deckName'
+    CREATOR_DISPLAY_KEY_1 = 'user'
+    CREATOR_DISPLAY_KEY_2 = 'name'
+
+    def _process_response(self, response):
+        envelope = response.json()
+        next = envelope['next']
+        if next:
+            self.url = next
+        else:
+            # reached the end!
+            self._keep_going = False
+            self.url = None
 
         oldest_seen = self._process_page(envelope['data'], self.stop_after)
         if self.stop_after and oldest_seen < self.stop_after:
