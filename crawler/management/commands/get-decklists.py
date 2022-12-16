@@ -8,6 +8,17 @@ from itertools import chain
 from crawler.crawlers import HEADERS
 
 
+def get_known_printings(cards, get_printing_id):
+    lookup_printings = set()
+    for card_json in cards:
+        printing_id = get_printing_id(card_json)
+        lookup_printings.add(printing_id)
+    return {
+        str(p.id): p.card
+        for p in Printing.objects.filter(id__in=lookup_printings)
+    }
+
+
 class Command(LoggingBaseCommand):
     help = 'Populate any decks retrieved by the crawlers'
 
@@ -61,14 +72,7 @@ class Command(LoggingBaseCommand):
     def _process_archidekt_deck(self, crawl_result, envelope):
         # resolve printings to cards
         cards = envelope['cards']
-        lookup_printings = set()
-        for card_json in cards:
-            printing_id = card_json['card']['uid']
-            lookup_printings.add(printing_id)
-        print_id_to_card = {
-            str(p.id): p.card
-            for p in Printing.objects.filter(id__in=lookup_printings)
-        }
+        print_id_to_card = get_known_printings(cards, lambda j: j['card']['uid'])
 
         # determine categories to skip, categories which are commander
         skip_categories = frozenset([
@@ -141,14 +145,10 @@ class Command(LoggingBaseCommand):
         cards = envelope['mainboard']
         cmdrs = envelope['commanders']
 
-        lookup_printings = set()
-        for _, card_json in chain(cards.items(), cmdrs.items()):
-            printing_id = card_json['card']['scryfall_id']
-            lookup_printings.add(printing_id)
-        print_id_to_card = {
-            str(p.id): p.card
-            for p in Printing.objects.filter(id__in=lookup_printings)
-        }
+        print_id_to_card = get_known_printings(
+            [c for _, c in chain(cards.items(), cmdrs.items())],
+            lambda j: j['card']['scryfall_id'],
+        )
 
         # reuse cards where we can
         current_cards = {
