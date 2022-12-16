@@ -31,16 +31,17 @@ class Command(LoggingBaseCommand):
                     new_deck = True if updatable_deck.deck.card_list.count() == 0 else False
                     verb = "Creating" if new_deck else "Updating"
                     envelope = response.json()
-                    if updatable_deck.deck.source == DataSource.ARCHIDEKT:
-                        self._log(f"{verb} \"{deck_name}\" (Archidekt)")
-                        self._process_archidekt_deck(updatable_deck, envelope)
-                    elif updatable_deck.deck.source == DataSource.MOXFIELD:
-                        self._log(f"{verb} \"{deck_name}\" (Moxfield)")
-                        self._process_moxfield_deck(updatable_deck, envelope)
-                    else:
-                        self._err(f"Can't update \"{deck_name}\", unimplemented source")
-                        updatable_deck.fetchable = False
-                        updatable_deck.save()
+                    match updatable_deck.deck.source:
+                        case DataSource.ARCHIDEKT:
+                            self._log(f"{verb} \"{deck_name}\" (Archidekt)")
+                            self._process_archidekt_deck(updatable_deck, envelope)
+                        case DataSource.MOXFIELD:
+                            self._log(f"{verb} \"{deck_name}\" (Moxfield)")
+                            self._process_moxfield_deck(updatable_deck, envelope)
+                        case _:
+                            self._err(f"Can't update \"{deck_name}\", unimplemented source")
+                            updatable_deck.fetchable = False
+                            updatable_deck.save()
                 elif response.status_code in (400, 404):
                     # mark deck as unfetchable and carry on
                     self._log(f"Got error {response.status_code} for \"{updatable_deck.deck.name}\" ({updatable_deck.url}).")
