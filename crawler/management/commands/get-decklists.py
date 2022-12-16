@@ -8,6 +8,34 @@ from itertools import chain
 from crawler.crawlers import HEADERS
 
 
+def get_known_printings(cards, get_printing_id):
+    lookup_printings = set()
+    for card_json in cards:
+        printing_id = get_printing_id(card_json)
+        lookup_printings.add(printing_id)
+    return {
+        str(p.id): p.card
+        for p in Printing.objects.filter(id__in=lookup_printings)
+    }
+
+
+def lookup_card(name, set_code):
+    p = (
+        Printing.objects
+        .filter(
+            card__name__iexact=name,
+            set_code__iexact=set_code,
+        )
+        .first()
+    )
+    if p:
+        return p.card
+    raise CardNotFound(f'"{name}" ({set_code})')
+
+
+class CardNotFound(Exception): ...
+
+
 class Command(LoggingBaseCommand):
     help = 'Populate any decks retrieved by the crawlers'
 
@@ -61,14 +89,7 @@ class Command(LoggingBaseCommand):
     def _process_archidekt_deck(self, crawl_result, envelope):
         # resolve printings to cards
         cards = envelope['cards']
-        lookup_printings = set()
-        for card_json in cards:
-            printing_id = card_json['card']['uid']
-            lookup_printings.add(printing_id)
-        print_id_to_card = {
-            str(p.id): p.card
-            for p in Printing.objects.filter(id__in=lookup_printings)
-        }
+        print_id_to_card = get_known_printings(cards, lambda j: j['card']['uid'])
 
         # determine categories to skip, categories which are commander
         skip_categories = frozenset([
@@ -98,22 +119,26 @@ class Command(LoggingBaseCommand):
             is_commander = not card_categories.isdisjoint(premier_categories)
 
             printing_id = card_json['card']['uid']
-            if printing_id not in print_id_to_card.keys():
+            if printing_id in print_id_to_card.keys():
+                card = print_id_to_card[printing_id]
+            else:
                 name = card_json['card']['oracleCard']['name']
                 edition = card_json['card']['edition']['editioncode']
-                self._err(f"could not resolve printing {printing_id}; should be \"{name}\" ({edition})")
-                continue
+                try:
+                    card = lookup_card(name, edition)
+                    self._log(f'Had to look up "{name}" ({edition})')
+                except CardNotFound:
+                    self._err(f'Could not resolve printing {printing_id}; should be "{name}" ({edition})')
+                    continue
             
-            card_id = print_id_to_card[printing_id].id
-            
-            if card_id in current_cards.keys():
-                reuse_card = current_cards.pop(card_id)
+            if card.id in current_cards.keys():
+                reuse_card = current_cards.pop(card.id)
                 reuse_card.is_pdh_commander = is_commander
                 update_cards.append(reuse_card)
             else:
                 new_cards.append(CardInDeck(
                     deck=crawl_result.deck,
-                    card=print_id_to_card[printing_id],
+                    card=card,
                     is_pdh_commander=is_commander,
                 ))
         
@@ -141,14 +166,10 @@ class Command(LoggingBaseCommand):
         cards = envelope['mainboard']
         cmdrs = envelope['commanders']
 
-        lookup_printings = set()
-        for _, card_json in chain(cards.items(), cmdrs.items()):
-            printing_id = card_json['card']['scryfall_id']
-            lookup_printings.add(printing_id)
-        print_id_to_card = {
-            str(p.id): p.card
-            for p in Printing.objects.filter(id__in=lookup_printings)
-        }
+        print_id_to_card = get_known_printings(
+            [c for _, c in chain(cards.items(), cmdrs.items())],
+            lambda j: j['card']['scryfall_id'],
+        )
 
         # reuse cards where we can
         current_cards = {
@@ -160,20 +181,26 @@ class Command(LoggingBaseCommand):
         for card_set, is_commander in ((cards, False), (cmdrs, True)):
             for _, card_json in card_set.items():
                 printing_id = card_json['card']['scryfall_id']
-                if printing_id not in print_id_to_card.keys():
+                if printing_id in print_id_to_card.keys():
+                    card = print_id_to_card[printing_id]
+                else:
                     name = card_json['card']['name']
                     edition = card_json['card']['set']
-                    self._err(f"could not resolve printing {printing_id}; should be \"{name}\" ({edition})")
-                    continue
-                card_id = print_id_to_card[printing_id].id
-                if card_id in current_cards.keys():
-                    reuse_card = current_cards.pop(card_id)
+                    try:
+                        card = lookup_card(name, edition)
+                        self._log(f'Had to look up "{name}" ({edition})')
+                    except CardNotFound:
+                        self._err(f'Could not resolve printing {printing_id}; should be "{name}" ({edition})')
+                        continue
+                
+                if card.id in current_cards.keys():
+                    reuse_card = current_cards.pop(card.id)
                     reuse_card.is_pdh_commander = is_commander
                     update_cards.append(reuse_card)
                 else:
                     new_cards.append(CardInDeck(
                         deck=crawl_result.deck,
-                        card=print_id_to_card[printing_id],
+                        card=card,
                         is_pdh_commander=is_commander,
                     ))
         
