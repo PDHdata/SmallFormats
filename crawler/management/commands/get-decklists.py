@@ -38,6 +38,9 @@ class Command(LoggingBaseCommand):
                         case DataSource.MOXFIELD:
                             self._log(f"{verb} \"{deck_name}\" (Moxfield)")
                             self._process_moxfield_deck(updatable_deck, envelope)
+                        case DataSource.TAPPED_OUT:
+                            self._log(f"{verb} \"{deck_name}\" (TappedOut)")
+                            self._process_tappedout_deck(updatable_deck, envelope)
                         case _:
                             self._err(f"Can't update \"{deck_name}\", unimplemented source")
                             updatable_deck.fetchable = False
@@ -195,3 +198,8 @@ class Command(LoggingBaseCommand):
             crawl_result.deck.save()
             crawl_result.got_cards = True
             crawl_result.save()
+
+
+    def _process_tappedout_deck(self, crawl_result, envelope):
+        # this needs to do what the other _process_x_deck methods do
+        ...
