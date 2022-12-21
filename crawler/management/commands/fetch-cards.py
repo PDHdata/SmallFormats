@@ -5,8 +5,7 @@ from django.db.utils import DataError
 from django.utils.dateparse import parse_date
 import httpx
 import json_stream.httpx
-from decklist.models import Card, Printing
-from crawler.models import LogEntry
+from decklist.models import Card, Printing, PartnerType
 from crawler.crawlers import HEADERS, SCRYFALL_API_BASE
 from ._command_base import LoggingBaseCommand
 
@@ -102,6 +101,14 @@ class Command(LoggingBaseCommand):
             # front of double-faced card
             elif 'card_faces' in json_card and 'image_uris' in json_card['card_faces'][0]:
                 p.image_uri = json_card['card_faces'][0]['image_uris'].get('normal')
+            
+            # determine partnership
+            keywords = json_card['keywords']
+            oracle_text = json_card['oracle_text']
+            type_line = json_card['type_line']
+            c.partner_type = self._determine_partnership(
+                keywords, oracle_text, type_line
+            )
                 
             return c, p
         except KeyError:
@@ -135,8 +142,51 @@ class Command(LoggingBaseCommand):
                 )
                 if 'image_uris' in face:
                     p.image_uri = face['image_uris'].get('normal')
+
+                # determine partnership
+                keywords = json_card['keywords']
+                oracle_text = face['oracle_text']
+                type_line = face['type_line']
+                c.partner_type = self._determine_partnership(
+                    keywords, oracle_text, type_line
+                )
+
                 return c, p
             except Exception as ex:
                 raise CantParseCardError() from ex
 
         raise CantParseCardError("card face oracle_ids don't match")
+
+    def _determine_partnership(self, keywords, oracle_text, type_line):
+        if 'Partner with' in keywords:
+            return self._determine_partner_with(oracle_text)
+        elif 'Partner' in keywords:
+            return PartnerType.PARTNER
+        elif 'Choose a Background' in oracle_text:
+            return PartnerType.CHOOSE_A_BACKGROUND
+        elif 'Background' in type_line:
+            return PartnerType.BACKGROUND
+        
+        return PartnerType.NONE
+
+    def _determine_partner_with(self, oracle_text):
+        if 'Partner with Blaring' in oracle_text:
+            return PartnerType.PARTNER_WITH_BLARING
+
+        elif 'Partner with Chakram' in oracle_text:
+            return PartnerType.PARTNER_WITH_CHAKRAM
+
+        elif 'Partner with Proud Mentor' in oracle_text:
+            return PartnerType.PARTNER_WITH_PROTEGE
+        elif 'Partner with Impetuous Protege' in oracle_text:
+            return PartnerType.PARTNER_WITH_PROTEGE
+
+        elif 'Partner with Soulblade' in oracle_text:
+            return PartnerType.PARTNER_WITH_SOULBLADE
+
+        elif 'Partner with Lore Weaver' in oracle_text:
+            return PartnerType.PARTNER_WITH_WEAVER
+        elif 'Partner with Ley Weaver' in oracle_text:
+            return PartnerType.PARTNER_WITH_WEAVER
+        
+        raise CantParseCardError(f'Unknown PARTNER_WITH_*: "{oracle_text}"')
