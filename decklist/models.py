@@ -337,3 +337,52 @@ class SiteStat(models.Model):
 
     def __str__(self):
         return f"{self.timestamp}: {self.legal_decks} decks"
+
+
+class Commander(models.Model):
+    commander1 = models.ForeignKey(
+        Card,
+        on_delete=models.PROTECT,
+        related_name='commander1_slots',
+    )
+    commander2 = models.ForeignKey(
+        Card,
+        on_delete=models.PROTECT,
+        related_name='commander2_slots',
+        blank=True,
+        null=True,
+    )
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=['commander1', 'commander2'],
+                name='unique_pair_of_commanders',
+                condition=Q(commander2__isnull=False),
+                violation_error_message='Commander pair is not unique',
+            ),
+            models.UniqueConstraint(
+                fields=['commander1'],
+                name='unique_single_commander',
+                condition=Q(commander2__isnull=True),
+                violation_error_message='Solo commander is not unique',
+            ),
+            models.CheckConstraint(
+                check=(
+                    Q(commander1_id__lte=models.F('commander2_id'))
+                    | Q(commander2__isnull=True)
+                ),
+                name='commander1_sorts_before_commander2',
+                violation_error_message='Commander 1 ID must sort before commander 2 ID',
+            ),
+        ]
+    
+    def __str__(self):
+        if self.commander2:
+            return f"{self.commander1.name} + {self.commander2.name}"
+        return self.commander1.name
+
+    def clean(self):
+        # try to move the lower card ID to the commander1 slot
+        if self.commander2 and self.commander1.id > self.commander2.id:
+            self.commander2, self.commander1 = self.commander1, self.commander2
