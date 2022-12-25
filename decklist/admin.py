@@ -34,6 +34,9 @@ class DeckAdmin(admin.ModelAdmin):
     search_fields = [
         'name', 'creator_display_name',
     ]
+    autocomplete_fields = ('commander',)
+    list_display = ('name', 'pdh_legal')
+    list_filter = ('pdh_legal',)
 
 
 class CardInDeckAdmin(admin.ModelAdmin):
@@ -46,6 +49,10 @@ class CommanderAdmin(admin.ModelAdmin):
     list_display = ('commander1', 'commander2')
     list_display_links = ('commander1', 'commander2')
     autocomplete_fields = ('commander1', 'commander2')
+    search_fields = [
+        'commander1__name',
+        'commander2__name',
+    ]
 
 
 admin.site.register(models.User, UserAdmin)

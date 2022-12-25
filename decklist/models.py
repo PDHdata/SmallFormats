@@ -38,7 +38,16 @@ class Deck(models.Model):
     creator_display_name = models.CharField(max_length=50, blank=True)
     ingested_time = models.DateTimeField(auto_now_add=True)
     updated_time = models.DateTimeField(default=timezone.now)
+
+    # these fields are computed, not canonical data
     pdh_legal = models.BooleanField(default=False, verbose_name='is PDH-legal')
+    commander = models.ForeignKey(
+        'Commander',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='decks',
+    )
 
     def __str__(self):
         return self.name
