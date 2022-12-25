@@ -97,6 +97,7 @@ class _BaseCrawler:
             this_id = str(deck_data[self.ID_KEY])
             if this_id in existing_decks.keys():
                 deck = existing_decks[this_id]
+                deck.commander = None # reset commander in case it changed
             else:
                 deck = Deck()
                 deck.pdh_legal = False # until proven otherwise!
