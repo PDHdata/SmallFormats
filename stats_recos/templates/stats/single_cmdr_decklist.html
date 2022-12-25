@@ -26,7 +26,7 @@
     <tr>
       <td>
         {% if deck.source_link %}<a href="{{ deck.source_link }}">{{ deck.name }}</a>{% else %}{{ deck.name }}{% endif %}
-        {% for cmdr in deck.commanders %}{% if cmdr.card != card %}<small>(with <a href="{% url 'cmdr-single' cmdr.card.id %}">{{ cmdr.card.name }}</a>)</small>{% endif %}{% endfor %}
+        {% for cmdr in deck.commander_cards %}{% if cmdr.card != card %}<small>(with <a href="{% url 'cmdr-single' cmdr.card.id %}">{{ cmdr.card.name }}</a>)</small>{% endif %}{% endfor %}
       </td>
       <td>{{ deck.creator_display_name }}</td>
       <td>{{ deck.get_source_display }}</td>

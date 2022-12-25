@@ -51,7 +51,7 @@ class Deck(models.Model):
             ),
         ]
 
-    def commanders(self):
+    def commander_cards(self):
         return (
             self.card_list
             .filter(is_pdh_commander=True)
@@ -145,7 +145,7 @@ class Deck(models.Model):
         ) > 0:
             return False, "contains banned card"
 
-        cmdr_count = self.commanders().count()
+        cmdr_count = self.commander_cards().count()
 
         # deck has a commander
         if cmdr_count < 1:
@@ -156,7 +156,7 @@ class Deck(models.Model):
             return False, f"{cmdr_count} is too many commanders"
             
         # all commanders printed at uncommon and have correct types
-        for entry in self.commanders():
+        for entry in self.commander_cards():
             if not entry.card.ever_uncommon:
                 return False, f"commander {entry.card.name} not printed at uncommon"
             if not 'Creature' in entry.card.type_line and not 'Background' in entry.card.type_line:

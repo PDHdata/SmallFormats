@@ -33,7 +33,7 @@
     {% for deck in top_decks %}
     <li class="list-group-item">
       {% if deck.source_link %}<a href="{{ deck.source_link }}">{{ deck.name }}</a>{% else %}{{ deck.name }}{% endif %} by {{ deck.creator_display_name }}
-      {% for cmdr in deck.commanders %}{% if cmdr.card != card %}<small>(with <a href="{% url 'cmdr-single' cmdr.card.id %}">{{ cmdr.card.name }}</a>)</small>{% endif %}{% endfor %}
+      {% for cmdr in deck.commander_cards %}{% if cmdr.card != card %}<small>(with <a href="{% url 'cmdr-single' cmdr.card.id %}">{{ cmdr.card.name }}</a>)</small>{% endif %}{% endfor %}
     </li>
     {% endfor %}
     {% if top_decks|length < commands %}
