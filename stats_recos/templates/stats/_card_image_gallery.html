@@ -53,13 +53,13 @@
   document.getElementById("moreLeft").addEventListener("click", () => {
     currentIdx = (currentIdx - 1 + images.length) % images.length;
     imgTarget.src = images[currentIdx].img;
-    setCode.textContent = images[currentIdx].set;
+    setcodeTarget.textContent = images[currentIdx].set;
     {% if request.user.is_superuser %}printIdTarget.value = images[currentIdx].id;{% endif %}
   });
   document.getElementById("moreRight").addEventListener("click", () => {
     currentIdx = (currentIdx + 1) % images.length;
     imgTarget.src = images[currentIdx].img;
-    setCode.textContent = images[currentIdx].set;
+    setcodeTarget.textContent = images[currentIdx].set;
     {% if request.user.is_superuser %}printIdTarget.value = images[currentIdx].id;{% endif %}
   });
 </script>
