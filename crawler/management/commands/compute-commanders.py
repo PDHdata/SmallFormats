@@ -26,9 +26,6 @@ class Command(LoggingBaseCommand):
                         commander1=commander1.card,
                         commander2=None,
                     )
-                    if created: self.stdout.write(f"created commander {cmdr}")
-                    deck.commander = cmdr
-                    deck.save()
                 case [commander1, commander2]:
                     # commander1 should have an ID <= commander2's
                     if commander1.card.id > commander2.card.id:
@@ -37,11 +34,18 @@ class Command(LoggingBaseCommand):
                         commander1=commander1.card,
                         commander2=commander2.card,
                     )
-                    if created: self.stdout.write(f"created commander {cmdr}")
-                    deck.commander = cmdr
-                    deck.save()
                 case _:
                     self._err(f"{deck} ({deck.id}) has illegal number of commanders")
                     continue
+
+            # reminder: if a value was bound in a previous iteration, it will
+            # remain bound here even if not set in the most recent iteration.
+            # make sure to `continue` out of any match branch that shouldn't
+            # save the deck, and make sure `cmdr`/`deck`/`created` are properly
+            # set before getting here.
+            if created:
+                self._log(f"created commander {cmdr}")
+            deck.commander = cmdr
+            deck.save()
         
         self._log("Done!")
