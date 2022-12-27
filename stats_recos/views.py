@@ -582,6 +582,27 @@ def single_cmdr_new(request, cmdr_id):
     )
 
 
+def single_cmdr_decklist_new(request, cmdr_id):
+    cmdr = get_object_or_404(Commander, pk=cmdr_id)
+
+    commands = cmdr.decks.order_by('-updated_time')
+    paginator = Paginator(commands, 20, orphans=3)
+    page_number = request.GET.get('page')
+    cmdrs_page = paginator.get_page(page_number)
+
+    return render(
+        request,
+        "stats/single_cmdr_decklist_new.html",
+        context={
+            'cmdr': cmdr,
+            'commander1': cmdr.commander1,
+            'commander2': cmdr.commander2,
+            'is_pair': cmdr.commander2 is not None,
+            'decks': cmdrs_page,
+        },
+    )
+
+
 def single_cmdr_partners(request, card_id):
     card = get_object_or_404(Card, pk=card_id)
 

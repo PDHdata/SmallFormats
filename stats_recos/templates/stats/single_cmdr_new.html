@@ -17,8 +17,7 @@
     {% endif %}
   </li>
   <li class="nav-item">
-    {# FIXME #}
-    <a class="nav-link" href="{% url 'cmdr-decklist' commander1.id %}">Decks</a>
+    <a class="nav-link" href="{% url 'cmdr-decklist-new' cmdr.id %}">Decks</a>
   </li>
   <li class="nav-item">
     {# FIXME #}
@@ -50,7 +49,7 @@
     </li>
     {% endfor %}
     {% if top_decks|length < commands %}
-      <li class="list-group-item"><a href="{# FIXME #}{% url 'cmdr-decklist' commander1.id %}">More decks commanded by {{ cmdr }}</a></li>
+      <li class="list-group-item"><a href="{% url 'cmdr-decklist-new' cmdr.id %}">More decks commanded by {{ cmdr }}</a></li>
     {% endif %}
   </ul>
 </div>

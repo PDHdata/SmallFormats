@@ -1,0 +1,49 @@
+{% extends 'base.html' %}
+{% load simple_math %}
+{% block title %}Decks commanded by {{ cmdr }}{% endblock %}
+{% block body %}
+<h1>{{ cmdr }}</h1>
+<ul class="nav nav-tabs mb-2">
+  <li class="nav-item">
+    {% if is_pair %}
+    <a class="nav-link" href="{% url 'cmdr-single-new' cmdr.id %}">Commander pair</a>
+    {% else %}
+    <a class="nav-link" href="{% url 'cmdr-single-new' cmdr.id %}">Commander</a>
+    {% endif %}
+  </li>
+  <li class="nav-item">
+    <a class="nav-link active" href="{% url 'cmdr-decklist-new' cmdr.id %}">Decks</a>
+  </li>
+  <li class="nav-item">
+    {# FIXME #}
+    <a class="nav-link" href="{% url 'card-single' commander1.id %}">Card</a>
+  </li>
+</ul>
+<div class="container">
+  <table class="table mb-3">
+    <tr><th>Deck name</th><th>Creator</th><th>Source</th><tr>
+    {% for deck in decks %}
+    <tr>
+      <td>
+        {% if deck.source_link %}<a href="{{ deck.source_link }}">{{ deck.name }}</a>{% else %}{{ deck.name }}{% endif %}
+      </td>
+      <td>{{ deck.creator_display_name }}</td>
+      <td>{{ deck.get_source_display }}</td>
+    </tr>
+    {% empty %}
+    <tr><td colspan="3">No decks helmed by {{ cmdr }}.</td></tr>
+    {% endfor %}
+  </table>
+  <p>
+    {% if decks.has_previous %}
+    <a href="?page=1">first</a>
+    <a href="?page={{ decks.previous_page_number }}">previous</a>
+    {% endif %}
+    (page {{ decks.number }} of {{ decks.paginator.num_pages }})
+    {% if decks.has_next %}
+    <a href="?page={{ decks.next_page_number }}">next</a>
+    <a href="?page={{ decks.paginator.num_pages }}">last</a>
+    {% endif %}
+  </p>
+</div>
+{% endblock %}
