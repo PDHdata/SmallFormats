@@ -398,12 +398,9 @@ def single_card(request, card_id):
     )
 
     commands = (
-        Deck.objects
-        .filter(
-            pdh_legal=True,
-            card_list__card=card,
-            card_list__is_pdh_commander=True,
-        )
+        Commander.objects
+        .filter(Q(commander1=card) | Q(commander2=card))
+        .count()
     )
 
     cmdrs = (
@@ -429,16 +426,13 @@ def single_card(request, card_id):
     page_number = request.GET.get('page')
     cmdrs_page = paginator.get_page(page_number)
 
-    partners = _partners_with_query(card)
-
     return render(
         request,
         "stats/single_card.html",
         context={
             'card': card,
             'is_in': is_in.count(),
-            'commands': commands.count(),
-            'has_partners': partners.count() > 0,
+            'is_commander': commands > 0,
             'could_be_in': could_be_in,
             'commanders': cmdrs_page,
         },
