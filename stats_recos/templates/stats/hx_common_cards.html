@@ -12,8 +12,8 @@
   <div class="card-footer">
     <ul class="nav nav-pills">
     {% if common_cards.has_previous %}
-    <li class="nav-item"><a class="nav-link" hx-get="{% url 'hx-common-cards' cmdr_id card_type '1' %}" href="">first</a></li>
-    <li class="nav-item"><a class="nav-link" hx-get="{% url 'hx-common-cards' cmdr_id card_type common_cards.previous_page_number %}"
+    <li class="nav-item"><a class="nav-link" hx-get="{% url view_name cmdr_id card_type '1' %}" href="">first</a></li>
+    <li class="nav-item"><a class="nav-link" hx-get="{% url view_name cmdr_id card_type common_cards.previous_page_number %}"
       href="">prev</a></li>
     {% else %}
     <li class="nav-item"><span class="nav-link disabled">first</span></li>
@@ -21,9 +21,9 @@
     {% endif %}
     <li class="nav-item"><span class="nav-link active">{{ common_cards.number }} of {{ common_cards.paginator.num_pages }}</span></li>
     {% if common_cards.has_next %}
-    <li class="nav-item"><a class="nav-link" hx-get="{% url 'hx-common-cards' cmdr_id card_type common_cards.next_page_number %}"
+    <li class="nav-item"><a class="nav-link" hx-get="{% url view_name cmdr_id card_type common_cards.next_page_number %}"
       href="">next</a></li>
-    <li class="nav-item"><a class="nav-link" hx-get="{% url 'hx-common-cards' cmdr_id card_type common_cards.paginator.num_pages %}"
+    <li class="nav-item"><a class="nav-link" hx-get="{% url view_name cmdr_id card_type common_cards.paginator.num_pages %}"
       href="">last</a></li>
     {% else %}
     <li class="nav-item"><span class="nav-link disabled">next</span></li>

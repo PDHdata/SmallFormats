@@ -603,6 +603,84 @@ def single_cmdr_decklist_new(request, cmdr_id):
     )
 
 
+def hx_common_cards_new(request, cmdr_id, card_type, page_number):
+    if not request.htmx:
+        return HttpResponseNotAllowed("expected HTMX request")
+    
+    cmdr = get_object_or_404(Commander, pk=cmdr_id)
+
+    commands_count = cmdr.decks.count()
+
+    match card_type:
+        case 'c':
+            filter_to = 'Creature'
+            card_type_plural = 'creatures'
+        case 'a':
+            filter_to = 'Artifact'
+            card_type_plural = 'artifacts'
+        case 'e':
+            filter_to = 'Enchantment'
+            card_type_plural = 'enchantments'
+        case 'i':
+            filter_to = 'Instant'
+            card_type_plural = 'instants'
+        case 's':
+            filter_to = 'Sorcery'
+            card_type_plural = 'sorceries'
+        case 'p':
+            filter_to = 'Planeswalker'
+            card_type_plural = 'planeswalkers'
+        case 'l':
+            filter_to = 'Land'
+            card_type_plural = 'lands'
+        case 'g':
+            filter_to = 'Legendary'
+            card_type_plural = 'legendaries'
+        case _:
+            return HttpResponseNotAllowed()
+
+    
+    common_cards = (
+        CardInDeck.objects
+        .filter(
+            is_pdh_commander=False,
+            deck__commander=cmdr,
+        )
+        .exclude(card__type_line__contains='Basic')
+        .filter(card__type_line__contains=filter_to)
+        .values('card')
+        .annotate(count=Count('deck'))
+        .values('count', 'card__id', 'card__name')
+        .filter(count__gt=1)
+        .order_by('-count')
+    )
+    paginator = Paginator(common_cards, 10, orphans=3)
+    cards_page = paginator.get_page(page_number)
+
+    response = render(
+        request,
+        "stats/hx_common_cards.html",
+        context={
+            'view_name': 'hx-common-cards-new',
+            'cmdr_id': cmdr.id,
+            'card_type': card_type,
+            'card_type_plural': card_type_plural,
+            'commands': commands_count,
+            'common_cards': cards_page,
+        },
+    )
+    
+    return trigger_client_event(
+        response,
+        "page_move",
+        {
+            'type': card_type,
+            'page': page_number,
+        },
+        after="settle",
+    )
+
+
 def single_cmdr_partners(request, card_id):
     card = get_object_or_404(Card, pk=card_id)
 
@@ -725,6 +803,7 @@ def hx_common_cards(request, card_id, card_type, page_number):
         request,
         "stats/hx_common_cards.html",
         context={
+            'view_name': 'hx-common-cards',
             'cmdr_id': card_id,
             'card_type': card_type,
             'card_type_plural': card_type_plural,
