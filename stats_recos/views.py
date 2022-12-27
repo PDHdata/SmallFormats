@@ -6,7 +6,7 @@ from django.core.paginator import Paginator
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_POST
 from django.utils import timezone
-from decklist.models import Card, Deck, Printing, CardInDeck, SiteStat
+from decklist.models import Card, Deck, Printing, CardInDeck, SiteStat, Commander
 from .wubrg_utils import COLORS, filter_to_name, name_to_symbol
 from django_htmx.http import trigger_client_event, HttpResponseClientRefresh
 import operator
@@ -526,6 +526,58 @@ def single_cmdr(request, card_id):
     return render(
         request,
         "stats/single_cmdr.html",
+        context=context,
+    )
+
+
+def single_cmdr_new(request, cmdr_id):
+    cmdr = get_object_or_404(Commander, pk=cmdr_id)
+
+    if cmdr.commander2:
+        identity = {
+            'w': cmdr.commander1.identity_w | cmdr.commander2.identity_w,
+            'u': cmdr.commander1.identity_u | cmdr.commander2.identity_u,
+            'b': cmdr.commander1.identity_b | cmdr.commander2.identity_b,
+            'r': cmdr.commander1.identity_r | cmdr.commander2.identity_r,
+            'g': cmdr.commander1.identity_g | cmdr.commander2.identity_g,
+        }
+    else:
+        identity = {
+            'w': cmdr.commander1.identity_w,
+            'u': cmdr.commander1.identity_u,
+            'b': cmdr.commander1.identity_b,
+            'r': cmdr.commander1.identity_r,
+            'g': cmdr.commander1.identity_g,
+        }
+
+    could_be_in = _deck_count_at_least_color(**identity)
+
+    commands = cmdr.decks.order_by('-updated_time')
+
+    context = {}
+    # card type codes, see `hx_common_cards`
+    for letter in 'caeisplg':
+        if page_number := request.GET.get(letter, default=None):
+            try:
+                if int(page_number) > 1:
+                    context[f'page_{letter}'] = page_number
+            except ValueError:
+                # user probably munged the URL with something like "?c=foo"
+                pass
+    
+    context.update({
+        'cmdr': cmdr,
+        'commander1': cmdr.commander1,
+        'commander2': cmdr.commander2,
+        'is_pair': cmdr.commander2 is not None,
+        'commands': commands.count(),
+        'top_decks': commands[:4],
+        'could_be_in': could_be_in,
+    })
+
+    return render(
+        request,
+        "stats/single_cmdr_new.html",
         context=context,
     )
 

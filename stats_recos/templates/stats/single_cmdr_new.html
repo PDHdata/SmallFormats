@@ -2,42 +2,55 @@
 {% load humanize %}
 {% load simple_math %}
 {% load mana %}
-{% block title %}{{ card.name }} (commander){% endblock %}
+{% block title %}{{ cmdr }} (commander){% endblock %}
 {% block opengraph %}
 {% include '_opengraph.html' with og_cardname=card.name og_url=request.build_absolute_uri og_image=card.default_printing.image_uri %}
 {% endblock %}
 {% block body %}
-<h1>{{ card.name }}</h1>
+<h1>{{ cmdr }}</h1>
 <ul class="nav nav-tabs mb-2">
   <li class="nav-item">
-    <a class="nav-link active" href="{% url 'cmdr-single' card.id %}">Commander</a>
-  </li>
-  {% if has_partners %}
-  <li class="nav-item">
-    <a class="nav-link" href="{% url 'cmdr-partners' card.id %}">Partners</a>
-  </li>
-  {% endif %}
-  <li class="nav-item">
-    <a class="nav-link" href="{% url 'cmdr-decklist' card.id %}">Decks</a>
+    {% if is_pair %}
+    <a class="nav-link active" href="{% url 'cmdr-single-new' cmdr.id %}">Commander pair</a>
+    {% else %}
+    <a class="nav-link active" href="{% url 'cmdr-single-new' cmdr.id %}">Commander</a>
+    {% endif %}
   </li>
   <li class="nav-item">
-    <a class="nav-link" href="{% url 'card-single' card.id %}">Card</a>
+    {# FIXME #}
+    <a class="nav-link" href="{% url 'cmdr-decklist' commander1.id %}">Decks</a>
+  </li>
+  <li class="nav-item">
+    {# FIXME #}
+    <a class="nav-link" href="{% url 'card-single' commander1.id %}">Card</a>
   </li>
 </ul>
 <div class="clearfix">
+  {% with card=commander1 %}
   {% include 'stats/_card_image_gallery.html' with pos="start" %}
-  <p>{{ card.type_line }} {{ card.color_identity|mana_symbols|safe }}</p>
-  <p><a href="{% url 'card-single' card.id %}">View as card</a> | <a href="{{ card.scryfall_uri }}">View on Scryfall</a></p>
-  <p>Commands {{ commands|intcomma }} of {{ could_be_in|intcomma }} decks ({{ commands|percent_of:could_be_in }}).</p>
+  {% endwith %}
+  {% if is_pair %}
+  {% with card=commander2 %}
+  {% include 'stats/_card_image_gallery.html' with pos="end" %}
+  {% endwith %}
+  {% endif %}
+  <p><span class="d-md-none">{{ commander1.name }}<br></span>{{ commander1.type_line }} {{ commander1.color_identity|mana_symbols|safe }}</p>
+  <p><a href="{% url 'card-single' commander1.id %}">View as card</a> | <a href="{{ commander1.scryfall_uri }}">View on Scryfall</a></p>
+  {% if is_pair %}
+  <div class="text-md-end">
+  <p><span class="d-md-none">{{ commander2.name }}<br></span>{{ commander2.type_line }} {{ commander2.color_identity|mana_symbols|safe }}</p>
+  <p><a href="{% url 'card-single' commander2.id %}">View as card</a> | <a href="{{ commander2.scryfall_uri }}">View on Scryfall</a></p>
+  </div>
+  {% endif %}
+  <p>{% if is_pair %}Command{% else %}Commands{% endif %} {{ commands|intcomma }} of {{ could_be_in|intcomma }} decks ({{ commands|percent_of:could_be_in }}).</p>
   <ul class="list-group mb-3 ms-sm-3 me-sm-3">
     {% for deck in top_decks %}
     <li class="list-group-item">
       {% if deck.source_link %}<a href="{{ deck.source_link }}">{{ deck.name }}</a>{% else %}{{ deck.name }}{% endif %} by {{ deck.creator_display_name }}
-      {% for cmdr in deck.commander_cards %}{% if cmdr.card != card %}<small>(with <a href="{% url 'cmdr-single' cmdr.card.id %}">{{ cmdr.card.name }}</a>)</small>{% endif %}{% endfor %}
     </li>
     {% endfor %}
     {% if top_decks|length < commands %}
-      <li class="list-group-item"><a href="{% url 'cmdr-decklist' card.id %}">More decks commanded by {{ card.name }}</a></li>
+      <li class="list-group-item"><a href="{# FIXME #}{% url 'cmdr-decklist' commander1.id %}">More decks commanded by {{ cmdr }}</a></li>
     {% endif %}
   </ul>
 </div>
@@ -53,6 +66,8 @@
     {% comment %} {% firstof page_p '1' as p %} {% endcomment %}
     {% firstof page_l '1' as l %}
     {% firstof page_g '1' as g %}
+    {# FIXME #}
+    {% with card=commander1 %}
     <div class="col" hx-get="{% url 'hx-common-cards' card.id 'c' c %}" hx-trigger="load" hx-swap="outerHTML"><div class="card mb-3"><h5 class="card-header">Creatures</h5><div class="card-body"><p class="card-text placeholder-glow"><span class="placeholder col-5"></span><span class="placeholder col-6"></span><span class="placeholder col-7"></span><span class="placeholder col-4"></span></p></div></div></div>
     <div class="col" hx-get="{% url 'hx-common-cards' card.id 'a' a %}" hx-trigger="load" hx-swap="outerHTML"><div class="card mb-3"><h5 class="card-header">Artifacts</h5><div class="card-body"><p class="card-text placeholder-glow"><span class="placeholder col-5"></span><span class="placeholder col-6"></span><span class="placeholder col-7"></span><span class="placeholder col-4"></span></p></div></div></div>
     <div class="col" hx-get="{% url 'hx-common-cards' card.id 'e' e %}" hx-trigger="load" hx-swap="outerHTML"><div class="card mb-3"><h5 class="card-header">Enchantments</h5><div class="card-body"><p class="card-text placeholder-glow"><span class="placeholder col-5"></span><span class="placeholder col-6"></span><span class="placeholder col-7"></span><span class="placeholder col-4"></span></p></div></div></div>
@@ -61,6 +76,7 @@
     {% comment %} <div class="col" hx-get="{% url 'hx-common-cards' card.id 'p' p %}" hx-trigger="load" hx-swap="outerHTML"><div class="card mb-3"><h5 class="card-header">Planeswalkers</h5><div class="card-body"><p class="card-text placeholder-glow"><span class="placeholder col-5"></span><span class="placeholder col-6"></span><span class="placeholder col-7"></span><span class="placeholder col-4"></span></p></div></div></div> {% endcomment %}
     <div class="col" hx-get="{% url 'hx-common-cards' card.id 'l' l %}" hx-trigger="load" hx-swap="outerHTML"><div class="card mb-3"><h5 class="card-header">Lands</h5><div class="card-body"><p class="card-text placeholder-glow"><span class="placeholder col-5"></span><span class="placeholder col-6"></span><span class="placeholder col-7"></span><span class="placeholder col-4"></span></p></div></div></div>
     <div class="col" hx-get="{% url 'hx-common-cards' card.id 'g' g %}" hx-trigger="load" hx-swap="outerHTML"><div class="card mb-3"><h5 class="card-header">Legendaries</h5><div class="card-body"><p class="card-text placeholder-glow"><span class="placeholder col-5"></span><span class="placeholder col-6"></span><span class="placeholder col-7"></span><span class="placeholder col-4"></span></p></div></div></div>
+    {% endwith %}
   </div>
 </div>
 {% endblock %}

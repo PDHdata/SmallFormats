@@ -25,7 +25,7 @@
 </ul>
 
 <div class="clearfix">
-  {% include 'stats/_card_image_gallery.html' %}
+  {% include 'stats/_card_image_gallery.html' with pos="start" %}
   <p>{{ card.type_line }} {{ card.color_identity|mana_symbols|safe }}</p>
   <p>{% if commands > 0 %}<a href="{% url 'cmdr-single' card.id %}">View as commander</a> | {% endif %}<a href="{{ card.scryfall_uri }}">View on Scryfall</a></p>
   <p>Appears in {{ is_in|intcomma }} of {{ could_be_in|intcomma }} decks ({{ is_in|percent_of:could_be_in }}).</p>
