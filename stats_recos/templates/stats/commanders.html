@@ -14,13 +14,13 @@
       <th># of decks</th>
       <th>% of decks</th>
     </tr>
-    {% for card in cards %}
+    {% for cmdr in commanders %}
     <tr>
-      <td>{{ cards.start_index|plus:forloop.counter0 }}</td>
-      <td><a href="{% url 'cmdr-single' card.id %}">{{ card.name }}{% if "Background" in card.type_line %} <span class="badge bg-primary">Background</span>{% endif %}{% if "Adventure" in card.type_line %} <span class="badge bg-secondary">Adventure</span>{% endif %}</a></td>
-      <td>{{ card.color_identity|mana_symbols|safe }}</td>
-      <td>{{ card.num_decks|intcomma }}</td>
-      <td>{{ card.num_decks|percent_of:deck_count }}</td>
+      <td>{{ commanders.start_index|plus:forloop.counter0 }}</td>
+      <td><a href="{% url 'cmdr-single-new' cmdr.id %}">{{ cmdr }}</a></td>
+      <td>{{ cmdr.color_identity|mana_symbols|safe }}</td>
+      <td>{{ cmdr.num_decks|intcomma }}</td>
+      <td>{{ cmdr.num_decks|percent_of:deck_count }}</td>
     </tr>
     {% empty %}
     <tr><td colspan="5">Sorry, no commanders like that.</td></tr>
@@ -34,14 +34,14 @@
     </tr>
   </table>
   <p>
-    {% if cards.has_previous %}
+    {% if commanders.has_previous %}
     <a href="?page=1">first</a>
-    <a href="?page={{ cards.previous_page_number }}">previous</a>
+    <a href="?page={{ commanders.previous_page_number }}">previous</a>
     {% endif %}
-    (page {{ cards.number }} of {{ cards.paginator.num_pages }})
-    {% if cards.has_next %}
-    <a href="?page={{ cards.next_page_number }}">next</a>
-    <a href="?page={{ cards.paginator.num_pages }}">last</a>
+    (page {{ commanders.number }} of {{ commanders.paginator.num_pages }})
+    {% if commanders.has_next %}
+    <a href="?page={{ commanders.next_page_number }}">next</a>
+    <a href="?page={{ commanders.paginator.num_pages }}">last</a>
     {% endif %}
   </p>
 </div>

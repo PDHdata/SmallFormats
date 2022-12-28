@@ -395,3 +395,11 @@ class Commander(models.Model):
         # try to move the lower card ID to the commander1 slot
         if self.commander2 and self.commander1.id > self.commander2.id:
             self.commander2, self.commander1 = self.commander1, self.commander2
+
+    @property
+    def color_identity(self):
+        identity = [
+            x for x in "wubrg"
+            if getattr(self.commander1, f"identity_{x}") or (self.commander2 and getattr(self.commander2, f"identity_{x}"))
+        ]
+        return ''.join(identity).upper() if identity else 'C'

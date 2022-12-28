@@ -17,24 +17,28 @@ FRONT_PAGE_TOP_COMMANDERS_TO_ROTATE = 25
 
 
 def _deck_count_exact_color(w, u, b, r, g):
+    filters = []
+    # for each color...
+    for c in 'wubrg':
+        cmdr1 = f'commander1__identity_{c}'
+        cmdr2 = f'commander2__identity_{c}'
+        # ... if we want the color, either partner can bring it
+        if locals()[c]:
+            filters.append(Q(**dict([(cmdr1,True),])) | Q(**dict([(cmdr2,True),])))
+        # ... if we don't want the color, neither partner can bring it
+        # ... or else partner2 can be empty
+        else:
+            filters.append(
+                Q(**dict([(cmdr1,False),])) & 
+                (Q(commander2__isnull=True) | Q(**dict([(cmdr2,False),])))
+            )
+    
     return (
-        CardInDeck.objects
-        .filter(
-            deck__pdh_legal=True,
-            is_pdh_commander=True,
-        )
-        .aggregate(count=(
-            Count('deck',
-            filter=
-                Q(card__identity_w=w) & 
-                Q(card__identity_u=u) &
-                Q(card__identity_b=b) &
-                Q(card__identity_r=r) &
-                Q(card__identity_g=g),
-            distinct=True,
-            ))
-        )
-    )['count']
+        Commander.objects
+        .filter(decks__pdh_legal=True)
+        .filter(*filters)
+        .count()
+    )
 
 
 def _deck_count_at_least_color(w, u, b, r, g):
@@ -44,21 +48,20 @@ def _deck_count_at_least_color(w, u, b, r, g):
     # build up a filter for the aggregation
     # that has a Q object set to True for each color we
     # care about and nothing for the colors which we don't
-    q_objs = []
+    filters = []
     for c in 'wubrg':
         if locals()[c]:
-            key = f'card__identity_{c}'
-            q_objs.append(Q(**dict([(key,True),])))
-    filter_q = functools.reduce(operator.and_, q_objs)
+            cmdr1 = f'commander1__identity_{c}'
+            cmdr2 = f'commander2__identity_{c}'
+            filters.append(Q(**dict([(cmdr1,True),])) | Q(**dict([(cmdr2,True),])))
+    filters = functools.reduce(operator.and_, filters)
 
     return (
-        CardInDeck.objects
-        .filter(
-            deck__pdh_legal=True,
-            is_pdh_commander=True,
-        )
-        .aggregate(count=Count('deck', filter=filter_q, distinct=True))
-    )['count']
+        Commander.objects
+        .filter(decks__pdh_legal=True)
+        .filter(filters)
+        .count()
+    )
 
 
 @functools.lru_cache(maxsize=2)
@@ -132,26 +135,24 @@ def commander_index(request):
 
 
 def top_commanders(request):
-    cmdr_cards = (
-        Card.objects
-        .filter(
-            deck_list__deck__pdh_legal=True,
-            deck_list__is_pdh_commander=True,
-        )
-        .annotate(num_decks=Count('deck_list'))
+    cmdrs = (
+        Commander.objects
+        .filter(decks__pdh_legal=True)
+        .annotate(num_decks=Count('decks'))
         .order_by('-num_decks')
     )
-    deck_count = Deck.objects.filter(pdh_legal=True).count()
-    paginator = Paginator(cmdr_cards, 25, orphans=3)
+    paginator = Paginator(cmdrs, 25, orphans=3)
     page_number = request.GET.get('page')
-    cards_page = paginator.get_page(page_number)
+    cmdrs_page = paginator.get_page(page_number)
+
+    deck_count = Deck.objects.filter(pdh_legal=True).count()
 
     return render(
         request,
         "stats/commanders.html",
         context={
             'heading': 'top',
-            'cards': cards_page,
+            'commanders': cmdrs_page,
             'deck_count': deck_count,
         },
     )
@@ -184,39 +185,39 @@ def top_commanders_background(request):
 
 
 def commanders_by_color(request, w=False, u=False, b=False, r=False, g=False):
+    filters = []
+    # for each color...
+    for c in 'wubrg':
+        cmdr1 = f'commander1__identity_{c}'
+        cmdr2 = f'commander2__identity_{c}'
+        # ... if we want the color, either partner can bring it
+        if locals()[c]:
+            filters.append(Q(**dict([(cmdr1,True),])) | Q(**dict([(cmdr2,True),])))
+        # ... if we don't want the color, neither partner can bring it
+        # ... or else partner2 can be empty
+        else:
+            filters.append(
+                Q(**dict([(cmdr1,False),])) & 
+                (Q(commander2__isnull=True) | Q(**dict([(cmdr2,False),])))
+            )
+
     cmdrs = (
-        Card.objects
-        .prefetch_related('printings')
-        .filter(
-            identity_w=w,
-            identity_u=u,
-            identity_b=b,
-            identity_r=r,
-            identity_g=g,
-        )
-        .filter(
-            deck_list__is_pdh_commander=True,
-        )
-        .annotate(num_decks=Count(
-            'deck_list',
-            distinct=True,
-            filter=Q(deck_list__is_pdh_commander=True) & 
-                   Q(deck_list__deck__pdh_legal=True)
-        ))
-        .filter(num_decks__gt=0)
+        Commander.objects
+        .filter(decks__pdh_legal=True)
+        .filter(*filters)
+        .annotate(num_decks=Count('decks'))
         .order_by('-num_decks')
     )
     paginator = Paginator(cmdrs, 25, orphans=3)
     page_number = request.GET.get('page')
-    cards_page = paginator.get_page(page_number)
+    cmdrs_page = paginator.get_page(page_number)
 
     return render(
         request,
         "stats/commanders.html",
         context={
             'heading': filter_to_name({'W':w,'U':u,'B':b,'R':r,'G':g}),
-            'cards': cards_page,
-            # TODO: probably fails to account for partners
+            'commanders': cmdrs_page,
             'deck_count': _deck_count_exact_color(w, u, b, r, g),
         },
     )
