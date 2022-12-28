@@ -87,7 +87,7 @@ def _get_face_card(index):
             return (
                 top_cmdr.commander1.name,
                 top_cmdr.commander1.default_printing.image_uri,
-                reverse('cmdr-single-new', args=(top_cmdr.id,)),
+                reverse('cmdr-single', args=(top_cmdr.id,)),
             )
 
     # this happens if we have no cards/printings in the database, or
@@ -441,92 +441,7 @@ def single_card_pairings(request, card_id):
     )
 
 
-def _partners_with_query(card):
-    multiple_commanders = (
-        Deck.objects
-        .filter(pdh_legal=True)
-        .annotate(cmdr_count=Count(
-            'card_list', 
-            filter=Q(card_list__is_pdh_commander=True),
-        ))
-        .filter(cmdr_count__gt=1)
-        .values_list('id')
-    )
-
-    helmed_decks = (
-        Deck.objects
-        .filter(
-            pdh_legal=True,
-            card_list__card=card,
-            card_list__is_pdh_commander=True,
-        )
-        .values_list('id')
-    )
-
-    partnered_decks = multiple_commanders.intersection(helmed_decks)
-
-    return (
-        Card.objects
-        .filter(
-            deck_list__deck__in=partnered_decks,
-            deck_list__is_pdh_commander=True
-        )
-        .exclude(deck_list__card=card)
-        .annotate(paired_count=Count('deck_list__id'))
-        .order_by('-paired_count')
-    )
-
-
-def single_cmdr(request, card_id):
-    card = get_object_or_404(Card, pk=card_id)
-
-    could_be_in = _deck_count_at_least_color(
-        card.identity_w,
-        card.identity_u,
-        card.identity_b,
-        card.identity_r,
-        card.identity_g
-    )
-
-    commands = (
-        Deck.objects
-        .filter(
-            pdh_legal=True,
-            card_list__card=card,
-            card_list__is_pdh_commander=True,
-        )
-        .order_by('-updated_time')
-    )
-
-    partners = _partners_with_query(card)
-
-    context = {}
-    # card type codes, see `hx_common_cards`
-    for letter in 'caeisplg':
-        if page_number := request.GET.get(letter, default=None):
-            try:
-                if int(page_number) > 1:
-                    context[f'page_{letter}'] = page_number
-            except ValueError:
-                # user probably munged the URL with something like "?c=foo"
-                pass
-    
-    context.update({
-        'card': card,
-        'commands': commands.count(),
-        'top_decks': commands[:4],
-        'has_partners': partners.count() > 0,
-        'could_be_in': could_be_in,
-    })
-
-    return render(
-        request,
-        "stats/single_cmdr.html",
-        context=context,
-    )
-
-
-def single_cmdr_new(request, cmdr_id):
+def single_cmdr(request, cmdr_id):
     cmdr = get_object_or_404(Commander, pk=cmdr_id)
 
     if cmdr.commander2:
@@ -578,7 +493,7 @@ def single_cmdr_new(request, cmdr_id):
     )
 
 
-def single_cmdr_decklist_new(request, cmdr_id):
+def single_cmdr_decklist(request, cmdr_id):
     cmdr = get_object_or_404(Commander, pk=cmdr_id)
 
     commands = cmdr.decks.order_by('-updated_time')
@@ -599,7 +514,7 @@ def single_cmdr_decklist_new(request, cmdr_id):
     )
 
 
-def hx_common_cards_new(request, cmdr_id, card_type, page_number):
+def hx_common_cards(request, cmdr_id, card_type, page_number):
     if not request.htmx:
         return HttpResponseNotAllowed("expected HTMX request")
     
@@ -657,150 +572,7 @@ def hx_common_cards_new(request, cmdr_id, card_type, page_number):
         request,
         "stats/hx_common_cards.html",
         context={
-            'view_name': 'hx-common-cards-new',
             'cmdr_id': cmdr.id,
-            'card_type': card_type,
-            'card_type_plural': card_type_plural,
-            'commands': commands_count,
-            'common_cards': cards_page,
-        },
-    )
-    
-    return trigger_client_event(
-        response,
-        "page_move",
-        {
-            'type': card_type,
-            'page': page_number,
-        },
-        after="settle",
-    )
-
-
-def single_cmdr_partners(request, card_id):
-    card = get_object_or_404(Card, pk=card_id)
-
-    partners = _partners_with_query(card)
-    paginator = Paginator(partners, 20, orphans=3)
-    page_number = request.GET.get('page')
-    partners_page = paginator.get_page(page_number)
-
-    partners = _partners_with_query(card)
-    
-    return render(
-        request,
-        "stats/single_cmdr_partners.html",
-        context={
-            'card': card,
-            'partners': partners_page,
-        },
-    )
-
-
-def single_cmdr_decklist(request, card_id):
-    card = get_object_or_404(Card, pk=card_id)
-
-    commands = (
-        Deck.objects
-        .filter(
-            pdh_legal=True,
-            card_list__card=card,
-            card_list__is_pdh_commander=True,
-        )
-        .order_by('-updated_time')
-    )
-    paginator = Paginator(commands, 20, orphans=3)
-    page_number = request.GET.get('page')
-    cmdrs_page = paginator.get_page(page_number)
-
-    partners = _partners_with_query(card)
-    
-    return render(
-        request,
-        "stats/single_cmdr_decklist.html",
-        context={
-            'card': card,
-            'decks': cmdrs_page,
-            'has_partners': partners.count() > 0,
-        },
-    )
-
-
-def hx_common_cards(request, card_id, card_type, page_number):
-    if not request.htmx:
-        return HttpResponseNotAllowed("expected HTMX request")
-    
-    card = get_object_or_404(Card, pk=card_id)
-
-    commands_count = (
-        Deck.objects
-        .filter(
-            pdh_legal=True,
-            card_list__card=card,
-            card_list__is_pdh_commander=True,
-        )
-        .count()
-    )
-
-    match card_type:
-        case 'c':
-            filter_to = 'Creature'
-            card_type_plural = 'creatures'
-        case 'a':
-            filter_to = 'Artifact'
-            card_type_plural = 'artifacts'
-        case 'e':
-            filter_to = 'Enchantment'
-            card_type_plural = 'enchantments'
-        case 'i':
-            filter_to = 'Instant'
-            card_type_plural = 'instants'
-        case 's':
-            filter_to = 'Sorcery'
-            card_type_plural = 'sorceries'
-        case 'p':
-            filter_to = 'Planeswalker'
-            card_type_plural = 'planeswalkers'
-        case 'l':
-            filter_to = 'Land'
-            card_type_plural = 'lands'
-        case 'g':
-            filter_to = 'Legendary'
-            card_type_plural = 'legendaries'
-        case _:
-            return HttpResponseNotAllowed()
-
-    
-    common_cards = (
-        CardInDeck.objects
-        .filter(
-            is_pdh_commander=False,
-            deck__in=(
-                Deck.objects
-                .filter(
-                    pdh_legal=True,
-                    card_list__card=card,
-                )
-                .distinct()
-            ),
-        )
-        .exclude(card__type_line__contains='Basic')
-        .filter(card__type_line__contains=filter_to)
-        .values('card')
-        .annotate(count=Count('deck'))
-        .values('count', 'card__id', 'card__name')
-        .filter(count__gt=1)
-        .order_by('-count')
-    )
-    paginator = Paginator(common_cards, 10, orphans=3)
-    cards_page = paginator.get_page(page_number)
-
-    response = render(
-        request,
-        "stats/hx_common_cards.html",
-        context={
-            'view_name': 'hx-common-cards',
-            'cmdr_id': card_id,
             'card_type': card_type,
             'card_type_plural': card_type_plural,
             'commands': commands_count,

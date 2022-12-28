@@ -17,7 +17,7 @@
     {% for cmdr in commanders %}
     <tr>
       <td>{{ commanders.start_index|plus:forloop.counter0 }}</td>
-      <td><a href="{% url 'cmdr-single-new' cmdr.id %}">{{ cmdr }}</a></td>
+      <td><a href="{% url 'cmdr-single' cmdr.id %}">{{ cmdr }}</a></td>
       <td>{{ cmdr.color_identity|mana_symbols|safe }}</td>
       <td>{{ cmdr.num_decks|intcomma }}</td>
       <td>{{ cmdr.num_decks|percent_of:deck_count }}</td>

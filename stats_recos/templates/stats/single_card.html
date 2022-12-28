@@ -19,13 +19,13 @@
 <div class="clearfix">
   {% include 'stats/_card_image_gallery.html' with pos="start" %}
   <p>{{ card.type_line }} {{ card.color_identity|mana_symbols|safe }}</p>
-  <p>{% if solo_commander %}<a href="{% url 'cmdr-single-new' solo_commander.id %}">View as commander</a> | {% endif %}<a href="{{ card.scryfall_uri }}">View on Scryfall</a></p>
+  <p>{% if solo_commander %}<a href="{% url 'cmdr-single' solo_commander.id %}">View as commander</a> | {% endif %}<a href="{{ card.scryfall_uri }}">View on Scryfall</a></p>
   <p>Appears in {{ is_in|intcomma }} of {{ could_be_in|intcomma }} decks ({{ is_in|percent_of:could_be_in }}).</p>
   {% if commanders %}
   <p>Appears with these commanders:</p>
   <ul class="list-group mb-3 ms-sm-3 me-sm-3">
     {% for cmdr in commanders %}
-    <li class="list-group-item"><a href="{% url 'cmdr-single-new' cmdr.id %}">{{ cmdr }}</a> ({{ cmdr.count }})</li>
+    <li class="list-group-item"><a href="{% url 'cmdr-single' cmdr.id %}">{{ cmdr }}</a> ({{ cmdr.count }})</li>
     {% endfor %}
     <li class="list-group-item">
       {% if commanders.has_previous %}

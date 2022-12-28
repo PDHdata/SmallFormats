@@ -26,17 +26,13 @@ urlpatterns = (
 ] +
 [
     path('cmdr/top/', views.top_commanders, name="cmdr-top"),
-    path('cmdr/new/<int:cmdr_id>', views.single_cmdr_new, name="cmdr-single-new"),
-    path('cmdr/new/<int:cmdr_id>/decks', views.single_cmdr_decklist_new, name="cmdr-decklist-new"),
-    path('cmdr/<uuid:card_id>', views.single_cmdr, name="cmdr-single"),
-    path('cmdr/<uuid:card_id>/decks', views.single_cmdr_decklist, name="cmdr-decklist"),
-    path('cmdr/<uuid:card_id>/partners', views.single_cmdr_partners, name="cmdr-partners"),
+    path('cmdr/<int:cmdr_id>', views.single_cmdr, name="cmdr-single"),
+    path('cmdr/<int:cmdr_id>/decks', views.single_cmdr_decklist, name="cmdr-decklist"),
     path('card/top/', views.top_cards, name="card-top"),
     path('card/<uuid:card_id>', views.single_card, name="card-single"),
     path('card/<uuid:card_id>/pairs', views.single_card_pairings, name="card-single-pairings"),
     path('card/<uuid:card_id>/setimage', views.set_editorial_image, name="card-setimage"),
     path('land/top/', views.top_lands, name="land-top"),
-    path('hx/cmdr/<uuid:card_id>/<card_type>/<int:page_number>', views.hx_common_cards, name="hx-common-cards"),
-    path('hx/cmdr/new/<int:cmdr_id>/<card_type>/<int:page_number>', views.hx_common_cards_new, name="hx-common-cards-new"),
+    path('hx/cmdr/<int:cmdr_id>/<card_type>/<int:page_number>', views.hx_common_cards, name="hx-common-cards"),
     path('search/', views.search, name="search"),
 ])

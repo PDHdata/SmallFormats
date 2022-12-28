@@ -20,7 +20,7 @@
   <ul class="list-group mb-3 ms-sm-3 me-sm-3">
     {% for partner in partners %}
     <li class="list-group-item">
-      <a href="{% url 'cmdr-single-new' partner.id %}">{% if partner.commander2 is None %}<i>Solo</i>{% elif card.id == partner.commander2.id %}{{ partner.commander1 }}{% else %}{{ partner.commander2 }}{% endif %}</a>
+      <a href="{% url 'cmdr-single' partner.id %}">{% if partner.commander2 is None %}<i>Solo</i>{% elif card.id == partner.commander2.id %}{{ partner.commander1 }}{% else %}{{ partner.commander2 }}{% endif %}</a>
       ({{ partner.count }} deck{{ partner.count|pluralize }})
     </li>
     {% endfor %}
