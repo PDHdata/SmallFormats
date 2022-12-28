@@ -394,6 +394,7 @@ def single_card(request, card_id):
         .filter(
             pdh_legal=True,
             card_list__card=card,
+            card_list__is_pdh_commander=False,
         )
     )
 
@@ -404,22 +405,12 @@ def single_card(request, card_id):
     )
 
     cmdrs = (
-        CardInDeck.objects
+        Commander.objects
         .filter(
-            is_pdh_commander=True,
-            deck__in=(
-                Deck.objects
-                .filter(
-                    pdh_legal=True,
-                    card_list__card=card,
-                )
-                .distinct()
-            ),
+            decks__card_list__card=card,
+            decks__card_list__is_pdh_commander=False,
         )
-        .exclude(is_pdh_commander=True, card=card)
-        .values('card')
-        .annotate(count=Count('deck'))
-        .values('count', 'card__id', 'card__name')
+        .annotate(count=Count('decks'))
         .order_by('-count')
     )
     paginator = Paginator(cmdrs, 25, orphans=3)

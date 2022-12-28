@@ -28,7 +28,7 @@
   <p>Appears with these commanders:</p>
   <ul class="list-group mb-3 ms-sm-3 me-sm-3">
     {% for cmdr in commanders %}
-    <li class="list-group-item"><a href="{% url 'card-single' cmdr.card__id %}">{{ cmdr.card__name }}</a> ({{ cmdr.count }})</li>
+    <li class="list-group-item"><a href="{% url 'cmdr-single-new' cmdr.id %}">{{ cmdr }}</a> ({{ cmdr.count }})</li>
     {% endfor %}
     <li class="list-group-item">
       {% if commanders.has_previous %}
