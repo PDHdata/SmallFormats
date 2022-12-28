@@ -26,7 +26,6 @@ urlpatterns = (
 ] +
 [
     path('cmdr/top/', views.top_commanders, name="cmdr-top"),
-    path('cmdr/bg/', views.top_commanders_background, name="cmdr-background"),
     path('cmdr/new/<int:cmdr_id>', views.single_cmdr_new, name="cmdr-single-new"),
     path('cmdr/new/<int:cmdr_id>/decks', views.single_cmdr_decklist_new, name="cmdr-decklist-new"),
     path('cmdr/<uuid:card_id>', views.single_cmdr, name="cmdr-single"),

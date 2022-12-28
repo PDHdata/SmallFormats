@@ -12,7 +12,6 @@ _CARDS_LINKS = (
 )
 _CMDRS_LINKS = (
     ('Top commanders', reverse_lazy('cmdr-top')),
-    ('Backgrounds', reverse_lazy('cmdr-background')),
     ('Commanders by color', reverse_lazy('cmdr')),
 )
 _LANDS_LINKS = (
