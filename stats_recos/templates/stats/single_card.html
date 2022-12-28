@@ -6,20 +6,12 @@
 {% block body %}
 <h1>{{ card.name }}</h1>
 <ul class="nav nav-tabs mb-2">
-  {% if solo_commander %}
-  <li class="nav-item">
-    <a class="nav-link" href="{% url 'cmdr-single-new' solo_commander.id %}">Commander</a>
-  </li>
-  <li class="nav-item">
-    <a class="nav-link" href="{% url 'cmdr-decklist-new' solo_commander.id %}">Decks</a>
-  </li>
-  {% endif %}
   <li class="nav-item">
     <a class="nav-link active" href="{% url 'card-single' card.id %}">Card</a>
   </li>
-  {% if not solo_commander and all_commander %}
+  {% if all_commander %}
   <li class="nav-item">
-    <a class="nav-link" href="{% url 'card-single-pairings' card.id %}">Pairs with</a>
+    <a class="nav-link" href="{% url 'card-single-pairings' card.id %}">Commander pairs</a>
   </li>
   {% endif %}
 </ul>

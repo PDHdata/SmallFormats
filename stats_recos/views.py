@@ -407,6 +407,7 @@ def single_card(request, card_id):
     commands = (
         Commander.objects
         .filter(Q(commander1=card) | Q(commander2=card))
+        .exclude(commander1=card, commander2=None)
     )
 
     cmdrs = (
@@ -439,15 +440,10 @@ def single_card(request, card_id):
 def single_card_pairings(request, card_id):
     card = get_object_or_404(Card, pk=card_id)
 
-    solo_commander = (
-        Commander.objects
-        .filter(commander1=card, commander2=None)
-        .first()
-    )
-
     commands = (
         Commander.objects
         .filter(Q(commander1=card) | Q(commander2=card))
+        .exclude(commander1=card, commander2=None)
         .annotate(count=Count('decks'))
         .order_by('-count')
     )
@@ -461,7 +457,6 @@ def single_card_pairings(request, card_id):
         "stats/single_card_pairings.html",
         context={
             'card': card,
-            'solo_commander': solo_commander,
             'partners': partners_page,
         },
     )
