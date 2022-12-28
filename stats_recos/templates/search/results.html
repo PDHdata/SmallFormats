@@ -9,7 +9,7 @@
     </tr>
     {% for result in results %}
     <tr>
-      <td><a href="{% if result.helms_decks %}{% url 'cmdr-single' result.id %}{% else %}{% url 'card-single' result.id %}{% endif %}">{{ result.name }}</a></td>
+      <td><a href="{% url 'card-single' result.id %}">{{ result.name }}</a></td>
       <td>{% if result.helms_decks %}{{ result.helms_decks }}{% endif %}</td>
       <td>{% if result.ninetynine_decks %}{{ result.ninetynine_decks }}{% endif %}</td>
     </tr>

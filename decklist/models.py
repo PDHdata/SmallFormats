@@ -17,6 +17,19 @@ class DataSource(models.IntegerChoices):
     MOXFIELD = 2
 
 
+class PartnerType(models.IntegerChoices):
+    NONE = 0
+    PARTNER = 1, "keyword Partner"
+    CHOOSE_A_BACKGROUND = 10, "choose a Background"
+    BACKGROUND = 11
+    # the BBD partner-with pairs
+    PARTNER_WITH_BLARING = 100, "Blaring Captain/Recruiter"
+    PARTNER_WITH_CHAKRAM = 101, "Chakram Retriever/Slinger"
+    PARTNER_WITH_PROTEGE = 102, "Impetuous Protege/Proud Mentor"
+    PARTNER_WITH_SOULBLADE = 103, "Soulblade Corrupter/Renewer"
+    PARTNER_WITH_WEAVER = 104, "Ley/Lore Weaver"
+
+
 class Deck(models.Model):
     name = models.CharField(max_length=100)
     source = models.IntegerField(choices=DataSource.choices)
@@ -25,7 +38,16 @@ class Deck(models.Model):
     creator_display_name = models.CharField(max_length=50, blank=True)
     ingested_time = models.DateTimeField(auto_now_add=True)
     updated_time = models.DateTimeField(default=timezone.now)
+
+    # these fields are computed, not canonical data
     pdh_legal = models.BooleanField(default=False, verbose_name='is PDH-legal')
+    commander = models.ForeignKey(
+        'Commander',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='decks',
+    )
 
     def __str__(self):
         return self.name
@@ -38,7 +60,7 @@ class Deck(models.Model):
             ),
         ]
 
-    def commanders(self):
+    def commander_cards(self):
         return (
             self.card_list
             .filter(is_pdh_commander=True)
@@ -132,7 +154,7 @@ class Deck(models.Model):
         ) > 0:
             return False, "contains banned card"
 
-        cmdr_count = self.commanders().count()
+        cmdr_count = self.commander_cards().count()
 
         # deck has a commander
         if cmdr_count < 1:
@@ -143,7 +165,7 @@ class Deck(models.Model):
             return False, f"{cmdr_count} is too many commanders"
             
         # all commanders printed at uncommon and have correct types
-        for entry in self.commanders():
+        for entry in self.commander_cards():
             if not entry.card.ever_uncommon:
                 return False, f"commander {entry.card.name} not printed at uncommon"
             if not 'Creature' in entry.card.type_line and not 'Background' in entry.card.type_line:
@@ -220,6 +242,10 @@ class Card(models.Model):
         blank=True,
         null=True,
         related_name='editorial_showings',
+    )
+    partner_type = models.IntegerField(
+        choices=PartnerType.choices,
+        default=PartnerType.NONE,
     )
 
     def __str__(self):
@@ -320,3 +346,60 @@ class SiteStat(models.Model):
 
     def __str__(self):
         return f"{self.timestamp}: {self.legal_decks} decks"
+
+
+class Commander(models.Model):
+    commander1 = models.ForeignKey(
+        Card,
+        on_delete=models.PROTECT,
+        related_name='commander1_slots',
+    )
+    commander2 = models.ForeignKey(
+        Card,
+        on_delete=models.PROTECT,
+        related_name='commander2_slots',
+        blank=True,
+        null=True,
+    )
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=['commander1', 'commander2'],
+                name='unique_pair_of_commanders',
+                condition=Q(commander2__isnull=False),
+                violation_error_message='Commander pair is not unique',
+            ),
+            models.UniqueConstraint(
+                fields=['commander1'],
+                name='unique_single_commander',
+                condition=Q(commander2__isnull=True),
+                violation_error_message='Solo commander is not unique',
+            ),
+            models.CheckConstraint(
+                check=(
+                    Q(commander1_id__lte=models.F('commander2_id'))
+                    | Q(commander2__isnull=True)
+                ),
+                name='commander1_sorts_before_commander2',
+                violation_error_message='Commander 1 ID must sort before commander 2 ID',
+            ),
+        ]
+    
+    def __str__(self):
+        if self.commander2:
+            return f"{self.commander1.name} + {self.commander2.name}"
+        return self.commander1.name
+
+    def clean(self):
+        # try to move the lower card ID to the commander1 slot
+        if self.commander2 and self.commander1.id > self.commander2.id:
+            self.commander2, self.commander1 = self.commander1, self.commander2
+
+    @property
+    def color_identity(self):
+        identity = [
+            x for x in "wubrg"
+            if getattr(self.commander1, f"identity_{x}") or (self.commander2 and getattr(self.commander2, f"identity_{x}"))
+        ]
+        return ''.join(identity).upper() if identity else 'C'

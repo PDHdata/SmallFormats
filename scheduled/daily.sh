@@ -8,4 +8,5 @@ set +e
 ./manage crawl-archidekt --no-stdout
 ./manage crawl-moxfield --no-stdout
 ./manage get-decklists --no-stdout
+./manage compute-commanders --no-stdout
 ./manage update-site-stats

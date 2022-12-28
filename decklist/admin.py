@@ -21,6 +21,7 @@ class CardAdmin(admin.ModelAdmin):
         'editorial_printing',
     ]
 
+
 class PrintingAdmin(admin.ModelAdmin):
     model = models.Printing
 
@@ -28,15 +29,31 @@ class PrintingAdmin(admin.ModelAdmin):
         'set_code', 'card__name',
     ]
 
+
 class DeckAdmin(admin.ModelAdmin):
     search_fields = [
         'name', 'creator_display_name',
     ]
+    autocomplete_fields = ('commander',)
+    list_display = ('name', 'pdh_legal')
+    list_filter = ('pdh_legal',)
+
 
 class CardInDeckAdmin(admin.ModelAdmin):
     search_fields = [
         'card__name',
     ]
+
+
+class CommanderAdmin(admin.ModelAdmin):
+    list_display = ('commander1', 'commander2')
+    list_display_links = ('commander1', 'commander2')
+    autocomplete_fields = ('commander1', 'commander2')
+    search_fields = [
+        'commander1__name',
+        'commander2__name',
+    ]
+
 
 admin.site.register(models.User, UserAdmin)
 admin.site.register(models.Deck, DeckAdmin)
@@ -44,3 +61,4 @@ admin.site.register(models.Card, CardAdmin)
 admin.site.register(models.CardInDeck, CardInDeckAdmin)
 admin.site.register(models.Printing, PrintingAdmin)
 admin.site.register(models.SiteStat)
+admin.site.register(models.Commander, CommanderAdmin)
