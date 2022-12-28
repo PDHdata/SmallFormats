@@ -68,23 +68,27 @@ def _deck_count_at_least_color(w, u, b, r, g):
 def _get_face_card(index):
     try:
         top_cmdr = (
-            Card.objects
-            .filter(
-                deck_list__deck__pdh_legal=True,
-                deck_list__is_pdh_commander=True,
-            )
-            .annotate(num_decks=Count('deck_list'))
+            Commander.objects
+            .filter(decks__pdh_legal=True)
+            .annotate(num_decks=Count('decks'))
             .order_by('-num_decks')
         )[index]
     except IndexError:
         top_cmdr = None
 
-    if top_cmdr and top_cmdr.default_printing:
-        return (
-            top_cmdr.name,
-            top_cmdr.default_printing.image_uri,
-            reverse('cmdr-single', args=(top_cmdr.id,)),
-        )
+    if top_cmdr and top_cmdr.commander1.default_printing:
+        if top_cmdr.commander2:
+            return (
+                top_cmdr.commander1.name,
+                top_cmdr.commander1.default_printing.image_uri,
+                reverse('card-single-pairings', args=(top_cmdr.commander1.id,)),
+            )
+        else:
+            return (
+                top_cmdr.commander1.name,
+                top_cmdr.commander1.default_printing.image_uri,
+                reverse('cmdr-single-new', args=(top_cmdr.id,)),
+            )
 
     # this happens if we have no cards/printings in the database, or
     # if we're asked for an index that's too large, or if we don't
