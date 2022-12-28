@@ -398,10 +398,15 @@ def single_card(request, card_id):
         )
     )
 
+    solo_commander = (
+        Commander.objects
+        .filter(commander1=card, commander2=None)
+        .first()
+    )
+
     commands = (
         Commander.objects
         .filter(Q(commander1=card) | Q(commander2=card))
-        .count()
     )
 
     cmdrs = (
@@ -423,9 +428,41 @@ def single_card(request, card_id):
         context={
             'card': card,
             'is_in': is_in.count(),
-            'is_commander': commands > 0,
+            'solo_commander': solo_commander,
+            'all_commander': commands,
             'could_be_in': could_be_in,
             'commanders': cmdrs_page,
+        },
+    )
+
+
+def single_card_pairings(request, card_id):
+    card = get_object_or_404(Card, pk=card_id)
+
+    solo_commander = (
+        Commander.objects
+        .filter(commander1=card, commander2=None)
+        .first()
+    )
+
+    commands = (
+        Commander.objects
+        .filter(Q(commander1=card) | Q(commander2=card))
+        .annotate(count=Count('decks'))
+        .order_by('-count')
+    )
+
+    paginator = Paginator(commands, 25, orphans=3)
+    page_number = request.GET.get('page')
+    partners_page = paginator.get_page(page_number)
+
+    return render(
+        request,
+        "stats/single_card_pairings.html",
+        context={
+            'card': card,
+            'solo_commander': solo_commander,
+            'partners': partners_page,
         },
     )
 

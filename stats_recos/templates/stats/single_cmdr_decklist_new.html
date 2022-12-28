@@ -14,10 +14,11 @@
   <li class="nav-item">
     <a class="nav-link active" href="{% url 'cmdr-decklist-new' cmdr.id %}">Decks</a>
   </li>
+  {% if not is_pair %}
   <li class="nav-item">
-    {# FIXME #}
     <a class="nav-link" href="{% url 'card-single' commander1.id %}">Card</a>
   </li>
+  {% endif %}
 </ul>
 <div class="container">
   <table class="table mb-3">

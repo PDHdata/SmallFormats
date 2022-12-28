@@ -34,6 +34,7 @@ urlpatterns = (
     path('cmdr/<uuid:card_id>/partners', views.single_cmdr_partners, name="cmdr-partners"),
     path('card/top/', views.top_cards, name="card-top"),
     path('card/<uuid:card_id>', views.single_card, name="card-single"),
+    path('card/<uuid:card_id>/pairs', views.single_card_pairings, name="card-single-pairings"),
     path('card/<uuid:card_id>/setimage', views.set_editorial_image, name="card-setimage"),
     path('land/top/', views.top_lands, name="land-top"),
     path('hx/cmdr/<uuid:card_id>/<card_type>/<int:page_number>', views.hx_common_cards, name="hx-common-cards"),

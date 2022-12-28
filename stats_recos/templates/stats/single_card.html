@@ -6,23 +6,28 @@
 {% block body %}
 <h1>{{ card.name }}</h1>
 <ul class="nav nav-tabs mb-2">
-  {% if is_commander %}
+  {% if solo_commander %}
   <li class="nav-item">
-    <a class="nav-link" href="{% url 'cmdr-single' card.id %}">Commander</a>
+    <a class="nav-link" href="{% url 'cmdr-single-new' solo_commander.id %}">Commander</a>
   </li>
   <li class="nav-item">
-    <a class="nav-link" href="{% url 'cmdr-decklist' card.id %}">Decks</a>
+    <a class="nav-link" href="{% url 'cmdr-decklist-new' solo_commander.id %}">Decks</a>
   </li>
   {% endif %}
   <li class="nav-item">
     <a class="nav-link active" href="{% url 'card-single' card.id %}">Card</a>
   </li>
+  {% if not solo_commander and all_commander %}
+  <li class="nav-item">
+    <a class="nav-link" href="{% url 'card-single-pairings' card.id %}">Pairs with</a>
+  </li>
+  {% endif %}
 </ul>
 
 <div class="clearfix">
   {% include 'stats/_card_image_gallery.html' with pos="start" %}
   <p>{{ card.type_line }} {{ card.color_identity|mana_symbols|safe }}</p>
-  <p>{% if is_commander %}<a href="{% url 'cmdr-single' card.id %}">View as commander</a> | {% endif %}<a href="{{ card.scryfall_uri }}">View on Scryfall</a></p>
+  <p>{% if solo_commander %}<a href="{% url 'cmdr-single-new' solo_commander.id %}">View as commander</a> | {% endif %}<a href="{{ card.scryfall_uri }}">View on Scryfall</a></p>
   <p>Appears in {{ is_in|intcomma }} of {{ could_be_in|intcomma }} decks ({{ is_in|percent_of:could_be_in }}).</p>
   {% if commanders %}
   <p>Appears with these commanders:</p>
