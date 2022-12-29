@@ -301,17 +301,19 @@ def card_index(request):
 def top_cards(request):
     cards = (
         Card.objects
-        .filter(
-            deck_list__deck__pdh_legal=True,
-        )
-        .annotate(num_decks=Count('deck_list'))
+        .annotate(num_decks=Count(
+            'deck_list',
+            distinct=True,
+            filter=Q(deck_list__deck__pdh_legal=True),
+        ))
         .filter(num_decks__gt=0)
         .order_by('-num_decks')
     )
-    deck_count = Deck.objects.filter(pdh_legal=True).count()
     paginator = Paginator(cards, 25, orphans=3)
     page_number = request.GET.get('page')
     cards_page = paginator.get_page(page_number)
+
+    deck_count = Deck.objects.filter(pdh_legal=True).count()
 
     return render(
         request,
