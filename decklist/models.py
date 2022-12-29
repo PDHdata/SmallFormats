@@ -59,6 +59,9 @@ class Deck(models.Model):
                 name='one_entry_per_deck',
             ),
         ]
+        indexes = (
+            models.Index(fields=('pdh_legal',)),
+        )
 
     def commander_cards(self):
         return (
@@ -335,6 +338,11 @@ class CardInDeck(models.Model):
 
     def __str__(self):
         return f"{self.card} in {self.deck}"
+    
+    class Meta:
+        indexes = (
+            models.Index(fields=('deck', 'card')),
+        )
 
 
 class SiteStat(models.Model):
