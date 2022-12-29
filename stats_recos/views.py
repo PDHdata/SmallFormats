@@ -308,10 +308,11 @@ def top_cards(request):
         .filter(num_decks__gt=0)
         .order_by('-num_decks')
     )
-    deck_count = Deck.objects.filter(pdh_legal=True).count()
     paginator = Paginator(cards, 25, orphans=3)
     page_number = request.GET.get('page')
     cards_page = paginator.get_page(page_number)
+
+    deck_count = Deck.objects.filter(pdh_legal=True).count()
 
     return render(
         request,
