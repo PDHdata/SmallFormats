@@ -157,22 +157,47 @@ class Deck(models.Model):
         ) > 0:
             return False, "contains banned card"
 
-        cmdr_count = self.commander_cards().count()
-
-        # deck has a commander
-        if cmdr_count < 1:
-            return False, "no commander"
-        
-        # deck has a plausible number of commanders
-        if cmdr_count > 2:
-            return False, f"{cmdr_count} is too many commanders"
+        # deck has a plausible number of commanders, all commanders printed at
+        # uncommon, each have correct types, and partnership is legal
+        match list(self.commander_cards()):
+            case (commander1,):
+                if not commander1.card.ever_uncommon:
+                    return False, f"commander {commander1.card.name} not printed at uncommon"
+                if not 'Creature' in commander1.card.type_line:
+                    return False, f"commander {commander1.card.name} is not a creature"
             
-        # all commanders printed at uncommon and have correct types
-        for entry in self.commander_cards():
-            if not entry.card.ever_uncommon:
-                return False, f"commander {entry.card.name} not printed at uncommon"
-            if not 'Creature' in entry.card.type_line and not 'Background' in entry.card.type_line:
-                return False, f"commander {entry.card.name} is neither Creature nor Background"
+            case (commander1, commander2):
+                if not commander1.card.ever_uncommon:
+                    return False, f"commander {commander1.card.name} not printed at uncommon"
+                if not commander2.card.ever_uncommon:
+                    return False, f"commander {commander2.card.name} not printed at uncommon"
+                if not ('Creature' in commander1.card.type_line or 'Creature' in commander2.card.type_line):
+                    return False, f"at least one commander must be a creature"
+                
+                match (commander1.card.partner_type, commander2.card.partner_type):
+                    case (PartnerType.PARTNER, PartnerType.PARTNER):
+                        # both are standard partners
+                        pass
+                    case ((PartnerType.CHOOSE_A_BACKGROUND, PartnerType.BACKGROUND)
+                        | (PartnerType.BACKGROUND, PartnerType.CHOOSE_A_BACKGROUND)):
+                        # background and choose-a-background
+                        pass
+                    case ((PartnerType.PARTNER_WITH_BLARING, PartnerType.PARTNER_WITH_BLARING)
+                        | (PartnerType.PARTNER_WITH_CHAKRAM, PartnerType.PARTNER_WITH_CHAKRAM)
+                        | (PartnerType.PARTNER_WITH_PROTEGE, PartnerType.PARTNER_WITH_PROTEGE)
+                        | (PartnerType.PARTNER_WITH_SOULBLADE, PartnerType.PARTNER_WITH_SOULBLADE)
+                        | (PartnerType.PARTNER_WITH_WEAVER, PartnerType.PARTNER_WITH_WEAVER)):
+                        # compatible partnerships, as long as they're different
+                        if commander1.card.id == commander2.card.id:
+                            return False, f'invalid partnership: two copies of "{commander1.card}"'
+                    case _:
+                        return False, f'invalid partnership: "{commander1.card}" and "{commander2.card}"'
+            
+            case (commander1, commander2, *_):
+                return False, f"{len(self.commander_cards())} is too many commanders"
+            
+            case _:
+                return False, "no commander"
 
         # all cards in correct identity
         q_filters = []
