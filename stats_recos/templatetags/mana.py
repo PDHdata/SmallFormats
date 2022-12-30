@@ -1,6 +1,6 @@
 from django import template
 from django.conf import settings
-from stats_recos.wubrg_utils import identity_to_symbol, name_to_symbol
+from stats_recos.wubrg_utils import identity_to_symbol, name_to_symbol, symbol_to_name
 
 register = template.Library()
 
@@ -17,3 +17,11 @@ def mana_symbols_by_name(name):
     return "".join(
         [f'<img src="{settings.STATIC_URL}{sym}" class="mana-symbol">' for sym in name_to_symbol(name)]
     )
+
+
+@register.filter()
+def mana_symbol_to_name(symbol):
+    try:
+        return symbol_to_name(symbol)
+    except IndexError:
+        return ''
