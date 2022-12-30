@@ -564,7 +564,7 @@ def hx_common_cards(request, cmdr_id, card_type, page_number):
         .values('card')
         .annotate(count=Count('deck'))
         .values('count', 'card__id', 'card__name')
-        .filter(count__gt=1)
+        .filter(count__gt=0)
         .order_by('-count')
     )
     paginator = Paginator(common_cards, 10, orphans=3)
