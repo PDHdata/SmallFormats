@@ -509,7 +509,7 @@ def single_cmdr(request, cmdr_id):
 
     return render(
         request,
-        "stats/single_cmdr_new.html",
+        "stats/single_cmdr.html",
         context=context,
     )
 
