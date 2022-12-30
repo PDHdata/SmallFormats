@@ -16,7 +16,7 @@
     </tr>
     {% for card in cards %}
     <tr>
-      <td>{{ cards.start_index|plus:forloop.counter0 }}</td>
+      <td>{{ card.rank }}</td>
       <td><a href="{% url 'card-single' card.id %}">{{ card.name }}</a></td>
       <td>{{ card.color_identity|mana_symbols|safe }}</td>
       <td>{{ card.num_decks|intcomma }}</td>
