@@ -8,6 +8,7 @@ def sitename(request):
 
 _CARDS_LINKS = (
     ('Top cards', reverse_lazy('card-top')),
+    ('Non-land cards', reverse_lazy('card-top-nonland')),
     ('Cards by color', reverse_lazy('card')),
 )
 _CMDRS_LINKS = (

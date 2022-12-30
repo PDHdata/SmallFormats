@@ -311,9 +311,14 @@ def card_index(request):
     )
 
 
-def top_cards(request):
+def top_cards(request, include_land=True):
+    if include_land:
+        cards = Card.objects
+    else:
+        cards = Card.objects.exclude(type_line__contains='Land')
+
     cards = (
-        Card.objects
+        cards
         .annotate(num_decks=Count(
             'deck_list',
             distinct=True,
@@ -331,11 +336,13 @@ def top_cards(request):
 
     deck_count = Deck.objects.filter(pdh_legal=True).count()
 
+    heading = 'top' if include_land else 'top non-land'
+
     return render(
         request,
         "stats/cards.html",
         context={
-            'heading': 'top',
+            'heading': heading,
             'cards': cards_page,
             'deck_count': deck_count,
         },

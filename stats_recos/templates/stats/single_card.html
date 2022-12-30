@@ -6,7 +6,7 @@
 {% block body %}
 {% with card_color=card.color_identity|mana_symbol_to_name %}
 {% with card_link='card-'|add:card_color %}
-<h1>{{ card.name }}{% if card_color %} <a href="{% url card_link %}" title="More {{ card_color|title }} cards">{{ card.color_identity|mana_symbols|safe }}</a>{% endif %}</h1>
+<h1>{{ card.name }}{% if card_color %} <a href="{% url card_link %}" title="More {{ card_color|capfirst }} cards">{{ card.color_identity|mana_symbols|safe }}</a>{% endif %}</h1>
 {% endwith %}
 {% endwith %}
 <ul class="nav nav-tabs mb-2">
