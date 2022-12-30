@@ -4,7 +4,7 @@
 {% load mana %}
 {% block title %}{{ heading|title }} commanders{% endblock %}
 {% block body %}
-<h1>{{ heading|title }} commanders {{ heading|mana_symbols_by_name|safe }}</h1>
+<h1>{{ heading|capfirst }} commanders {{ heading|mana_symbols_by_name|safe }}</h1>
 <div class="container">
   <table class="table">
     <tr>
@@ -16,7 +16,7 @@
     </tr>
     {% for cmdr in commanders %}
     <tr>
-      <td>{{ commanders.start_index|plus:forloop.counter0 }}</td>
+      <td>{{ cmdr.rank }}</td>
       <td><a href="{% url 'cmdr-single' cmdr.id %}">{{ cmdr }}</a></td>
       <td>{{ cmdr.color_identity|mana_symbols|safe }}</td>
       <td>{{ cmdr.num_decks|intcomma }}</td>

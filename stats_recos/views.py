@@ -1,7 +1,8 @@
 from django.shortcuts import render, get_object_or_404
 from django.http import HttpResponseNotAllowed
 from django.urls import reverse
-from django.db.models import Count, Q
+from django.db.models import Count, Q, F, Window
+from django.db.models.functions import Rank
 from django.core.paginator import Paginator
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_POST
@@ -143,7 +144,10 @@ def top_commanders(request):
         Commander.objects
         .filter(decks__pdh_legal=True)
         .annotate(num_decks=Count('decks'))
-        .order_by('-num_decks')
+        .annotate(rank=Window(
+            expression=Rank(),
+            order_by=F('num_decks').desc(),
+        ))
     )
     paginator = Paginator(cmdrs, 25, orphans=3)
     page_number = request.GET.get('page')
@@ -184,7 +188,10 @@ def commanders_by_color(request, w=False, u=False, b=False, r=False, g=False):
         .filter(decks__pdh_legal=True)
         .filter(*filters)
         .annotate(num_decks=Count('decks'))
-        .order_by('-num_decks')
+        .annotate(rank=Window(
+            expression=Rank(),
+            order_by=F('num_decks').desc(),
+        ))
     )
     paginator = Paginator(cmdrs, 25, orphans=3)
     page_number = request.GET.get('page')
@@ -227,8 +234,11 @@ def top_lands(request):
             type_line__contains='Land',
         )
         .annotate(num_decks=Count('deck_list'))
-        .order_by('-num_decks')
         .filter(num_decks__gt=0)
+        .annotate(rank=Window(
+            expression=Rank(),
+            order_by=F('num_decks').desc(),
+        ))
     )
     deck_count = Deck.objects.filter(pdh_legal=True).count()
     paginator = Paginator(land_cards, 25, orphans=3)
@@ -262,8 +272,11 @@ def lands_by_color(request, w=False, u=False, b=False, r=False, g=False):
             distinct=True,
             filter=Q(deck_list__deck__pdh_legal=True),
         ))
-        .order_by('-num_decks')
         .filter(num_decks__gt=0)
+        .annotate(rank=Window(
+            expression=Rank(),
+            order_by=F('num_decks').desc(),
+        ))
     )
     paginator = Paginator(land_cards, 25, orphans=3)
     page_number = request.GET.get('page')
@@ -298,16 +311,24 @@ def card_index(request):
     )
 
 
-def top_cards(request):
+def top_cards(request, include_land=True):
+    if include_land:
+        cards = Card.objects
+    else:
+        cards = Card.objects.exclude(type_line__contains='Land')
+
     cards = (
-        Card.objects
+        cards
         .annotate(num_decks=Count(
             'deck_list',
             distinct=True,
             filter=Q(deck_list__deck__pdh_legal=True),
         ))
         .filter(num_decks__gt=0)
-        .order_by('-num_decks')
+        .annotate(rank=Window(
+            expression=Rank(),
+            order_by=F('num_decks').desc(),
+        ))
     )
     paginator = Paginator(cards, 25, orphans=3)
     page_number = request.GET.get('page')
@@ -315,11 +336,13 @@ def top_cards(request):
 
     deck_count = Deck.objects.filter(pdh_legal=True).count()
 
+    heading = 'top' if include_land else 'top non-land'
+
     return render(
         request,
         "stats/cards.html",
         context={
-            'heading': 'top',
+            'heading': heading,
             'cards': cards_page,
             'deck_count': deck_count,
         },
@@ -341,8 +364,11 @@ def cards_by_color(request, w=False, u=False, b=False, r=False, g=False):
             distinct=True,
             filter=Q(deck_list__deck__pdh_legal=True),
         ))
-        .order_by('-num_decks')
         .filter(num_decks__gt=0)
+        .annotate(rank=Window(
+            expression=Rank(),
+            order_by=F('num_decks').desc(),
+        ))
     )
     paginator = Paginator(cards, 25, orphans=3)
     page_number = request.GET.get('page')
@@ -490,7 +516,7 @@ def single_cmdr(request, cmdr_id):
 
     return render(
         request,
-        "stats/single_cmdr_new.html",
+        "stats/single_cmdr.html",
         context=context,
     )
 
@@ -564,8 +590,11 @@ def hx_common_cards(request, cmdr_id, card_type, page_number):
         .values('card')
         .annotate(count=Count('deck'))
         .values('count', 'card__id', 'card__name')
-        .filter(count__gt=1)
-        .order_by('-count')
+        .filter(count__gt=0)
+        .annotate(rank=Window(
+            expression=Rank(),
+            order_by=F('count').desc(),
+        ))
     )
     paginator = Paginator(common_cards, 10, orphans=3)
     cards_page = paginator.get_page(page_number)

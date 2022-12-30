@@ -11,6 +11,7 @@
       <div>
       {% if forloop.first %}
       <a href="{% url 'card-top' %}">Top cards (any color)</a><br>
+      <a href="{% url 'card-top-nonland' %}">Non-land cards (any color)</a><br>
       {% endif %}
       {% for color in entry %}
       <a href="{% url color.2 %}">{{ color.0.title }} {% for img in color.1 %}<img src="{% static img %}" class="mana-symbol">{% endfor %}</a><br>

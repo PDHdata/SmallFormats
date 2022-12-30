@@ -74,5 +74,12 @@ def name_to_symbol(color_name):
     return [f"mana/{c}.svg" for c in _COLORS_MAP[color_name]]
 
 
+def symbol_to_name(color_symbol):
+    color_symbol = color_symbol.upper()
+    if color_symbol == 'C':
+        return 'colorless'
+    return REVERSE_COLORS["".join(sorted(color_symbol))]
+
+
 def identity_to_symbol(identity):
     return [f"mana/{c}.svg" for c in identity]
