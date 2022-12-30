@@ -4,7 +4,7 @@
 {% load mana %}
 {% block title %}{{ cmdr }} (commander){% endblock %}
 {% block opengraph %}
-{% include '_opengraph.html' with og_cardname=card.name og_url=request.build_absolute_uri og_image=card.default_printing.image_uri %}
+{% include '_opengraph.html' with og_cardname=cmdr og_url=request.build_absolute_uri og_image=cmdr.commander1.default_printing.image_uri %}
 {% endblock %}
 {% block body %}
 {% with cmdr_color=cmdr.color_identity|mana_symbol_to_name %}
