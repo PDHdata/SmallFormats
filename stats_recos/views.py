@@ -88,7 +88,7 @@ def _get_face_card(index):
             return (
                 top_cmdr.commander1.name,
                 top_cmdr.commander1.default_printing.image_uri,
-                reverse('cmdr-single', args=(top_cmdr.id,)),
+                reverse('cmdr-single', args=(top_cmdr.sfid,)),
             )
 
     # this happens if we have no cards/printings in the database, or
@@ -470,7 +470,7 @@ def single_card_pairings(request, card_id):
 
 
 def single_cmdr(request, cmdr_id):
-    cmdr = get_object_or_404(Commander, pk=cmdr_id)
+    cmdr = get_object_or_404(Commander, sfid=cmdr_id)
 
     if cmdr.commander2:
         identity = {
@@ -522,7 +522,7 @@ def single_cmdr(request, cmdr_id):
 
 
 def single_cmdr_decklist(request, cmdr_id):
-    cmdr = get_object_or_404(Commander, pk=cmdr_id)
+    cmdr = get_object_or_404(Commander, sfid=cmdr_id)
 
     commands = cmdr.decks.order_by('-updated_time')
     paginator = Paginator(commands, 20, orphans=3)
