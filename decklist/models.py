@@ -1,6 +1,7 @@
 import operator
 import functools
 import datetime
+import uuid
 from django.db import models
 from django.db.models import Q, Count
 from django.contrib.auth.models import AbstractUser
@@ -394,6 +395,8 @@ class Commander(models.Model):
         blank=True,
         null=True,
     )
+    # sfid = SmallFormats identifier
+    sfid = models.UUIDField(unique=True, verbose_name='SmallFormats ID')
 
     class Meta:
         constraints = [
@@ -428,6 +431,10 @@ class Commander(models.Model):
         # try to move the lower card ID to the commander1 slot
         if self.commander2 and self.commander1.id > self.commander2.id:
             self.commander2, self.commander1 = self.commander1, self.commander2
+        # compute the SFID
+        namespace = self.commander1.id
+        name = str(self.commander2.id) if self.commander2 else ''
+        self.sfid = uuid.uuid5(namespace, name)
 
     @property
     def color_identity(self):
