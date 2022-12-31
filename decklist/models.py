@@ -426,15 +426,23 @@ class Commander(models.Model):
         if self.commander2:
             return f"{self.commander1.name} + {self.commander2.name}"
         return self.commander1.name
+    
+    def save(self, *args, **kwargs):
+        if not self.sfid:
+            self.sfid = self._compute_sfid()
+        super().save(*args, **kwargs)
 
     def clean(self):
         # try to move the lower card ID to the commander1 slot
         if self.commander2 and self.commander1.id > self.commander2.id:
             self.commander2, self.commander1 = self.commander1, self.commander2
         # compute the SFID
+        self.sfid = self._compute_sfid()
+
+    def _compute_sfid(self):
         namespace = self.commander1.id
         name = str(self.commander2.id) if self.commander2 else ''
-        self.sfid = uuid.uuid5(namespace, name)
+        return uuid.uuid5(namespace, name)
 
     @property
     def color_identity(self):
