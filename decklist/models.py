@@ -265,6 +265,7 @@ class Card(models.Model):
     identity_g = models.BooleanField(default=False, verbose_name='is G')
     # double-sided cards have double-sided type_lines
     type_line = models.CharField(max_length=100)
+    keywords = models.JSONField(default=list)
     scryfall_uri = models.URLField(max_length=200)
     editorial_printing = models.ForeignKey(
         'Printing',
