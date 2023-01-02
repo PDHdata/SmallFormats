@@ -7,7 +7,7 @@ from django.core.paginator import Paginator
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_POST
 from django.utils import timezone
-from decklist.models import Card, Deck, Printing, CardInDeck, SiteStat, Commander
+from decklist.models import Card, Deck, Printing, CardInDeck, SiteStat, Commander, Theme
 from .wubrg_utils import COLORS, filter_to_name, name_to_symbol
 from django_htmx.http import trigger_client_event, HttpResponseClientRefresh
 import operator
@@ -389,21 +389,16 @@ def theme_index(request):
     ...
 
 
-def single_theme(request, theme):
-    if theme != 'elf':
-        raise HttpResponseNotFound()
+def single_theme_tribe(request, theme_slug):
+    theme = get_object_or_404(Theme, slug=theme_slug, filter_type=Theme.Type.TRIBE)
     
-    tribe = 'Elf'
-    card_threshold = 15
-    deck_threshold = .2
-
     tribal_decks = (
         Deck.objects
         .annotate(tribal_count=Count(
             'card_list',
-            filter=Q(card_list__card__type_line__contains=tribe),
+            filter=Q(card_list__card__type_line__contains=theme.filter_text),
         ))
-        .filter(tribal_count__gt=card_threshold)
+        .filter(tribal_count__gt=theme.card_threshold)
     )
 
     tribal_cmdrs = (
@@ -417,7 +412,7 @@ def single_theme(request, theme):
             total_deck_count=Count('decks', unique=True),
         )
         .filter(tribal_decks__gt=1)
-        .filter(tribal_decks__gte=F('total_deck_count') * Value(deck_threshold))
+        .filter(tribal_decks__gte=F('total_deck_count') * Value(theme.deck_threshold / 100.0))
         .annotate(rank=Window(
             expression=Rank(),
             order_by=F('tribal_decks').desc(),
@@ -428,9 +423,9 @@ def single_theme(request, theme):
         request,
         'themes/tribal.html',
         context={
-            'tribe': tribe,
-            'card_threshold': card_threshold,
-            'deck_threshold': round(deck_threshold * 100),
+            'tribe': theme.display_name,
+            'card_threshold': theme.card_threshold,
+            'deck_threshold': theme.deck_threshold,
             'commanders': tribal_cmdrs,
         }
     )
