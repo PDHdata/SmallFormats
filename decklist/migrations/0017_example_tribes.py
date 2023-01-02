@@ -5,19 +5,20 @@ from django.db import migrations
 
 def add_sample_themes(apps, schema_editor):
     Theme = apps.get_model('decklist', 'Theme')
-    # note: filter_type='T' corresponds to Theme.Type.TRIBE
+    # note 1: filter_type='T' corresponds to Theme.Type.TRIBE.
+    # note 2: the thresholds have been tuned based on eyeballing 2023-01-02 data,
+    # and should not be taken as gospel truth.
     Theme.objects.bulk_create(
         [
-            Theme(display_name='Angel', filter_text='Angel', slug='angel', filter_type='T'),
-            Theme(display_name='Bird', filter_text='Bird', slug='bird', filter_type='T'),
+            Theme(display_name='Bird', filter_text='Bird', slug='bird', card_threshold=12, filter_type='T'),
             Theme(display_name='Dragon', filter_text='Dragon', slug='dragon', filter_type='T'),
-            Theme(display_name='Druid', filter_text='Druid', slug='druid', filter_type='T'),
+            Theme(display_name='Druid', filter_text='Druid', slug='druid', card_threshold=12, filter_type='T'),
             Theme(display_name='Elf', filter_text='Elf', slug='elf', filter_type='T'),
             Theme(display_name='Goblin', filter_text='Goblin', slug='goblin', filter_type='T'),
-            Theme(display_name='Human', filter_text='Human', slug='human', filter_type='T'),
-            Theme(display_name='Knight', filter_text='Knight', slug='knight', filter_type='T'),
-            Theme(display_name='Merfolk', filter_text='Merfolk', slug='merfolk', filter_type='T'),
-            Theme(display_name='Pirate', filter_text='Pirate', slug='pirate', filter_type='T'),
+            Theme(display_name='Human', filter_text='Human', slug='human', card_threshold=12, deck_threshold=20, filter_type='T'),
+            Theme(display_name='Knight', filter_text='Knight', slug='knight', card_threshold=12, filter_type='T'),
+            Theme(display_name='Merfolk', filter_text='Merfolk', slug='merfolk', card_threshold=12, filter_type='T'),
+            Theme(display_name='Pirate', filter_text='Pirate', slug='pirate', deck_threshold=15, filter_type='T'),
             Theme(display_name='Rogue', filter_text='Rogue', slug='rogue', filter_type='T'),
             Theme(display_name='Sliver', filter_text='Sliver', slug='sliver', filter_type='T'),
             Theme(display_name='Spirit', filter_text='Spirit', slug='spirit', filter_type='T'),

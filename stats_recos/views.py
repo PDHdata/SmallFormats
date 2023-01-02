@@ -406,6 +406,7 @@ def single_theme_tribe(request, theme_slug):
     
     tribal_decks = (
         Deck.objects
+        .filter(pdh_legal=True)
         .annotate(tribal_count=Count(
             'card_list',
             filter=Q(card_list__card__type_line__contains=theme.filter_text),
