@@ -1,13 +1,13 @@
 from django.shortcuts import render, get_object_or_404
-from django.http import HttpResponseNotAllowed
+from django.http import HttpResponseNotAllowed, HttpResponseNotFound
 from django.urls import reverse
-from django.db.models import Count, Q, F, Window
+from django.db.models import Count, Q, F, Window, Value
 from django.db.models.functions import Rank
 from django.core.paginator import Paginator
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_POST
 from django.utils import timezone
-from decklist.models import Card, Deck, Printing, CardInDeck, SiteStat, Commander
+from decklist.models import Card, Deck, Printing, CardInDeck, SiteStat, Commander, Theme
 from .wubrg_utils import COLORS, filter_to_name, name_to_symbol
 from django_htmx.http import trigger_client_event, HttpResponseClientRefresh
 import operator
@@ -382,6 +382,64 @@ def cards_by_color(request, w=False, u=False, b=False, r=False, g=False):
             'cards': cards_page,
             'deck_count': _deck_count_at_least_color(w, u, b, r, g),
         },
+    )
+
+
+def theme_index(request):
+    tribes = (
+        Theme.objects
+        .filter(filter_type=Theme.Type.TRIBE)
+        .order_by('display_name')
+    )
+
+    return render(
+        request,
+        'themes/index.html',
+        context={
+            'tribes': tribes,
+        }
+    )
+
+
+def single_theme_tribe(request, theme_slug):
+    theme = get_object_or_404(Theme, slug=theme_slug, filter_type=Theme.Type.TRIBE)
+    
+    tribal_decks = (
+        Deck.objects
+        .annotate(tribal_count=Count(
+            'card_list',
+            filter=Q(card_list__card__type_line__contains=theme.filter_text),
+        ))
+        .filter(tribal_count__gt=theme.card_threshold)
+    )
+
+    tribal_cmdrs = (
+        Commander.objects
+        .annotate(
+            tribal_decks=Count(
+                'decks',
+                filter=Q(decks__in=tribal_decks),
+                unique=True,
+            ),
+            total_deck_count=Count('decks', unique=True),
+        )
+        .filter(tribal_decks__gt=1)
+        .filter(tribal_decks__gte=F('total_deck_count') * Value(theme.deck_threshold / 100.0))
+        .annotate(rank=Window(
+            expression=Rank(),
+            order_by=F('tribal_decks').desc(),
+        ))
+    )
+
+    return render(
+        request,
+        'themes/tribal.html',
+        context={
+            'tribe': theme.display_name,
+            'card_threshold': theme.card_threshold,
+            'deck_threshold': theme.deck_threshold,
+            'commanders': tribal_cmdrs,
+        }
     )
 
 

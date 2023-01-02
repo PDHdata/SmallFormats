@@ -55,6 +55,14 @@ class CommanderAdmin(admin.ModelAdmin):
     ]
 
 
+class ThemeAdmin(admin.ModelAdmin):
+    list_display = (
+        'display_name', 'filter_type', 'card_threshold', 'deck_threshold',
+    )
+    prepopulated_fields = {
+        'slug': ('display_name',),
+    }
+
 admin.site.register(models.User, UserAdmin)
 admin.site.register(models.Deck, DeckAdmin)
 admin.site.register(models.Card, CardAdmin)
@@ -62,3 +70,4 @@ admin.site.register(models.CardInDeck, CardInDeckAdmin)
 admin.site.register(models.Printing, PrintingAdmin)
 admin.site.register(models.SiteStat)
 admin.site.register(models.Commander, CommanderAdmin)
+admin.site.register(models.Theme, ThemeAdmin)
