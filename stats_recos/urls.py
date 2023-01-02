@@ -36,6 +36,7 @@ urlpatterns = (
     path('card/<uuid:card_id>/setimage', views.set_editorial_image, name="card-setimage"),
     path('land/top/', views.top_lands, name="land-top"),
     path('theme/tribe/<slug:theme_slug>/', views.single_theme_tribe, name="theme-single-tribal"),
+    path('theme/keyword/<slug:theme_slug>/', views.single_theme_keyword, name="theme-single-keyword"),
     path('hx/cmdr/<int:cmdr_id>/<card_type>/<int:page_number>', views.hx_common_cards, name="hx-common-cards"),
     path('search/', views.search, name="search"),
 ])
