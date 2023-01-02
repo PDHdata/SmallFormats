@@ -82,6 +82,7 @@ class Command(LoggingBaseCommand):
                 identity_r="R" in json_card['color_identity'],
                 identity_g="G" in json_card['color_identity'],
                 type_line=json_card['type_line'],
+                keywords=list(json_card['keywords']),
                 scryfall_uri=json_card['scryfall_uri'],
             )
             p = Printing(
@@ -129,6 +130,7 @@ class Command(LoggingBaseCommand):
                     identity_r="R" in json_card['color_identity'],
                     identity_g="G" in json_card['color_identity'],
                     type_line=face['type_line'],
+                    keywords=list(json_card['keywords']),
                     scryfall_uri=json_card['scryfall_uri'],
                 )
                 p = Printing(

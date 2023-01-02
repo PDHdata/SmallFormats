@@ -17,6 +17,10 @@ import functools
 
 FRONT_PAGE_TOP_COMMANDERS_TO_ROTATE = 25
 
+# HACK: see `single_theme_keyword` below for why this is necessary
+from django.db import connections
+USE_SQLITE_JSON_HACK = True if connections['default'].vendor == 'sqlite' else False
+
 
 def _deck_count_exact_color(w, u, b, r, g):
     filters = []
@@ -389,17 +393,13 @@ def cards_by_color(request, w=False, u=False, b=False, r=False, g=False):
 
 
 def theme_index(request):
-    tribes = (
-        Theme.objects
-        .filter(filter_type=Theme.Type.TRIBE)
-        .order_by('display_name')
-    )
+    themes = Theme.objects.order_by('display_name')
 
     return render(
         request,
         'themes/index.html',
         context={
-            'tribes': tribes,
+            'themes': themes,
         }
     )
 
@@ -444,6 +444,58 @@ def single_theme_tribe(request, theme_slug):
             'card_threshold': theme.card_threshold,
             'deck_threshold': theme.deck_threshold,
             'commanders': tribal_cmdrs,
+        }
+    )
+
+
+@cache_page(10 * 60)
+def single_theme_keyword(request, theme_slug):
+    theme = get_object_or_404(Theme, slug=theme_slug, filter_type=Theme.Type.KEYWORD)
+    
+    # HACK: `contains` is not supported on JSONField on SQLite.
+    # Because we're only storing a flat array, `regex` is a good
+    # enough approximation in this instance.
+    if USE_SQLITE_JSON_HACK:
+        filter = Q(card_list__card__keywords__regex=rf'"{theme.filter_text}"')
+    else:
+        filter = Q(card_list__card__keywords__contains=theme.filter_text)
+
+    keyword_decks = (
+        Deck.objects
+        .filter(pdh_legal=True)
+        .annotate(keyword_count=Count(
+            'card_list',
+            filter=filter,
+        ))
+        .filter(keyword_count__gt=theme.card_threshold)
+    )
+
+    keyword_cmdrs = (
+        Commander.objects
+        .annotate(
+            keyword_decks=Count(
+                'decks',
+                filter=Q(decks__in=keyword_decks),
+                unique=True,
+            ),
+            total_deck_count=Count('decks', unique=True),
+        )
+        .filter(keyword_decks__gt=1)
+        .filter(keyword_decks__gte=F('total_deck_count') * Value(theme.deck_threshold / 100.0))
+        .annotate(rank=Window(
+            expression=Rank(),
+            order_by=F('keyword_decks').desc(),
+        ))
+    )
+
+    return render(
+        request,
+        'themes/keyword.html',
+        context={
+            'keyword': theme.display_name,
+            'card_threshold': theme.card_threshold,
+            'deck_threshold': theme.deck_threshold,
+            'commanders': keyword_cmdrs,
         }
     )
 
