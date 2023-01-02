@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load simple_math %}
+{% block title %}Themes{% endblock %}
+{% block body %}
+<h1>Themes</h1>
+<div class="container">
+  <h2>Tribal (creature types)</h2>
+  <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-4 py-3">
+    {% for tribe in tribes %}
+    {% with parity=forloop.counter0|parity %}
+    <div class="col d-flex align-items-start fs-4">
+    {% endwith %}
+      <div>
+      <a href="{% url 'theme-single-tribal' tribe.slug %}">{{ tribe.display_name }}</a><br>
+      </div>
+    </div>
+    {% empty %}
+    <div>Sorry, no themes found.</div>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}

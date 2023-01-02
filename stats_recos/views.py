@@ -386,7 +386,19 @@ def cards_by_color(request, w=False, u=False, b=False, r=False, g=False):
 
 
 def theme_index(request):
-    ...
+    tribes = (
+        Theme.objects
+        .filter(filter_type=Theme.Type.TRIBE)
+        .order_by('display_name')
+    )
+
+    return render(
+        request,
+        'themes/index.html',
+        context={
+            'tribes': tribes,
+        }
+    )
 
 
 def single_theme_tribe(request, theme_slug):
