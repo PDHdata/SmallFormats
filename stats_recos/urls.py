@@ -11,6 +11,7 @@ urlpatterns = (
     path('cmdr/', views.commander_index, name="cmdr"),
     path('land/', views.land_index, name="land"),
     path('card/', views.card_index, name="card"),
+    path('theme/', views.theme_index, name="theme"),
 ] +
 [
     path(f'cmdr/{name}/', views.commanders_by_color, filters, name=f'cmdr-{name}')
@@ -34,6 +35,7 @@ urlpatterns = (
     path('card/<uuid:card_id>/pairs', views.single_card_pairings, name="card-single-pairings"),
     path('card/<uuid:card_id>/setimage', views.set_editorial_image, name="card-setimage"),
     path('land/top/', views.top_lands, name="land-top"),
+    path('theme/<slug:theme>/', views.single_theme, name="theme-single"),
     path('hx/cmdr/<int:cmdr_id>/<card_type>/<int:page_number>', views.hx_common_cards, name="hx-common-cards"),
     path('search/', views.search, name="search"),
 ])
