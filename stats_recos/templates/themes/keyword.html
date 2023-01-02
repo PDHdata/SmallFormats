@@ -5,6 +5,13 @@
 {% block title %}{{ keyword }} commanders{% endblock %}
 {% block body %}
 <h1>{{ keyword }} commanders</h1>
+<nav aria-label="breadcrumb">
+  <ol class="breadcrumb">
+    <li class="breadcrumb-item"><a href="{% url 'theme' %}">Themes</a></li>
+    <li class="breadcrumb-item">Keyword</li>
+    <li class="breadcrumb-item active" aria-current="page">{{ keyword }}</li>
+  </ol>
+</nav>
 <p>
   A deck with {{ card_threshold }}+ {{ keyword }} cards is considered "{{ keyword }} themed".
   Each commander with {{ deck_threshold }}% or more of their decks {{ keyword }}-themed shows up here, assuming it has at least 2 decks of that theme.

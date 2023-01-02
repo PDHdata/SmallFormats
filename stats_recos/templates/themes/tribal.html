@@ -5,6 +5,13 @@
 {% block title %}{{ tribe }} commanders{% endblock %}
 {% block body %}
 <h1>{{ tribe }} commanders</h1>
+<nav aria-label="breadcrumb">
+  <ol class="breadcrumb">
+    <li class="breadcrumb-item"><a href="{% url 'theme' %}">Themes</a></li>
+    <li class="breadcrumb-item">Tribal</li>
+    <li class="breadcrumb-item active" aria-current="page">{{ tribe }}</li>
+  </ol>
+</nav>
 <p>
   A deck with {{ card_threshold }}+ {{ tribe }} cards is considered "{{ tribe }} tribal".
   Each commander with {{ deck_threshold }}% or more of their decks {{ tribe }}-themed shows up here, assuming it has at least 2 decks of the tribe.
