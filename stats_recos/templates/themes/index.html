@@ -5,28 +5,17 @@
 {% block body %}
 <h1>Themes</h1>
 <div class="container">
-  <h2>Tribal (creature types)</h2>
   <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-4 py-3">
-    {% for tribe in tribes %}
+    {% for theme in themes %}
     {% with parity=forloop.counter0|parity %}
-    <div class="col d-flex align-items-start fs-4">
+    <div class="col d-flex align-items-start">
     {% endwith %}
       <div>
-      <a href="{% url 'theme-single-tribal' tribe.slug %}">{{ tribe.display_name }}</a><br>
-      </div>
-    </div>
-    {% empty %}
-    <div>Sorry, no themes found.</div>
-    {% endfor %}
-  </div>
-  <h2>Keywords</h2>
-  <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-4 py-3">
-    {% for keyword in keywords %}
-    {% with parity=forloop.counter0|parity %}
-    <div class="col d-flex align-items-start fs-4">
-    {% endwith %}
-      <div>
-      <a href="{% url 'theme-single-keyword' keyword.slug %}">{{ keyword.display_name }}</a><br>
+        {% if theme.filter_type == 'T' %}
+        <a class="fs-4" href="{% url 'theme-single-tribal' theme.slug %}">{{ theme.display_name }}</a> <span class="badge bg-info">tribal</span>
+        {% elif theme.filter_type == 'K' %}
+        <a class="fs-4" href="{% url 'theme-single-keyword' theme.slug %}">{{ theme.display_name }}</a> <span class="badge bg-secondary">keyword</span>
+        {% endif %}
       </div>
     </div>
     {% empty %}
