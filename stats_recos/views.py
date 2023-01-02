@@ -1,11 +1,12 @@
 from django.shortcuts import render, get_object_or_404
-from django.http import HttpResponseNotAllowed, HttpResponseNotFound
+from django.http import HttpResponseNotAllowed
 from django.urls import reverse
 from django.db.models import Count, Q, F, Window, Value
 from django.db.models.functions import Rank
 from django.core.paginator import Paginator
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_POST
+from django.views.decorators.cache import cache_page
 from django.utils import timezone
 from decklist.models import Card, Deck, Printing, CardInDeck, SiteStat, Commander, Theme
 from .wubrg_utils import COLORS, filter_to_name, name_to_symbol
@@ -226,6 +227,7 @@ def land_index(request):
     )
 
 
+@cache_page(10 * 60)
 def top_lands(request):
     land_cards = (
         Card.objects
@@ -311,6 +313,7 @@ def card_index(request):
     )
 
 
+@cache_page(10 * 60)
 def top_cards(request, include_land=True):
     if include_land:
         cards = Card.objects
@@ -401,6 +404,7 @@ def theme_index(request):
     )
 
 
+@cache_page(10 * 60)
 def single_theme_tribe(request, theme_slug):
     theme = get_object_or_404(Theme, slug=theme_slug, filter_type=Theme.Type.TRIBE)
     

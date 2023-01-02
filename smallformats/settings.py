@@ -13,6 +13,7 @@ https://docs.djangoproject.com/en/4.1/ref/settings/
 from pathlib import Path
 import os
 import dj_database_url
+import django_cache_url
 from django.urls import reverse_lazy
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -103,9 +104,19 @@ ASGI_APPLICATION = 'smallformats.asgi.application'
 # https://docs.djangoproject.com/en/4.1/ref/settings/#databases
 
 DATABASES = {
+    # reads DATABASE_URL from the environment
     'default': dj_database_url.config(
         default="sqlite:///" + os.path.join(BASE_DIR, 'db.sqlite3'),
     ),
+}
+
+# Caching
+
+CACHES = {
+    # reads CACHE_URL from the environment
+    'default': django_cache_url.config(
+        default="locmem://",
+    )
 }
 
 
