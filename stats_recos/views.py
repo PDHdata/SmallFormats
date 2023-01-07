@@ -8,7 +8,7 @@ from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_POST
 from django.views.decorators.cache import cache_page
 from django.utils import timezone
-from decklist.models import Card, Deck, Printing, CardInDeck, SiteStat, Commander, Theme
+from decklist.models import Card, Deck, Printing, CardInDeck, PartnerType, SiteStat, Commander, Theme
 from .wubrg_utils import COLORS, filter_to_name, name_to_symbol
 from django_htmx.http import trigger_client_event, HttpResponseClientRefresh
 import operator
@@ -165,6 +165,37 @@ def top_commanders(request):
         "stats/commanders.html",
         context={
             'heading': 'top',
+            'commanders': cmdrs_page,
+            'deck_count': deck_count,
+        },
+    )
+
+
+def background_commanders(request):
+    cmdrs = (
+        Commander.objects
+        .filter(decks__pdh_legal=True)
+        .filter(
+            Q(commander1__partner_type=PartnerType.BACKGROUND)
+            | Q(commander2__partner_type=PartnerType.BACKGROUND)
+        )
+        .annotate(num_decks=Count('decks'))
+        .annotate(rank=Window(
+            expression=Rank(),
+            order_by=F('num_decks').desc(),
+        ))
+    )
+    paginator = Paginator(cmdrs, 25, orphans=3)
+    page_number = request.GET.get('page')
+    cmdrs_page = paginator.get_page(page_number)
+
+    deck_count = Deck.objects.filter(pdh_legal=True).count()
+
+    return render(
+        request,
+        "stats/commanders.html",
+        context={
+            'heading': 'Background',
             'commanders': cmdrs_page,
             'deck_count': deck_count,
         },
