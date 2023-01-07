@@ -263,6 +263,37 @@ def commanders_by_color(request, w=False, u=False, b=False, r=False, g=False):
     )
 
 
+def commanders_lonely(request):
+    "Available commanders with no decks"
+    non_cmdrs = (
+        Card.objects
+        .filter(
+            type_line__contains="Creature",
+            printings__rarity=Printing.Rarity.UNCOMMON,
+        )
+        .distinct()
+        .exclude(
+            name__startswith="A-",
+        )
+        .filter(
+            commander1_slots=None,
+            commander2_slots=None,
+        )
+        .order_by('name')
+    )
+    paginator = Paginator(non_cmdrs, 25, orphans=3)
+    page_number = request.GET.get('page')
+    cards_page = paginator.get_page(page_number)
+
+    return render(
+        request,
+        "stats/commanders_lonely.html",
+        context={
+            'cards': cards_page,
+        },
+    )
+
+
 def land_index(request):
     colors = [
         [(c[0], name_to_symbol(c[0]), f'land-{c[0]}') for c in COLORS if c[1] == 0],
