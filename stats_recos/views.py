@@ -171,14 +171,33 @@ def top_commanders(request):
     )
 
 
+def partner_commanders(request):
+    all_parters = [
+        PartnerType.PARTNER,
+        PartnerType.PARTNER_WITH_BLARING,
+        PartnerType.PARTNER_WITH_CHAKRAM,
+        PartnerType.PARTNER_WITH_PROTEGE,
+        PartnerType.PARTNER_WITH_SOULBLADE,
+        PartnerType.PARTNER_WITH_WEAVER,
+    ]
+    return _partner_commanders(request, 'Partner', [
+        Q(commander1__partner_type__in=all_parters)
+        | Q(commander2__partner_type__in=all_parters)
+    ])
+
+
 def background_commanders(request):
+    return _partner_commanders(request, 'Background', [
+        Q(commander1__partner_type=PartnerType.BACKGROUND)
+        | Q(commander2__partner_type=PartnerType.BACKGROUND)
+    ])
+
+
+def _partner_commanders(request, heading, filters):
     cmdrs = (
         Commander.objects
         .filter(decks__pdh_legal=True)
-        .filter(
-            Q(commander1__partner_type=PartnerType.BACKGROUND)
-            | Q(commander2__partner_type=PartnerType.BACKGROUND)
-        )
+        .filter(*filters)
         .annotate(num_decks=Count('decks'))
         .annotate(rank=Window(
             expression=Rank(),
@@ -195,7 +214,7 @@ def background_commanders(request):
         request,
         "stats/commanders.html",
         context={
-            'heading': 'Background',
+            'heading': heading,
             'commanders': cmdrs_page,
             'deck_count': deck_count,
         },
