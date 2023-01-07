@@ -426,6 +426,9 @@ class Commander(models.Model):
     
     def __str__(self):
         if self.commander2:
+            if self.commander1.partner_type == PartnerType.BACKGROUND:
+                # for display, always try to put a Background second
+                return f"{self.commander2.name} + {self.commander1.name}"
             return f"{self.commander1.name} + {self.commander2.name}"
         return self.commander1.name
     
