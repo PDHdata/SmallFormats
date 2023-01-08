@@ -56,7 +56,7 @@ def _deck_count_exact_color(w, u, b, r, g):
 
 def _deck_count_at_least_color(w, u, b, r, g):
     if not any([w, u, b, r, g]):
-        return Deck.objects.count()
+        return Deck.objects.filter(pdh_legal=True).count()
 
     # build up a filter for the aggregation
     # that has a Q object set to True for each color we
