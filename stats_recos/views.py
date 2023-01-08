@@ -23,13 +23,20 @@ USE_SQLITE_JSON_HACK = True if connections['default'].vendor == 'sqlite' else Fa
 
 
 def _deck_count_exact_color(w, u, b, r, g):
+    wubrg = {
+        'w': w,
+        'u': u,
+        'b': b,
+        'r': r,
+        'g': g,
+    }
     filters = []
     # for each color...
     for c in 'wubrg':
         cmdr1 = f'commander1__identity_{c}'
         cmdr2 = f'commander2__identity_{c}'
         # ... if we want the color, either partner can bring it
-        if locals()[c]:
+        if wubrg[c]:
             filters.append(Q(**dict([(cmdr1,True),])) | Q(**dict([(cmdr2,True),])))
         # ... if we don't want the color, neither partner can bring it
         # ... or else partner2 can be empty
@@ -54,9 +61,16 @@ def _deck_count_at_least_color(w, u, b, r, g):
     # build up a filter for the aggregation
     # that has a Q object set to True for each color we
     # care about and nothing for the colors which we don't
+    wubrg = {
+        'w': w,
+        'u': u,
+        'b': b,
+        'r': r,
+        'g': g,
+    }
     filters = []
     for c in 'wubrg':
-        if locals()[c]:
+        if wubrg[c]:
             cmdr1 = f'commander1__identity_{c}'
             cmdr2 = f'commander2__identity_{c}'
             filters.append(Q(**dict([(cmdr1,True),])) | Q(**dict([(cmdr2,True),])))
@@ -222,13 +236,20 @@ def _partner_commanders(request, heading, filters):
 
 
 def commanders_by_color(request, w=False, u=False, b=False, r=False, g=False):
+    wubrg = {
+        'w': w,
+        'u': u,
+        'b': b,
+        'r': r,
+        'g': g,
+    }
     filters = []
     # for each color...
     for c in 'wubrg':
         cmdr1 = f'commander1__identity_{c}'
         cmdr2 = f'commander2__identity_{c}'
         # ... if we want the color, either partner can bring it
-        if locals()[c]:
+        if wubrg[c]:
             filters.append(Q(**dict([(cmdr1,True),])) | Q(**dict([(cmdr2,True),])))
         # ... if we don't want the color, neither partner can bring it
         # ... or else partner2 can be empty
