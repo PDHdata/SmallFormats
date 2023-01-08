@@ -236,33 +236,8 @@ def _partner_commanders(request, heading, filters):
 
 
 def commanders_by_color(request, w=False, u=False, b=False, r=False, g=False):
-    wubrg = {
-        'w': w,
-        'u': u,
-        'b': b,
-        'r': r,
-        'g': g,
-    }
-    filters = []
-    # for each color...
-    for c in 'wubrg':
-        cmdr1 = f'commander1__identity_{c}'
-        cmdr2 = f'commander2__identity_{c}'
-        # ... if we want the color, either partner can bring it
-        if wubrg[c]:
-            filters.append(Q(**dict([(cmdr1,True),])) | Q(**dict([(cmdr2,True),])))
-        # ... if we don't want the color, neither partner can bring it
-        # ... or else partner2 can be empty
-        else:
-            filters.append(
-                Q(**dict([(cmdr1,False),])) & 
-                (Q(commander2__isnull=True) | Q(**dict([(cmdr2,False),])))
-            )
-
     cmdrs = (
-        Commander.objects
-        .filter(decks__pdh_legal=True)
-        .filter(*filters)
+        _legal_commanders_for_color(w, u, b, r, g)
         .annotate(num_decks=Count('decks'))
         .annotate(rank=Window(
             expression=Rank(),
@@ -281,6 +256,37 @@ def commanders_by_color(request, w=False, u=False, b=False, r=False, g=False):
             'commanders': cmdrs_page,
             'deck_count': _deck_count_exact_color(w, u, b, r, g),
         },
+    )
+
+def _legal_commanders_for_color(w, u, b, r, g):
+    wubrg = {
+        'w': w,
+        'u': u,
+        'b': b,
+        'r': r,
+        'g': g,
+    }
+
+    filters = []
+    # for each color...
+    for c in 'wubrg':
+        cmdr1 = f'commander1__identity_{c}'
+        cmdr2 = f'commander2__identity_{c}'
+        # ... if we want the color, either partner can bring it
+        if wubrg[c]:
+            filters.append(Q(**dict([(cmdr1,True),])) | Q(**dict([(cmdr2,True),])))
+        # ... if we don't want the color, neither partner can bring it
+        # ... or else partner2 can be empty
+        else:
+            filters.append(
+                Q(**dict([(cmdr1,False),])) & 
+                (Q(commander2__isnull=True) | Q(**dict([(cmdr2,False),])))
+            )
+
+    return (
+        Commander.objects
+        .filter(decks__pdh_legal=True)
+        .filter(*filters)
     )
 
 
