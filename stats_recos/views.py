@@ -1,15 +1,16 @@
 from django.shortcuts import render, get_object_or_404
 from django.http import HttpResponseNotAllowed
 from django.urls import reverse
-from django.db.models import Count, Q, F, Window, Value, FloatField
-from django.db.models.functions import Rank, Cast
+from django.db.models import Count, Q, F, Window, Value
+from django.db.models.functions import Rank
 from django.core.paginator import Paginator
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_POST
 from django.views.decorators.cache import cache_page
 from django.utils import timezone
-from decklist.models import Card, Deck, Printing, CardInDeck, PartnerType, SiteStat, Commander, Theme
+from decklist.models import Card, Deck, Printing, CardInDeck, PartnerType, SiteStat, Commander, Theme, SynergyScore
 from .wubrg_utils import COLORS, filter_to_name, name_to_symbol
+from .synergy import compute_synergy, commanders_of_identity
 from django_htmx.http import trigger_client_event, HttpResponseClientRefresh
 import operator
 import functools
@@ -237,7 +238,7 @@ def _partner_commanders(request, heading, filters):
 
 def commanders_by_color(request, w=False, u=False, b=False, r=False, g=False):
     cmdrs = (
-        _commanders_of_identity(w, u, b, r, g)
+        commanders_of_identity(w, u, b, r, g)
         .annotate(num_decks=Count('decks'))
         .annotate(rank=Window(
             expression=Rank(),
@@ -256,40 +257,6 @@ def commanders_by_color(request, w=False, u=False, b=False, r=False, g=False):
             'commanders': cmdrs_page,
             'deck_count': _deck_count_exact_color(w, u, b, r, g),
         },
-    )
-
-
-def _commanders_of_identity(w, u, b, r, g, allow_superset=False):
-    """Find all commanders with a color identity. If allow_superset
-    is True, then find all commanders of at least that identity."""
-    wubrg = {
-        'w': w,
-        'u': u,
-        'b': b,
-        'r': r,
-        'g': g,
-    }
-
-    filters = []
-    # for each color...
-    for c in 'wubrg':
-        cmdr1 = f'commander1__identity_{c}'
-        cmdr2 = f'commander2__identity_{c}'
-        # ... if we want the color, either partner can bring it
-        if wubrg[c]:
-            filters.append(Q(**dict([(cmdr1,True),])) | Q(**dict([(cmdr2,True),])))
-        # ... if we don't want to allow the color, neither partner can bring it
-        # ... (or partner2 can be empty)
-        elif not allow_superset:
-            filters.append(
-                Q(**dict([(cmdr1,False),])) & 
-                (Q(commander2__isnull=True) | Q(**dict([(cmdr2,False),])))
-            )
-
-    return (
-        Commander.objects
-        .filter(decks__pdh_legal=True)
-        .filter(*filters)
     )
 
 
@@ -821,50 +788,7 @@ def synergy(request, cmdr_id, card_id):
     commander = get_object_or_404(Commander, sfid=cmdr_id)
     card = get_object_or_404(Card, pk=card_id)
 
-    # what fraction of this commander's decks does the card appear in?
-    in_percent_commander_decks = (
-        Deck.objects
-        .filter(pdh_legal=True, commander=commander)
-        .aggregate(
-            appears_frac=(
-                # how many of the commander's decks the card appears in
-                Cast(Count('card_list__card', filter=Q(card_list__card=card)), output_field=FloatField())
-                /
-                # all decks for the commander
-                Cast(Count('id', distinct=True), output_field=FloatField())
-            ),
-        )
-    )
-    # if there was, for example, division by zero in the database, we want
-    # this to end up NaN because the result would be nonsense
-    percent_decks = in_percent_commander_decks['appears_frac'] or float('nan')
-
-    # what fraction of decks belonging to other legal commanders for this card
-    # does it appear in?
-    in_percent_noncommander_decks = (
-        _commanders_of_identity(
-            card.identity_w,
-            card.identity_u,
-            card.identity_b,
-            card.identity_r,
-            card.identity_g,
-            allow_superset=True,
-        )
-        .exclude(id=commander.id)
-        .aggregate(
-            appears_frac=(
-                # how many other-commander decks the card appears in
-                Cast(Count('decks', filter=Q(decks__pdh_legal=True) & Q(decks__card_list__card=card), distinct=True), output_field=FloatField())
-                /
-                # how many total decks for the other commanders
-                Cast(Count('decks', filter=Q(decks__pdh_legal=True), distinct=True), output_field=FloatField())
-            ),
-        )
-    )
-    # same as above, on `None` then become `NaN`
-    percent_other_decks = in_percent_noncommander_decks['appears_frac'] or float('nan')
-
-    synergy = round(percent_decks - percent_other_decks, 2)
+    synergy = compute_synergy(commander, card)
 
     return render(
         request,
