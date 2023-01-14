@@ -237,7 +237,7 @@ def _partner_commanders(request, heading, filters):
 
 def commanders_by_color(request, w=False, u=False, b=False, r=False, g=False):
     cmdrs = (
-        _legal_commanders_for_color(w, u, b, r, g)
+        _commanders_of_identity(w, u, b, r, g)
         .annotate(num_decks=Count('decks'))
         .annotate(rank=Window(
             expression=Rank(),
@@ -258,7 +258,10 @@ def commanders_by_color(request, w=False, u=False, b=False, r=False, g=False):
         },
     )
 
-def _legal_commanders_for_color(w, u, b, r, g):
+
+def _commanders_of_identity(w, u, b, r, g, allow_superset=False):
+    """Find all commanders with a color identity. If allow_superset
+    is True, then find all commanders of at least that identity."""
     wubrg = {
         'w': w,
         'u': u,
@@ -275,9 +278,9 @@ def _legal_commanders_for_color(w, u, b, r, g):
         # ... if we want the color, either partner can bring it
         if wubrg[c]:
             filters.append(Q(**dict([(cmdr1,True),])) | Q(**dict([(cmdr2,True),])))
-        # ... if we don't want the color, neither partner can bring it
-        # ... or else partner2 can be empty
-        else:
+        # ... if we don't want to allow the color, neither partner can bring it
+        # ... (or partner2 can be empty)
+        elif not allow_superset:
             filters.append(
                 Q(**dict([(cmdr1,False),])) & 
                 (Q(commander2__isnull=True) | Q(**dict([(cmdr2,False),])))
@@ -811,6 +814,68 @@ def hx_common_cards(request, cmdr_id, card_type, page_number):
             'page': page_number,
         },
         after="settle",
+    )
+
+
+def synergy(request, cmdr_id, card_id):
+    commander = get_object_or_404(Commander, sfid=cmdr_id)
+    card = get_object_or_404(Card, pk=card_id)
+
+    commander_decks = (
+        Deck.objects
+        .filter(
+            pdh_legal=True,
+            commander=commander,
+        )
+    )
+    in_commander_decks = (
+        Deck.objects
+        .filter(
+            pdh_legal=True,
+            commander=commander,
+            card_list__card=card,
+        )
+
+    )
+
+    # other commanders this card could appear with
+    other_cmdrs = (
+        _commanders_of_identity(
+            card.identity_w,
+            card.identity_u,
+            card.identity_b,
+            card.identity_r,
+            card.identity_g,
+            allow_superset=True,
+        )
+        .exclude(id=commander.id)
+    )
+
+    noncommander_decks = other_cmdrs.aggregate(num_decks=Count('decks'))
+    in_noncommander_decks = (
+        other_cmdrs
+        .filter(decks__card_list__card=card)
+        .aggregate(num_decks=Count('decks', distinct=True))
+    )
+
+    decks_count, in_decks_count = commander_decks.count(), in_commander_decks.count()
+    other_decks_count, in_other_decks_count = noncommander_decks['num_decks'], in_noncommander_decks['num_decks']
+    percent_decks = in_decks_count / decks_count
+    percent_other_decks = in_other_decks_count / other_decks_count
+    synergy = round(percent_decks - percent_other_decks, 2)
+
+    return render(
+        request,
+        'stats/synergy.html',
+        context={
+            'commander': commander,
+            'card': card,
+            'decks': decks_count,
+            'in_decks': in_decks_count,
+            'other_decks': other_decks_count,
+            'in_other_decks': in_other_decks_count,
+            'synergy': synergy,
+        },
     )
 
 

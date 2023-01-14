@@ -31,6 +31,7 @@ urlpatterns = (
     path('cmdr/partner/', views.partner_commanders, name="cmdr-partner"),
     path('cmdr/<uuid:cmdr_id>', views.single_cmdr, name="cmdr-single"),
     path('cmdr/<uuid:cmdr_id>/decks', views.single_cmdr_decklist, name="cmdr-decklist"),
+    path('cmdr/<uuid:cmdr_id>/synergy/<uuid:card_id>', views.synergy, name="synergy"),
     path('card/top/nonland/', views.top_cards, kwargs={'include_land': False}, name="card-top-nonland"),
     path('card/top/', views.top_cards, name="card-top"),
     path('card/<uuid:card_id>', views.single_card, name="card-single"),
