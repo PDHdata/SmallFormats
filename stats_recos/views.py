@@ -1,8 +1,8 @@
 from django.shortcuts import render, get_object_or_404
 from django.http import HttpResponseNotAllowed
 from django.urls import reverse
-from django.db.models import Count, Q, F, Window, Value
-from django.db.models.functions import Rank
+from django.db.models import Count, Q, F, Window, Value, FloatField
+from django.db.models.functions import Rank, Cast
 from django.core.paginator import Paginator
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_POST
@@ -821,25 +821,25 @@ def synergy(request, cmdr_id, card_id):
     commander = get_object_or_404(Commander, sfid=cmdr_id)
     card = get_object_or_404(Card, pk=card_id)
 
-    commander_decks = (
+    # what fraction of this commander's decks does the card appear in?
+    in_percent_commander_decks = (
         Deck.objects
-        .filter(
-            pdh_legal=True,
-            commander=commander,
+        .filter(pdh_legal=True, commander=commander)
+        .aggregate(
+            appears_frac=(
+                # how many of the commander's decks the card appears in
+                Cast(Count('card_list__card', filter=Q(card_list__card=card)), output_field=FloatField())
+                /
+                # all decks for the commander
+                Cast(Count('id', distinct=True), output_field=FloatField())
+            ),
         )
     )
-    in_commander_decks = (
-        Deck.objects
-        .filter(
-            pdh_legal=True,
-            commander=commander,
-            card_list__card=card,
-        )
+    percent_decks = in_percent_commander_decks['appears_frac']
 
-    )
-
-    # other commanders this card could appear with
-    other_cmdrs = (
+    # what fraction of decks belonging to other legal commanders for this card
+    # does it appear in?
+    in_percent_noncommander_decks = (
         _commanders_of_identity(
             card.identity_w,
             card.identity_u,
@@ -849,19 +849,18 @@ def synergy(request, cmdr_id, card_id):
             allow_superset=True,
         )
         .exclude(id=commander.id)
+        .aggregate(
+            appears_frac=(
+                # how many other-commander decks the card appears in
+                Cast(Count('decks', filter=Q(decks__pdh_legal=True) & Q(decks__card_list__card=card), distinct=True), output_field=FloatField())
+                /
+                # how many total decks for the other commanders
+                Cast(Count('decks', filter=Q(decks__pdh_legal=True), distinct=True), output_field=FloatField())
+            ),
+        )
     )
+    percent_other_decks = in_percent_noncommander_decks['appears_frac']
 
-    noncommander_decks = other_cmdrs.aggregate(num_decks=Count('decks'))
-    in_noncommander_decks = (
-        other_cmdrs
-        .filter(decks__card_list__card=card)
-        .aggregate(num_decks=Count('decks', distinct=True))
-    )
-
-    decks_count, in_decks_count = commander_decks.count(), in_commander_decks.count()
-    other_decks_count, in_other_decks_count = noncommander_decks['num_decks'], in_noncommander_decks['num_decks']
-    percent_decks = in_decks_count / decks_count
-    percent_other_decks = in_other_decks_count / other_decks_count
     synergy = round(percent_decks - percent_other_decks, 2)
 
     return render(
@@ -870,10 +869,6 @@ def synergy(request, cmdr_id, card_id):
         context={
             'commander': commander,
             'card': card,
-            'decks': decks_count,
-            'in_decks': in_decks_count,
-            'other_decks': other_decks_count,
-            'in_other_decks': in_other_decks_count,
             'synergy': synergy,
         },
     )
