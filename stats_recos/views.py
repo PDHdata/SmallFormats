@@ -835,7 +835,9 @@ def synergy(request, cmdr_id, card_id):
             ),
         )
     )
-    percent_decks = in_percent_commander_decks['appears_frac']
+    # if there was, for example, division by zero in the database, we want
+    # this to end up NaN because the result would be nonsense
+    percent_decks = in_percent_commander_decks['appears_frac'] or float('nan')
 
     # what fraction of decks belonging to other legal commanders for this card
     # does it appear in?
@@ -859,7 +861,8 @@ def synergy(request, cmdr_id, card_id):
             ),
         )
     )
-    percent_other_decks = in_percent_noncommander_decks['appears_frac']
+    # same as above, on `None` then become `NaN`
+    percent_other_decks = in_percent_noncommander_decks['appears_frac'] or float('nan')
 
     synergy = round(percent_decks - percent_other_decks, 2)
 
