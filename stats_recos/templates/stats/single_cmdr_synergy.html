@@ -1,7 +1,12 @@
 {% extends 'base.html' %}
+{% load mana %}
 {% block title %}High synergy cards for {{ cmdr }}{% endblock %}
 {% block body %}
-<h1>{{ cmdr }}</h1>
+{% with cmdr_color=cmdr.color_identity|mana_symbol_to_name %}
+{% with cmdr_link='cmdr-'|add:cmdr_color %}
+<h1>{{ cmdr }}{% if cmdr_color %} <a href="{% url cmdr_link %}" title="More {{ cmdr_color|capfirst }} commanders">{{ cmdr.color_identity|mana_symbols|safe }}</a>{% endif %}</h1>
+{% endwith %}
+{% endwith %}
 <ul class="nav nav-tabs mb-2">
   <li class="nav-item">
     {% if is_pair %}
