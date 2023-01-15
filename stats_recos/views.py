@@ -693,7 +693,7 @@ def single_cmdr_decklist(request, cmdr_id):
 
     return render(
         request,
-        "stats/single_cmdr_decklist_new.html",
+        "stats/single_cmdr_decklist.html",
         context={
             'cmdr': cmdr,
             'commander1': cmdr.commander1,
