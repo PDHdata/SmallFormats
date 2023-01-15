@@ -1,5 +1,5 @@
 from ._command_base import LoggingBaseCommand
-from decklist.models import Card, SynergyScore
+from decklist.models import Card, Printing, SynergyScore
 from stats_recos.synergy import compute_synergy_bulk
 
 
@@ -13,7 +13,11 @@ class Command(LoggingBaseCommand):
 
         cards = (
             Card.objects
-            .filter(deck_list__deck__pdh_legal=True)
+            .filter(
+                # skip cards never printed at common
+                printings__rarity=Printing.Rarity.COMMON,
+                deck_list__deck__pdh_legal=True,
+            )
             .distinct()
         )
 
@@ -37,20 +41,27 @@ class Command(LoggingBaseCommand):
 
             new_records = []
             update_records = []
+            skipped_records = 0
 
             scores = compute_synergy_bulk(card)
             for commander, score in scores:
                 try:
                     score_record = existing_scores.get(commander=commander)
-                    update_records.append(score_record)
+                    # if the score has changed, record it
+                    if abs(score - score_record.score) >= 0.01:
+                        score_record.score = score
+                        update_records.append(score_record)
+                    else:
+                        skipped_records += 1
                 except SynergyScore.DoesNotExist:
                     score_record = SynergyScore(commander=commander, card=card)
+                    score_record.score = score
                     new_records.append(score_record)
                 
-                score_record.score = score
-
-            SynergyScore.objects.bulk_create(new_records)
-            SynergyScore.objects.bulk_update(update_records, ['score',])
-            self._log(f"{len(new_records)} new scores, {len(update_records)} updated scores")
+            if len(new_records) > 0:
+                SynergyScore.objects.bulk_create(new_records)
+            if len(update_records) > 0:
+                SynergyScore.objects.bulk_update(update_records, ['score',])
+            self._log(f"{len(new_records)} new scores, {len(update_records)} updated scores, {skipped_records} skipped")
 
         self._log("Done!")
