@@ -713,7 +713,7 @@ def single_cmdr_synergy(request, cmdr_id):
         .select_related('card')
         .annotate(rank=Window(
             expression=Rank(),
-            order_by=F('score').desc(),
+            order_by=F('score').desc(nulls_last=True),
         ))
     )
     paginator = Paginator(scores, 25, orphans=3)
