@@ -44,8 +44,8 @@ def compute_synergy(commander: Commander, card: Card):
             ),
         )
     )
-    # same as above, on `None` then become `NaN`
-    percent_other_decks = in_percent_noncommander_decks['appears_frac'] or float('nan')
+    # if it appears nowhere else, treat as 0
+    percent_other_decks = in_percent_noncommander_decks['appears_frac'] or 0.0
 
     return round(percent_decks - percent_other_decks, 2)
 
