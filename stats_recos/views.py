@@ -704,6 +704,33 @@ def single_cmdr_decklist(request, cmdr_id):
     )
 
 
+def single_cmdr_synergy(request, cmdr_id):
+    commander = get_object_or_404(Commander, sfid=cmdr_id)
+
+    scores = (
+        SynergyScore.objects
+        .filter(commander=commander)
+        .select_related('card')
+        .annotate(rank=Window(
+            expression=Rank(),
+            order_by=F('score').desc(),
+        ))
+    )
+    paginator = Paginator(scores, 25, orphans=3)
+    page_number = request.GET.get('page')
+    scores_page = paginator.get_page(page_number)
+
+    return render(
+        request,
+        'stats/single_cmdr_synergy.html',
+        context={
+            'cmdr': commander,
+            'scores': scores_page,
+            'is_pair': commander.commander2 is not None,
+        }
+    )
+
+
 def hx_common_cards(request, cmdr_id, card_type, page_number):
     if not request.htmx:
         return HttpResponseNotAllowed("expected HTMX request")
