@@ -1,5 +1,5 @@
 from django.shortcuts import render, get_object_or_404
-from django.http import HttpResponseNotAllowed
+from django.http import HttpResponseNotAllowed, Http404
 from django.urls import reverse
 from django.db.models import Count, Q, F, Window, Value
 from django.db.models.functions import Rank
@@ -8,6 +8,7 @@ from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_POST
 from django.views.decorators.cache import cache_page
 from django.utils import timezone
+from django.conf import settings
 from decklist.models import Card, Deck, Printing, CardInDeck, PartnerType, SiteStat, Commander, Theme, SynergyScore
 from .wubrg_utils import COLORS, filter_to_name, name_to_symbol
 from .synergy import compute_synergy, commanders_of_identity
@@ -713,7 +714,7 @@ def single_cmdr_synergy(request, cmdr_id):
         .select_related('card')
         .annotate(rank=Window(
             expression=Rank(),
-            order_by=F('score').desc(),
+            order_by=F('score').desc(nulls_last=True),
         ))
     )
     paginator = Paginator(scores, 25, orphans=3)
@@ -812,6 +813,12 @@ def hx_common_cards(request, cmdr_id, card_type, page_number):
 
 
 def synergy(request, cmdr_id, card_id):
+    # Calculating synergy is compute-intensive, we do it during
+    # nightly crawl in production. This page is sometimes useful
+    # in debug mode, though.
+    if not settings.DEBUG:
+        raise Http404()
+
     commander = get_object_or_404(Commander, sfid=cmdr_id)
     card = get_object_or_404(Card, pk=card_id)
 
