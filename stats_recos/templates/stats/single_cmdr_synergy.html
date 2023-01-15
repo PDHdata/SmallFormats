@@ -1,0 +1,54 @@
+{% extends 'base.html' %}
+{% load mana %}
+{% block title %}High synergy cards for {{ cmdr }}{% endblock %}
+{% block body %}
+{% with cmdr_color=cmdr.color_identity|mana_symbol_to_name %}
+{% with cmdr_link='cmdr-'|add:cmdr_color %}
+<h1>{{ cmdr }}{% if cmdr_color %} <a href="{% url cmdr_link %}" title="More {{ cmdr_color|capfirst }} commanders">{{ cmdr.color_identity|mana_symbols|safe }}</a>{% endif %}</h1>
+{% endwith %}
+{% endwith %}
+<ul class="nav nav-tabs mb-2">
+  <li class="nav-item">
+    {% if is_pair %}
+    <a class="nav-link" href="{% url 'cmdr-single' cmdr.sfid %}">Commander pair</a>
+    {% else %}
+    <a class="nav-link" href="{% url 'cmdr-single' cmdr.sfid %}">Commander</a>
+    {% endif %}
+  </li>
+  <li class="nav-item">
+    <a class="nav-link active" href="{% url 'cmdr-synergy-all' cmdr.sfid %}">Synergy</a>
+  </li>
+  <li class="nav-item">
+    <a class="nav-link" href="{% url 'cmdr-decklist' cmdr.sfid %}">Decks</a>
+  </li>
+</ul>
+<p>
+  Synergy is a rough depiction of how well a card pairs with a commander.
+  Read more <a href="{% url 'about' %}">on the About page</a>.
+</p>
+<div class="container">
+  <table class="table mb-3">
+    <tr><th>#</th><th>Card</th><th>Synergy</th><tr>
+    {% for score in scores %}
+    <tr>
+      <td>{{ score.rank }}</td>
+      <td><a href="{% url 'card-single' score.card.id %}">{{ score.card }}</a></td>
+      <td>{{ score.score }}</td>
+    </tr>
+    {% empty %}
+    <tr><td colspan="3"><i>No synergistic cards found.</i></td></tr>
+    {% endfor %}
+  </table>
+  <p>
+    {% if scores.has_previous %}
+    <a href="?page=1">first</a>
+    <a href="?page={{ scores.previous_page_number }}">previous</a>
+    {% endif %}
+    (page {{ scores.number }} of {{ scores.paginator.num_pages }})
+    {% if scores.has_next %}
+    <a href="?page={{ scores.next_page_number }}">next</a>
+    <a href="?page={{ scores.paginator.num_pages }}">last</a>
+    {% endif %}
+  </p>
+</div>
+{% endblock %}

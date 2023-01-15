@@ -8,8 +8,9 @@ from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_POST
 from django.views.decorators.cache import cache_page
 from django.utils import timezone
-from decklist.models import Card, Deck, Printing, CardInDeck, PartnerType, SiteStat, Commander, Theme
+from decklist.models import Card, Deck, Printing, CardInDeck, PartnerType, SiteStat, Commander, Theme, SynergyScore
 from .wubrg_utils import COLORS, filter_to_name, name_to_symbol
+from .synergy import compute_synergy, commanders_of_identity
 from django_htmx.http import trigger_client_event, HttpResponseClientRefresh
 import operator
 import functools
@@ -23,13 +24,20 @@ USE_SQLITE_JSON_HACK = True if connections['default'].vendor == 'sqlite' else Fa
 
 
 def _deck_count_exact_color(w, u, b, r, g):
+    wubrg = {
+        'w': w,
+        'u': u,
+        'b': b,
+        'r': r,
+        'g': g,
+    }
     filters = []
     # for each color...
     for c in 'wubrg':
         cmdr1 = f'commander1__identity_{c}'
         cmdr2 = f'commander2__identity_{c}'
         # ... if we want the color, either partner can bring it
-        if locals()[c]:
+        if wubrg[c]:
             filters.append(Q(**dict([(cmdr1,True),])) | Q(**dict([(cmdr2,True),])))
         # ... if we don't want the color, neither partner can bring it
         # ... or else partner2 can be empty
@@ -49,14 +57,21 @@ def _deck_count_exact_color(w, u, b, r, g):
 
 def _deck_count_at_least_color(w, u, b, r, g):
     if not any([w, u, b, r, g]):
-        return Deck.objects.count()
+        return Deck.objects.filter(pdh_legal=True).count()
 
     # build up a filter for the aggregation
     # that has a Q object set to True for each color we
     # care about and nothing for the colors which we don't
+    wubrg = {
+        'w': w,
+        'u': u,
+        'b': b,
+        'r': r,
+        'g': g,
+    }
     filters = []
     for c in 'wubrg':
-        if locals()[c]:
+        if wubrg[c]:
             cmdr1 = f'commander1__identity_{c}'
             cmdr2 = f'commander2__identity_{c}'
             filters.append(Q(**dict([(cmdr1,True),])) | Q(**dict([(cmdr2,True),])))
@@ -222,26 +237,8 @@ def _partner_commanders(request, heading, filters):
 
 
 def commanders_by_color(request, w=False, u=False, b=False, r=False, g=False):
-    filters = []
-    # for each color...
-    for c in 'wubrg':
-        cmdr1 = f'commander1__identity_{c}'
-        cmdr2 = f'commander2__identity_{c}'
-        # ... if we want the color, either partner can bring it
-        if locals()[c]:
-            filters.append(Q(**dict([(cmdr1,True),])) | Q(**dict([(cmdr2,True),])))
-        # ... if we don't want the color, neither partner can bring it
-        # ... or else partner2 can be empty
-        else:
-            filters.append(
-                Q(**dict([(cmdr1,False),])) & 
-                (Q(commander2__isnull=True) | Q(**dict([(cmdr2,False),])))
-            )
-
     cmdrs = (
-        Commander.objects
-        .filter(decks__pdh_legal=True)
-        .filter(*filters)
+        commanders_of_identity(w, u, b, r, g)
         .annotate(num_decks=Count('decks'))
         .annotate(rank=Window(
             expression=Rank(),
@@ -707,6 +704,33 @@ def single_cmdr_decklist(request, cmdr_id):
     )
 
 
+def single_cmdr_synergy(request, cmdr_id):
+    commander = get_object_or_404(Commander, sfid=cmdr_id)
+
+    scores = (
+        SynergyScore.objects
+        .filter(commander=commander)
+        .select_related('card')
+        .annotate(rank=Window(
+            expression=Rank(),
+            order_by=F('score').desc(),
+        ))
+    )
+    paginator = Paginator(scores, 25, orphans=3)
+    page_number = request.GET.get('page')
+    scores_page = paginator.get_page(page_number)
+
+    return render(
+        request,
+        'stats/single_cmdr_synergy.html',
+        context={
+            'cmdr': commander,
+            'scores': scores_page,
+            'is_pair': commander.commander2 is not None,
+        }
+    )
+
+
 def hx_common_cards(request, cmdr_id, card_type, page_number):
     if not request.htmx:
         return HttpResponseNotAllowed("expected HTMX request")
@@ -784,6 +808,23 @@ def hx_common_cards(request, cmdr_id, card_type, page_number):
             'page': page_number,
         },
         after="settle",
+    )
+
+
+def synergy(request, cmdr_id, card_id):
+    commander = get_object_or_404(Commander, sfid=cmdr_id)
+    card = get_object_or_404(Card, pk=card_id)
+
+    synergy = compute_synergy(commander, card)
+
+    return render(
+        request,
+        'stats/synergy.html',
+        context={
+            'commander': commander,
+            'card': card,
+            'synergy': synergy,
+        },
     )
 
 

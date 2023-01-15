@@ -63,6 +63,11 @@ class ThemeAdmin(admin.ModelAdmin):
         'slug': ('display_name',),
     }
 
+
+class SynergyAdmin(admin.ModelAdmin):
+    autocomplete_fields = ('card', 'commander')
+
+
 admin.site.register(models.User, UserAdmin)
 admin.site.register(models.Deck, DeckAdmin)
 admin.site.register(models.Card, CardAdmin)
@@ -71,3 +76,4 @@ admin.site.register(models.Printing, PrintingAdmin)
 admin.site.register(models.SiteStat)
 admin.site.register(models.Commander, CommanderAdmin)
 admin.site.register(models.Theme, ThemeAdmin)
+admin.site.register(models.SynergyScore, SynergyAdmin)

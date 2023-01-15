@@ -14,6 +14,29 @@
   We check for validity according to the PDH <a href="https://www.pdhhomebase.com/rules">rules</a> and <a href="https://www.pdhhomebase.com/faq">FAQ</a>.
   In the future, we may add an ability to "rule 0" acorn/silver-border cards.
 </p>
+{% comment %%}
+<h2>What is synergy?</h2>
+<p>
+  Synergy is a rough depiction of how well a card pairs with a commander.
+  It compares how often a card appears with a given commander comapred to often it appears in all other decks where it could go.
+  A card which appears mostly with one commander will have high synergy to that commander.
+  A card which is generically "good", and thus appears with lots of different commanders, will have low synergy with those commanders.
+</p>
+<p>
+  To compute synergy, we start with the fraction of a commander's decks which the card appears in.
+  Then we subtract the fraction of all the other possible decks the card appears in.
+  This gives a score from -1 to 1.
+  A score of 1 means the card appears in every deck for this commander and no decks for any other commander.
+  A score of -1 means the card appears in no decks for this commander and every deck for every other (legal) commander.
+</p>
+<p>
+  Here's an example.
+  Let's assume there are 10 decks for a mono-red commander called Alice, and a card called Bob appears in 7 of them.
+  There are also 100 other decks for commanders which include red but aren't Alice, and Bob appears in 15 of those.
+  So Bob's synergy with Alice would be <tt>(7/10) - (15/100) = 0.7 - 0.15 = 0.55</tt>.
+  Bob has pretty good synergy with Alice, as evidenced by his positive synergy score.
+</p>
+{% endcomment %}
 <h2>Thanks and credits</h2>
 <p>
   Thanks to the folks behind:
