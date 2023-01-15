@@ -6,10 +6,19 @@ from stats_recos.synergy import compute_synergy_bulk
 class Command(LoggingBaseCommand):
     help = 'Compute card synergy scores'
 
+    def add_arguments(self, parser):
+        super().add_arguments(parser)
+        parser.add_argument('--log-all', action='store_true')
+
     def handle(self, *args, **options):
         super().handle(*args, **options)
 
-        self._log('Computing card synergy scores')
+        log_all = options['log_all']
+
+        if log_all:
+            self._log('Loudly computing card synergy scores')
+        else:
+            self._log('Computing card synergy scores')
 
         cards = (
             Card.objects
@@ -32,7 +41,8 @@ class Command(LoggingBaseCommand):
             self._log(f"Deleted {deleted} irrelevant scores")
 
         for card in cards:
-            self._log(f"Working on {card}")
+            if log_all:
+                self._log(f"Working on {card}")
 
             existing_scores = (
                 SynergyScore.objects
@@ -62,6 +72,10 @@ class Command(LoggingBaseCommand):
                 SynergyScore.objects.bulk_create(new_records)
             if len(update_records) > 0:
                 SynergyScore.objects.bulk_update(update_records, ['score',])
-            self._log(f"{len(new_records)} new scores, {len(update_records)} updated scores, {skipped_records} skipped")
+            
+            if log_all:
+                self._log(f"{len(new_records)} new scores, {len(update_records)} updated scores, {skipped_records} skipped")
+            elif len(new_records) > 0 or len(update_records) > 0:
+                self._log(f"{card}: {len(new_records)} new scores, {len(update_records)} updated scores, {skipped_records} skipped")
 
         self._log("Done!")
