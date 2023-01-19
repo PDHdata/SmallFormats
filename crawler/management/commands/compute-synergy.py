@@ -1,4 +1,5 @@
 from ._command_base import LoggingBaseCommand
+from django.core.management.base import CommandError
 from decklist.models import Card, Printing, SynergyScore
 from stats_recos.synergy import compute_synergy_bulk
 
@@ -9,6 +10,7 @@ class Command(LoggingBaseCommand):
     def add_arguments(self, parser):
         super().add_arguments(parser)
         parser.add_argument('--log-all', action='store_true')
+        parser.add_argument('--card', type=str)
 
     def handle(self, *args, **options):
         super().handle(*args, **options)
@@ -20,25 +22,42 @@ class Command(LoggingBaseCommand):
         else:
             self._log('Computing card synergy scores')
 
-        cards = (
-            Card.objects
-            .filter(
-                # skip cards never printed at common
-                printings__rarity=Printing.Rarity.COMMON,
-                deck_list__deck__pdh_legal=True,
+        target_card = options['card']
+        if target_card:
+            # force high-fidelity logging to on since there's just one card
+            log_all = True
+            cards = (
+                Card.objects
+                .filter(name__iexact=target_card)
             )
-            .distinct()
-        )
+            results = cards.count()
+            if results > 1:
+                self._err(f'{target_card} matches more than one card')
+                raise CommandError(f'{target_card} matches more than one card')
+            elif results == 0:
+                self._err(f'{target_card} matches no cards')
+                raise CommandError(f'{target_card} matches no cards')
+        
+        else:
+            cards = (
+                Card.objects
+                .filter(
+                    # skip cards never printed at common
+                    printings__rarity=Printing.Rarity.COMMON,
+                    deck_list__deck__pdh_legal=True,
+                )
+                .distinct()
+            )
 
-        # delete synergy scores for any cards which have
-        # dropped out of decks
-        deleted, _ = (
-            SynergyScore.objects
-            .exclude(card__in=cards)
-            .delete()
-        )
-        if deleted > 0:
-            self._log(f"Deleted {deleted} irrelevant scores")
+            # in the standard case, delete synergy scores for any
+            # cards which have dropped out of decks
+            deleted, _ = (
+                SynergyScore.objects
+                .exclude(card__in=cards)
+                .delete()
+            )
+            if deleted > 0:
+                self._log(f"Deleted {deleted} irrelevant scores")
 
         for card in cards:
             if log_all:
