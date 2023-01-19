@@ -2,6 +2,7 @@ from ._command_base import LoggingBaseCommand
 from django.core.management.base import CommandError
 from decklist.models import Card, Printing, SynergyScore
 from stats_recos.synergy import compute_synergy_bulk
+import math
 
 
 class Command(LoggingBaseCommand):
@@ -77,7 +78,13 @@ class Command(LoggingBaseCommand):
                 try:
                     score_record = existing_scores.get(commander=commander)
                     # if the score has changed, record it
-                    if abs(score - score_record.score) >= 0.01:
+
+                    # treat NaN and NULL as 0
+                    old_score = score_record.score or 0.0
+                    if math.isnan(old_score):
+                        old_score = 0.0
+
+                    if abs(score - old_score) >= 0.005:
                         score_record.score = score
                         update_records.append(score_record)
                     else:
