@@ -9,7 +9,7 @@ from django.views.decorators.http import require_POST
 from django.views.decorators.cache import cache_page
 from django.utils import timezone
 from django.conf import settings
-from decklist.models import Card, Deck, Printing, CardInDeck, PartnerType, SiteStat, Commander, Theme, SynergyScore
+from decklist.models import Card, Deck, Printing, CardInDeck, PartnerType, SiteStat, Commander, Theme, ThemeResult, SynergyScore
 from .wubrg_utils import COLORS, filter_to_name, name_to_symbol
 from .synergy import compute_synergy, commanders_of_identity
 from django_htmx.http import trigger_client_event, HttpResponseClientRefresh
@@ -18,11 +18,6 @@ import functools
 
 
 FRONT_PAGE_TOP_COMMANDERS_TO_ROTATE = 25
-
-# HACK: see `single_theme_keyword` below for why this is necessary
-from django.db import connections
-USE_SQLITE_JSON_HACK = True if connections['default'].vendor == 'sqlite' else False
-
 
 def _deck_count_exact_color(w, u, b, r, g):
     wubrg = {
@@ -452,35 +447,15 @@ def theme_index(request):
     )
 
 
-@cache_page(10 * 60)
 def single_theme_tribe(request, theme_slug):
     theme = get_object_or_404(Theme, slug=theme_slug, filter_type=Theme.Type.TRIBE)
-    
-    tribal_decks = (
-        Deck.objects
-        .filter(pdh_legal=True)
-        .annotate(tribal_count=Count(
-            'card_list',
-            filter=Q(card_list__card__type_line__contains=theme.filter_text),
-        ))
-        .filter(tribal_count__gt=theme.card_threshold)
-    )
 
-    tribal_cmdrs = (
-        Commander.objects
-        .annotate(
-            tribal_decks=Count(
-                'decks',
-                filter=Q(decks__in=tribal_decks),
-                unique=True,
-            ),
-            total_deck_count=Count('decks', unique=True),
-        )
-        .filter(tribal_decks__gt=1)
-        .filter(tribal_decks__gte=F('total_deck_count') * Value(theme.deck_threshold / 100.0))
+    results = (
+        ThemeResult.objects
+        .filter(theme=theme)
         .annotate(rank=Window(
             expression=Rank(),
-            order_by=F('tribal_decks').desc(),
+            order_by=F('theme_deck_count').desc(),
         ))
     )
 
@@ -491,48 +466,20 @@ def single_theme_tribe(request, theme_slug):
             'tribe': theme.display_name,
             'card_threshold': theme.card_threshold,
             'deck_threshold': theme.deck_threshold,
-            'commanders': tribal_cmdrs,
+            'results': results,
         }
     )
 
 
-@cache_page(10 * 60)
 def single_theme_keyword(request, theme_slug):
     theme = get_object_or_404(Theme, slug=theme_slug, filter_type=Theme.Type.KEYWORD)
     
-    # HACK: `contains` is not supported on JSONField on SQLite.
-    # Because we're only storing a flat array, `regex` is a good
-    # enough approximation in this instance.
-    if USE_SQLITE_JSON_HACK:
-        filter = Q(card_list__card__keywords__regex=rf'"{theme.filter_text}"')
-    else:
-        filter = Q(card_list__card__keywords__contains=theme.filter_text)
-
-    keyword_decks = (
-        Deck.objects
-        .filter(pdh_legal=True)
-        .annotate(keyword_count=Count(
-            'card_list',
-            filter=filter,
-        ))
-        .filter(keyword_count__gt=theme.card_threshold)
-    )
-
-    keyword_cmdrs = (
-        Commander.objects
-        .annotate(
-            keyword_decks=Count(
-                'decks',
-                filter=Q(decks__in=keyword_decks),
-                unique=True,
-            ),
-            total_deck_count=Count('decks', unique=True),
-        )
-        .filter(keyword_decks__gt=1)
-        .filter(keyword_decks__gte=F('total_deck_count') * Value(theme.deck_threshold / 100.0))
+    results = (
+        ThemeResult.objects
+        .filter(theme=theme)
         .annotate(rank=Window(
             expression=Rank(),
-            order_by=F('keyword_decks').desc(),
+            order_by=F('theme_deck_count').desc(),
         ))
     )
 
@@ -543,7 +490,7 @@ def single_theme_keyword(request, theme_slug):
             'keyword': theme.display_name,
             'card_threshold': theme.card_threshold,
             'deck_threshold': theme.deck_threshold,
-            'commanders': keyword_cmdrs,
+            'results': results,
         }
     )
 

@@ -24,12 +24,12 @@
       <th>Color identity</th>
       <th># of {{ keyword }} decks</th>
     </tr>
-    {% for cmdr in commanders %}
+    {% for result in results %}
     <tr>
-      <td>{{ cmdr.rank }}</td>
-      <td><a href="{% url 'cmdr-single' cmdr.sfid %}">{{ cmdr }}</a></td>
-      <td>{{ cmdr.color_identity|mana_symbols|safe }}</td>
-      <td><a href="{% url 'cmdr-decklist' cmdr.sfid %}">{{ cmdr.keyword_decks|intcomma }} / {{ cmdr.total_deck_count|intcomma }}</a> ({{ cmdr.keyword_decks|percent_of:cmdr.total_deck_count }})</td>
+      <td>{{ result.rank }}</td>
+      <td><a href="{% url 'cmdr-single' result.commander.sfid %}">{{ result.commander }}</a></td>
+      <td>{{ result.commander.color_identity|mana_symbols|safe }}</td>
+      <td><a href="{% url 'cmdr-decklist' result.commander.sfid %}">{{ result.theme_deck_count|intcomma }} / {{ result.total_deck_count|intcomma }}</a> ({{ result.theme_deck_count|percent_of:result.total_deck_count }})</td>
     </tr>
     {% empty %}
     <tr><td colspan="4">Sorry, no commanders like that.</td></tr>
