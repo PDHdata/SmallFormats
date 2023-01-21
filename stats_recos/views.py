@@ -1,7 +1,7 @@
 from django.shortcuts import render, get_object_or_404
 from django.http import HttpResponseNotAllowed, Http404
 from django.urls import reverse
-from django.db.models import Count, Q, F, Window, Value
+from django.db.models import Count, Q, F, Window, Value, Subquery, OuterRef
 from django.db.models.functions import Rank
 from django.core.paginator import Paginator
 from django.contrib.auth.decorators import login_required
@@ -548,7 +548,7 @@ def single_theme_keyword(request, theme_slug):
     )
 
 
-def single_card(request, card_id):
+def single_card(request, card_id, sort_by_synergy=False):
     card = get_object_or_404(Card, pk=card_id)
 
     could_be_in = _deck_count_at_least_color(
@@ -580,15 +580,29 @@ def single_card(request, card_id):
         .exclude(commander1=card, commander2=None)
     )
 
+    synergy = (
+        SynergyScore.objects
+        .filter(
+            commander=OuterRef('pk'),
+            card=card,
+        )
+    )
     cmdrs = (
         Commander.objects
         .filter(
             decks__card_list__card=card,
             decks__card_list__is_pdh_commander=False,
         )
+        .distinct()
+        .annotate(synergy=Subquery(synergy.values('score')[:1]))
         .annotate(count=Count('decks'))
-        .order_by('-count')
+        .order_by('-count', '-synergy')
     )
+    if sort_by_synergy:
+        # from Django 4.1 docs:
+        # "Each order_by() call will clear any previous ordering."
+        cmdrs = cmdrs.order_by('-synergy', '-count')
+
     paginator = Paginator(cmdrs, 25, orphans=3)
     page_number = request.GET.get('page')
     cmdrs_page = paginator.get_page(page_number)
@@ -603,6 +617,7 @@ def single_card(request, card_id):
             'all_commander': commands,
             'could_be_in': could_be_in,
             'commanders': cmdrs_page,
+            'sorted_by_synergy': sort_by_synergy,
         },
     )
 
