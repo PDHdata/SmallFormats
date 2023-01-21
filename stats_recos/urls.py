@@ -36,6 +36,7 @@ urlpatterns = (
     path('card/top/nonland/', views.top_cards, kwargs={'include_land': False}, name="card-top-nonland"),
     path('card/top/', views.top_cards, name="card-top"),
     path('card/<uuid:card_id>', views.single_card, name="card-single"),
+    path('card/<uuid:card_id>/synergy', views.single_card, kwargs={'sort_by_synergy': True}, name="card-single-synergy"),
     path('card/<uuid:card_id>/pairs', views.single_card_pairings, name="card-single-pairings"),
     path('card/<uuid:card_id>/setimage', views.set_editorial_image, name="card-setimage"),
     path('land/top/', views.top_lands, name="land-top"),

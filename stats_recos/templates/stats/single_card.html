@@ -15,7 +15,7 @@
   </li>
   {% if all_commander %}
   <li class="nav-item">
-    <a class="nav-link" href="{% url 'card-single-pairings' card.id %}">Commander pairs</a>
+    <a class="nav-link" href="{% url 'card-single-pairings' card.id %}">As commander pair</a>
   </li>
   {% endif %}
 </ul>
@@ -27,22 +27,41 @@
   <p>Appears in {{ is_in|intcomma }} of {{ could_be_in|intcomma }} decks ({{ is_in|percent_of:could_be_in }}).</p>
   {% if commanders %}
   <p>Appears with these commanders:</p>
-  <ul class="list-group mb-3 ms-sm-3 me-sm-3">
+  <table class="table d-block mb-3">
+    <tr>
+      <th>Commander</th>
+      {% if sorted_by_synergy %}
+      <th><a href="{% url 'card-single' card.id %}">Decks</a></th>
+      {% else %}
+      <th>Decks&nbsp;↓</th>
+      {% endif %}
+      {% if sorted_by_synergy %}
+      <th>Synergy&nbsp;↓</th>
+      {% else %}
+      <th><a href="{% url 'card-single-synergy' card.id %}">Synergy</a></th>
+      {% endif %}
+    </tr>
     {% for cmdr in commanders %}
-    <li class="list-group-item"><a href="{% url 'cmdr-single' cmdr.sfid %}">{{ cmdr }}</a> ({{ cmdr.count }})</li>
+    <tr>
+      <td><a href="{% url 'cmdr-single' cmdr.sfid %}">{{ cmdr }}</a></td>
+      <td>{{ cmdr.count }}</td>
+      <td>{{ cmdr.synergy }}</td>
+    </tr>
     {% endfor %}
-    <li class="list-group-item">
-      {% if commanders.has_previous %}
-      <a href="?page=1">first</a>
-      <a href="?page={{ commanders.previous_page_number }}">previous</a>
-      {% endif %}
-      (page {{ commanders.number }} of {{ commanders.paginator.num_pages }})
-      {% if commanders.has_next %}
-      <a href="?page={{ commanders.next_page_number }}">next</a>
-      <a href="?page={{ commanders.paginator.num_pages }}">last</a>
-      {% endif %}
-    </li>
-  </ul>
+    <tr>
+      <td colspan="3">
+        {% if commanders.has_previous %}
+        <a href="?page=1">first</a>
+        <a href="?page={{ commanders.previous_page_number }}">previous</a>
+        {% endif %}
+        (page {{ commanders.number }} of {{ commanders.paginator.num_pages }})
+        {% if commanders.has_next %}
+        <a href="?page={{ commanders.next_page_number }}">next</a>
+        <a href="?page={{ commanders.paginator.num_pages }}">last</a>
+        {% endif %}
+      </td>
+    </tr>
+  </table>
   {% endif %}
 </div>
 {% endblock %}
