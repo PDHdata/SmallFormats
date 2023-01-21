@@ -1,5 +1,5 @@
 from django.shortcuts import render, get_object_or_404
-from django.http import HttpResponseNotAllowed, Http404
+from django.http import HttpResponseNotAllowed, Http404, HttpResponsePermanentRedirect
 from django.urls import reverse
 from django.db.models import Count, Q, F, Window, Value, Subquery, OuterRef
 from django.db.models.functions import Rank
@@ -447,8 +447,11 @@ def theme_index(request):
     )
 
 
-def single_theme_tribe(request, theme_slug):
-    theme = get_object_or_404(Theme, slug=theme_slug, filter_type=Theme.Type.TRIBE)
+def single_theme_redirect(request, theme_slug):
+    return HttpResponsePermanentRedirect(reverse('theme-single', kwargs={'theme_slug': theme_slug}))
+
+def single_theme(request, theme_slug):
+    theme = get_object_or_404(Theme, slug=theme_slug)
 
     results = (
         ThemeResult.objects
@@ -461,33 +464,11 @@ def single_theme_tribe(request, theme_slug):
 
     return render(
         request,
-        'themes/tribal.html',
+        'themes/single.html',
         context={
-            'tribe': theme.display_name,
-            'card_threshold': theme.card_threshold,
-            'deck_threshold': theme.deck_threshold,
-            'results': results,
-        }
-    )
-
-
-def single_theme_keyword(request, theme_slug):
-    theme = get_object_or_404(Theme, slug=theme_slug, filter_type=Theme.Type.KEYWORD)
-    
-    results = (
-        ThemeResult.objects
-        .filter(theme=theme)
-        .annotate(rank=Window(
-            expression=Rank(),
-            order_by=F('theme_deck_count').desc(),
-        ))
-    )
-
-    return render(
-        request,
-        'themes/keyword.html',
-        context={
-            'keyword': theme.display_name,
+            'theme': theme.display_name,
+            'kind': theme.get_filter_type_display(),
+            'word_themed': 'tribal' if theme.filter_type == Theme.Type.TRIBE else 'themed',
             'card_threshold': theme.card_threshold,
             'deck_threshold': theme.deck_threshold,
             'results': results,

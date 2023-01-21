@@ -2,19 +2,19 @@
 {% load humanize %}
 {% load simple_math %}
 {% load mana %}
-{% block title %}{{ tribe }} commanders{% endblock %}
+{% block title %}{{ theme }} commanders{% endblock %}
 {% block body %}
-<h1>{{ tribe }} commanders</h1>
+<h1>{{ theme }} commanders</h1>
 <nav aria-label="breadcrumb">
   <ol class="breadcrumb">
     <li class="breadcrumb-item"><a href="{% url 'theme' %}">Themes</a></li>
-    <li class="breadcrumb-item">Tribal</li>
-    <li class="breadcrumb-item active" aria-current="page">{{ tribe }}</li>
+    <li class="breadcrumb-item">{{ kind|capfirst }}</li>
+    <li class="breadcrumb-item active" aria-current="page">{{ theme }}</li>
   </ol>
 </nav>
 <p>
-  A deck with {{ card_threshold }}+ {{ tribe }} cards is considered "{{ tribe }} tribal".
-  Each commander with {{ deck_threshold }}% or more of their decks {{ tribe }}-themed shows up here, assuming it has at least 2 decks of the tribe.
+  A deck with {{ card_threshold }}+ {{ theme }} cards is considered "{{ theme }} {{ word_themed }}".
+  Each commander with {{ deck_threshold }}% or more of their decks {{ theme }}-themed shows up here, assuming it has at least 2 decks of that kind.
 </p>
 <div class="container">
   <table class="table">
@@ -22,7 +22,7 @@
       <th>#</th>
       <th>Name</th>
       <th>Color identity</th>
-      <th># of {{ tribe }} decks</th>
+      <th># of {{ theme }} decks</th>
     </tr>
     {% for result in results %}
     <tr>
