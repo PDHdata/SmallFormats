@@ -435,14 +435,20 @@ def cards_by_color(request, w=False, u=False, b=False, r=False, g=False):
     )
 
 
-def theme_index(request):
+def theme_index(request, limit_to=None):
     themes = Theme.objects.order_by('display_name')
+    if limit_to in (Theme.Type.TRIBE, Theme.Type.KEYWORD):
+        themes = themes.filter(filter_type=limit_to)
+    else:
+        limit_to = None
 
     return render(
         request,
         'themes/index.html',
         context={
             'themes': themes,
+            'kind': limit_to.label if limit_to else None,
+            'kinds': Theme.Type,
         }
     )
 
