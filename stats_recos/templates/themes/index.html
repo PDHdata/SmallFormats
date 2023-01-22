@@ -11,11 +11,7 @@
     <div class="col d-flex align-items-start">
     {% endwith %}
       <div>
-        {% if theme.filter_type == 'T' %}
-        <a class="fs-4" href="{% url 'theme-single-tribal' theme.slug %}">{{ theme.display_name }}</a> <span class="badge bg-info">tribal</span>
-        {% elif theme.filter_type == 'K' %}
-        <a class="fs-4" href="{% url 'theme-single-keyword' theme.slug %}">{{ theme.display_name }}</a> <span class="badge bg-secondary">keyword</span>
-        {% endif %}
+        <a class="fs-4" href="{% url 'theme-single' theme.slug %}">{{ theme.display_name }}</a> <span class="badge bg-{% if theme.filter_type == 'T'%}info{% else %}secondary{% endif %}">{{ theme.get_filter_type_display }}</span>
       </div>
     </div>
     {% empty %}

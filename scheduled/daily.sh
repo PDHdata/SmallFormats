@@ -9,4 +9,5 @@ set +e
 ./manage crawl-moxfield --no-stdout
 ./manage get-decklists --no-stdout
 ./manage compute-commanders --no-stdout
+./manage compute-themes --no-stdout
 ./manage update-site-stats

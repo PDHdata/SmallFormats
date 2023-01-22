@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+{% load humanize %}
+{% load simple_math %}
+{% load mana %}
+{% block title %}{{ theme }} commanders{% endblock %}
+{% block body %}
+<h1>{{ theme }} commanders</h1>
+<nav aria-label="breadcrumb">
+  <ol class="breadcrumb">
+    <li class="breadcrumb-item"><a href="{% url 'theme' %}">Themes</a></li>
+    <li class="breadcrumb-item">{{ kind|capfirst }}</li>
+    <li class="breadcrumb-item active" aria-current="page">{{ theme }}</li>
+  </ol>
+</nav>
+<p>
+  A deck with {{ card_threshold }}+ {{ theme }} cards is considered "{{ theme }} {{ word_themed }}".
+  Each commander with {{ deck_threshold }}% or more of their decks {{ theme }}-themed shows up here, assuming it has at least 2 decks of that kind.
+</p>
+<div class="container">
+  <table class="table">
+    <tr>
+      <th>#</th>
+      <th>Name</th>
+      <th>Color identity</th>
+      <th># of {{ theme }} decks</th>
+    </tr>
+    {% for result in results %}
+    <tr>
+      <td>{{ result.rank }}</td>
+      <td><a href="{% url 'cmdr-single' result.commander.sfid %}">{{ result.commander }}</a></td>
+      <td>{{ result.commander.color_identity|mana_symbols|safe }}</td>
+      <td><a href="{% url 'cmdr-decklist' result.commander.sfid %}">{{ result.theme_deck_count|intcomma }} / {{ result.total_deck_count|intcomma }}</a> ({{ result.theme_deck_count|percent_of:result.total_deck_count }})</td>
+    </tr>
+    {% empty %}
+    <tr><td colspan="4">Sorry, no commanders like that.</td></tr>
+    {% endfor %}
+  </table>
+</div>
+{% endblock %}
