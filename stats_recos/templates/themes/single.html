@@ -8,7 +8,7 @@
 <nav aria-label="breadcrumb">
   <ol class="breadcrumb">
     <li class="breadcrumb-item"><a href="{% url 'theme' %}">Themes</a></li>
-    <li class="breadcrumb-item">{{ kind|capfirst }}</li>
+    <li class="breadcrumb-item"><a href="{% url 'theme-'|add:kind %}">{{ kind|capfirst }}</a></li>
     <li class="breadcrumb-item active" aria-current="page">{{ theme }}</li>
   </ol>
 </nav>

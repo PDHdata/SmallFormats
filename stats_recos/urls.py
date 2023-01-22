@@ -1,4 +1,5 @@
 from stats_recos import views
+from decklist.models import Theme
 from django.urls import path
 from .wubrg_utils import COLORS
 
@@ -44,6 +45,17 @@ urlpatterns = (
     path('theme/tribe/<slug:theme_slug>/', views.single_theme_redirect),
     path('theme/keyword/<slug:theme_slug>/', views.single_theme_redirect),
     # end legacy routes
+] +
+[
+    path(
+        f'theme/{kind.label}/',
+        views.theme_index,
+        kwargs={'limit_to': kind},
+        name=f"theme-{kind.label}",
+    )
+    for kind in Theme.Type
+] +
+[
     path('theme/<slug:theme_slug>/', views.single_theme, name="theme-single"),
     path('hx/cmdr/<int:cmdr_id>/<card_type>/<int:page_number>', views.hx_common_cards, name="hx-common-cards"),
     path('search/', views.search, name="search"),

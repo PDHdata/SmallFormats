@@ -3,7 +3,27 @@
 {% load simple_math %}
 {% block title %}Themes{% endblock %}
 {% block body %}
-<h1>Themes</h1>
+{% if kind %}
+<h1>{{ kind|capfirst }} themes</h1>
+{% else %}
+<h1>All themes</h1>
+{% endif %}
+<nav aria-label="breadcrumb">
+  <ol class="breadcrumb">
+    {% if kind %}
+    <li class="breadcrumb-item"><a href="{% url 'theme' %}">Themes</a></li>
+    <li class="breadcrumb-item active" aria-current="page">{{ kind|capfirst }}</li>
+    {% else %}
+    <li class="breadcrumb-item active"  aria-current="page">Themes</li>
+    <li class="breadcrumb-item">
+      limit to:
+      {% for kind in kinds %}
+      (<a href="{% url 'theme-'|add:kind.label %}">{{ kind.label|capfirst }}</a>)
+      {% endfor %}
+    </li>
+    {% endif %}
+  </ol>
+</nav>
 <div class="container">
   <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-4 py-3">
     {% for theme in themes %}
