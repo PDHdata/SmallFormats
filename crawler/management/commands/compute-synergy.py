@@ -1,7 +1,7 @@
 from ._command_base import LoggingBaseCommand
 from django.core.management.base import CommandError
 from decklist.models import Card, Printing, SynergyScore
-from stats_recos.synergy import compute_synergy_bulk
+from decklist.synergy import compute_synergy_bulk
 import math
 
 

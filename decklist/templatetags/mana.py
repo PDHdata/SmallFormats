@@ -1,6 +1,6 @@
 from django import template
 from django.conf import settings
-from stats_recos.wubrg_utils import identity_to_symbol, name_to_symbol, symbol_to_name
+from decklist.wubrg_utils import identity_to_symbol, name_to_symbol, symbol_to_name
 
 register = template.Library()
 

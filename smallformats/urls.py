@@ -18,8 +18,7 @@ from django.urls import path, include
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('api/core/', include('decklist.urls')),
     path('crawler/', include('crawler.urls', namespace='crawler')),
-    path('', include('stats_recos.urls')),
+    path('', include('decklist.urls')),
     path('__debug__/', include('debug_toolbar.urls')),
 ]
