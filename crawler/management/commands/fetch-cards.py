@@ -5,7 +5,7 @@ from django.db.utils import DataError
 from django.utils.dateparse import parse_date
 import httpx
 import json_stream.httpx
-from decklist.models import Card, Printing, PartnerType
+from decklist.models import Card, Printing, PartnerType, Rarity
 from crawler.crawlers import HEADERS, SCRYFALL_API_BASE
 from ._command_base import LoggingBaseCommand
 
@@ -89,7 +89,7 @@ class Command(LoggingBaseCommand):
                 id=json_card['id'],
                 card=c,
                 set_code=json_card['set'],
-                rarity=Printing.Rarity[json_card['rarity'].upper()],
+                rarity=Rarity[json_card['rarity'].upper()],
                 is_highres=json_card['highres_image'],
                 is_paper="paper" in json_card['games'],
                 release_date=parse_date(json_card['released_at']),
@@ -137,7 +137,7 @@ class Command(LoggingBaseCommand):
                     id=json_card['id'],
                     card=c,
                     set_code=json_card['set'],
-                    rarity=Printing.Rarity[json_card['rarity'].upper()],
+                    rarity=Rarity[json_card['rarity'].upper()],
                     is_highres=json_card['highres_image'],
                     is_paper="paper" in json_card['games'],
                     release_date=parse_date(json_card['released_at']),

@@ -1,13 +1,10 @@
 import datetime
 from django.db import models
 from .card import Card
-from .rarity import Rarity as CompatRarity
+from .rarity import Rarity
 
 
 class Printing(models.Model):
-    # TODO: break dependence on Printing.Rarity everywhere
-    Rarity = CompatRarity
-
     # this is the Scryfall ID for the card
     id = models.UUIDField(primary_key=True)
     # we'll link back to the oracle card which has all the info

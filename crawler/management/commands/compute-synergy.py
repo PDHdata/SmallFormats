@@ -1,6 +1,6 @@
 from ._command_base import LoggingBaseCommand
 from django.core.management.base import CommandError
-from decklist.models import Card, Printing, SynergyScore
+from decklist.models import Card, Rarity, SynergyScore
 from decklist.synergy import compute_synergy_bulk
 import math
 
@@ -44,7 +44,7 @@ class Command(LoggingBaseCommand):
                 Card.objects
                 .filter(
                     # skip cards never printed at common
-                    printings__rarity=Printing.Rarity.COMMON,
+                    printings__rarity=Rarity.COMMON,
                     deck_list__deck__pdh_legal=True,
                 )
                 .distinct()

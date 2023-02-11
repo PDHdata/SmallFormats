@@ -16,3 +16,4 @@ from .commander import Commander
 from .theme import Theme
 from .themeresult import ThemeResult
 from .synergyscore import SynergyScore
+from .rarity import Rarity

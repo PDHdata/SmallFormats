@@ -5,7 +5,7 @@ from django.db.models import Q, Count
 from django.utils import timezone
 from .datasource import DataSource
 from .partnertype import PartnerType
-from .printing import Printing
+from .rarity import Rarity
 
 
 class Deck(models.Model):
@@ -212,7 +212,7 @@ class Deck(models.Model):
             .filter(is_pdh_commander=False)
             .annotate(common_count=Count(
                 'card__printings',
-                filter=Q(card__printings__rarity=Printing.Rarity.COMMON)
+                filter=Q(card__printings__rarity=Rarity.COMMON)
             ))
             .filter(common_count=0)
             .count()
