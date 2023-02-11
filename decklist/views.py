@@ -1,7 +1,7 @@
 from django.shortcuts import render, get_object_or_404
 from django.http import HttpResponseNotAllowed, Http404, HttpResponsePermanentRedirect
 from django.urls import reverse
-from django.db.models import Count, Q, F, Window, Value, Subquery, OuterRef
+from django.db.models import Count, Q, F, Window, Subquery, OuterRef
 from django.db.models.functions import Rank
 from django.core.paginator import Paginator
 from django.contrib.auth.decorators import login_required
