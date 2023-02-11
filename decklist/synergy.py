@@ -11,7 +11,13 @@ def compute_synergy(commander: Commander, card: Card):
         .aggregate(
             appears_frac=(
                 # how many of the commander's decks the card appears in
-                Cast(Count('card_list__card', filter=Q(card_list__card=card)), output_field=FloatField())
+                Cast(
+                    Count(
+                        'card_list__card',
+                        filter=Q(card_list__card=card) & Q(card_list__is_pdh_commander=False)
+                    ),
+                    output_field=FloatField()
+                )
                 /
                 # all decks for the commander
                 Cast(Count('id', distinct=True), output_field=FloatField())
@@ -65,6 +71,8 @@ def compute_synergy_bulk(card: Card) -> list[tuple[Commander, float]]:
         )
         .exclude(
             commander1=card,
+        )
+        .exclude(
             commander2=card,
         )
         .aggregate(
@@ -88,6 +96,12 @@ def compute_synergy_bulk(card: Card) -> list[tuple[Commander, float]]:
             card.identity_r,
             card.identity_g,
             allow_superset=True,
+        )
+        .exclude(
+            commander1=card,
+        )
+        .exclude(
+            commander2=card,
         )
         .annotate(
             appears=Count('decks', filter=Q(decks__pdh_legal=True) & Q(decks__card_list__card=card), distinct=True),
