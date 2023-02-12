@@ -657,15 +657,8 @@ def single_cmdr_decklist(request, cmdr_id):
 def single_cmdr_synergy(request, cmdr_id):
     commander = get_object_or_404(Commander, sfid=cmdr_id)
 
-    scores = (
-        SynergyScore.objects
-        .filter(commander=commander)
-        .select_related('card')
-        .annotate(rank=Window(
-            expression=Rank(),
-            order_by=F('score').desc(nulls_last=True),
-        ))
-    )
+    scores = SynergyScore.objects.for_commander(commander).ranked()
+
     paginator = Paginator(scores, 25, orphans=3)
     page_number = request.GET.get('page')
     scores_page = paginator.get_page(page_number)

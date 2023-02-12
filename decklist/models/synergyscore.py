@@ -1,9 +1,24 @@
 from django.db import models
+from django.db.models import F, Window
+from django.db.models.functions import Rank
 from .commander import Commander
 from .card import Card
 
 
+class SynergyQuerySet(models.QuerySet):
+    def for_commander(self, commander: Commander):
+        return self.filter(commander=commander)
+    
+    def ranked(self):
+        return self.annotate(rank=Window(
+            expression=Rank(),
+            order_by=F('score').desc(nulls_last=True),
+        ))
+
+
 class SynergyScore(models.Model):
+    objects = SynergyQuerySet.as_manager()
+
     commander = models.ForeignKey(
         Commander,
         on_delete=models.CASCADE,
