@@ -84,12 +84,7 @@ def _deck_count_at_least_color(w, u, b, r, g):
 @functools.lru_cache(maxsize=2)
 def _get_face_card(index):
     try:
-        top_cmdr = (
-            Commander.objects
-            .filter(decks__pdh_legal=True)
-            .annotate(num_decks=Count('decks'))
-            .order_by('-num_decks')
-        )[index]
+        top_cmdr = Commander.objects.top()[index]
     except IndexError:
         top_cmdr = None
 
@@ -156,15 +151,7 @@ def commander_index(request):
 
 
 def top_commanders(request):
-    cmdrs = (
-        Commander.objects
-        .filter(decks__pdh_legal=True)
-        .annotate(num_decks=Count('decks'))
-        .annotate(rank=Window(
-            expression=Rank(),
-            order_by=F('num_decks').desc(),
-        ))
-    )
+    cmdrs = Commander.objects.top()
     paginator = Paginator(cmdrs, 25, orphans=3)
     page_number = request.GET.get('page')
     cmdrs_page = paginator.get_page(page_number)
@@ -559,15 +546,9 @@ def single_card(request, card_id, sort_by_synergy=False):
 def single_card_pairings(request, card_id):
     card = get_object_or_404(Card, pk=card_id)
 
-    commands = (
-        Commander.objects
-        .filter(Q(commander1=card) | Q(commander2=card))
-        .exclude(commander1=card, commander2=None)
-        .annotate(count=Count('decks'))
-        .order_by('-count')
-    )
+    pairs = Commander.objects.pairs_for_card(card)
 
-    paginator = Paginator(commands, 25, orphans=3)
+    paginator = Paginator(pairs, 25, orphans=3)
     page_number = request.GET.get('page')
     partners_page = paginator.get_page(page_number)
 

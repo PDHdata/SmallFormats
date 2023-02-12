@@ -1,11 +1,39 @@
 import uuid
 from django.db import models
-from django.db.models import Q
+from django.db.models import Q, F, Count, Window
+from django.db.models.functions import Rank
 from .card import Card
 from .partnertype import PartnerType
 
 
+class CommanderQuerySet(models.QuerySet):
+    def legal_decks(self):
+        return self.filter(decks__pdh_legal=True)
+
+    def pairs_for_card(self, card: Card):
+        return (
+            self
+            .filter(Q(commander1=card) | Q(commander2=card))
+            .exclude(commander1=card, commander2=None)
+            .annotate(count=Count('decks'))
+            .order_by('-count')
+        )
+    
+    def top(self):
+        return (
+            self
+            .legal_decks()
+            .annotate(num_decks=Count('decks'))
+            .annotate(rank=Window(
+                expression=Rank(),
+                order_by=F('num_decks').desc(),
+            ))
+        )
+
+
 class Commander(models.Model):
+    objects = CommanderQuerySet.as_manager()
+
     commander1 = models.ForeignKey(
         Card,
         on_delete=models.PROTECT,
