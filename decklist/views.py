@@ -1,95 +1,26 @@
 from django.shortcuts import render, get_object_or_404
 from django.http import HttpResponseNotAllowed, Http404, HttpResponsePermanentRedirect
 from django.urls import reverse
-from django.db.models import Count, Q, F, Window, Value, Subquery, OuterRef
-from django.db.models.functions import Rank
 from django.core.paginator import Paginator
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_POST
 from django.views.decorators.cache import cache_page
 from django.utils import timezone
 from django.conf import settings
-from decklist.models import Card, Deck, Printing, CardInDeck, PartnerType, SiteStat, Commander, Theme, ThemeResult, SynergyScore
+from decklist.models import Card, Deck, Printing, CardInDeck, SiteStat, Commander, Theme, ThemeResult, SynergyScore
 from .wubrg_utils import COLORS, filter_to_name, name_to_symbol
-from .synergy import compute_synergy, commanders_of_identity
+from .synergy import compute_synergy
 from django_htmx.http import trigger_client_event, HttpResponseClientRefresh
-import operator
 import functools
 
 
 FRONT_PAGE_TOP_COMMANDERS_TO_ROTATE = 25
 
-def _deck_count_exact_color(w, u, b, r, g):
-    wubrg = {
-        'w': w,
-        'u': u,
-        'b': b,
-        'r': r,
-        'g': g,
-    }
-    filters = []
-    # for each color...
-    for c in 'wubrg':
-        cmdr1 = f'commander1__identity_{c}'
-        cmdr2 = f'commander2__identity_{c}'
-        # ... if we want the color, either partner can bring it
-        if wubrg[c]:
-            filters.append(Q(**dict([(cmdr1,True),])) | Q(**dict([(cmdr2,True),])))
-        # ... if we don't want the color, neither partner can bring it
-        # ... or else partner2 can be empty
-        else:
-            filters.append(
-                Q(**dict([(cmdr1,False),])) & 
-                (Q(commander2__isnull=True) | Q(**dict([(cmdr2,False),])))
-            )
-    
-    return (
-        Commander.objects
-        .filter(decks__pdh_legal=True)
-        .filter(*filters)
-        .count()
-    )
-
-
-def _deck_count_at_least_color(w, u, b, r, g):
-    if not any([w, u, b, r, g]):
-        return Deck.objects.filter(pdh_legal=True).count()
-
-    # build up a filter for the aggregation
-    # that has a Q object set to True for each color we
-    # care about and nothing for the colors which we don't
-    wubrg = {
-        'w': w,
-        'u': u,
-        'b': b,
-        'r': r,
-        'g': g,
-    }
-    filters = []
-    for c in 'wubrg':
-        if wubrg[c]:
-            cmdr1 = f'commander1__identity_{c}'
-            cmdr2 = f'commander2__identity_{c}'
-            filters.append(Q(**dict([(cmdr1,True),])) | Q(**dict([(cmdr2,True),])))
-    filters = functools.reduce(operator.and_, filters)
-
-    return (
-        Commander.objects
-        .filter(decks__pdh_legal=True)
-        .filter(filters)
-        .count()
-    )
-
 
 @functools.lru_cache(maxsize=2)
 def _get_face_card(index):
     try:
-        top_cmdr = (
-            Commander.objects
-            .filter(decks__pdh_legal=True)
-            .annotate(num_decks=Count('decks'))
-            .order_by('-num_decks')
-        )[index]
+        top_cmdr = Commander.objects.top()[index]
     except IndexError:
         top_cmdr = None
 
@@ -156,20 +87,12 @@ def commander_index(request):
 
 
 def top_commanders(request):
-    cmdrs = (
-        Commander.objects
-        .filter(decks__pdh_legal=True)
-        .annotate(num_decks=Count('decks'))
-        .annotate(rank=Window(
-            expression=Rank(),
-            order_by=F('num_decks').desc(),
-        ))
-    )
+    cmdrs = Commander.objects.top()
     paginator = Paginator(cmdrs, 25, orphans=3)
     page_number = request.GET.get('page')
     cmdrs_page = paginator.get_page(page_number)
 
-    deck_count = Deck.objects.filter(pdh_legal=True).count()
+    deck_count = Deck.objects.legal().count()
 
     return render(
         request,
@@ -183,43 +106,27 @@ def top_commanders(request):
 
 
 def partner_commanders(request):
-    all_parters = [
-        PartnerType.PARTNER,
-        PartnerType.PARTNER_WITH_BLARING,
-        PartnerType.PARTNER_WITH_CHAKRAM,
-        PartnerType.PARTNER_WITH_PROTEGE,
-        PartnerType.PARTNER_WITH_SOULBLADE,
-        PartnerType.PARTNER_WITH_WEAVER,
-    ]
-    return _partner_commanders(request, 'Partner', [
-        Q(commander1__partner_type__in=all_parters)
-        | Q(commander2__partner_type__in=all_parters)
-    ])
+    return _partner_boilerplate(
+        request,
+        'Partner',
+        Commander.objects.partner_pairs(),
+    )
 
 
 def background_commanders(request):
-    return _partner_commanders(request, 'Background', [
-        Q(commander1__partner_type=PartnerType.BACKGROUND)
-        | Q(commander2__partner_type=PartnerType.BACKGROUND)
-    ])
-
-
-def _partner_commanders(request, heading, filters):
-    cmdrs = (
-        Commander.objects
-        .filter(decks__pdh_legal=True)
-        .filter(*filters)
-        .annotate(num_decks=Count('decks'))
-        .annotate(rank=Window(
-            expression=Rank(),
-            order_by=F('num_decks').desc(),
-        ))
+    return _partner_boilerplate(
+        request,
+        'Background',
+        Commander.objects.background_pairs(),
     )
-    paginator = Paginator(cmdrs, 25, orphans=3)
+
+
+def _partner_boilerplate(request, heading, partner_queryset):
+    paginator = Paginator(partner_queryset, 25, orphans=3)
     page_number = request.GET.get('page')
     cmdrs_page = paginator.get_page(page_number)
 
-    deck_count = Deck.objects.filter(pdh_legal=True).count()
+    deck_count = Deck.objects.legal().count()
 
     return render(
         request,
@@ -234,16 +141,19 @@ def _partner_commanders(request, heading, filters):
 
 def commanders_by_color(request, w=False, u=False, b=False, r=False, g=False):
     cmdrs = (
-        commanders_of_identity(w, u, b, r, g)
-        .annotate(num_decks=Count('decks'))
-        .annotate(rank=Window(
-            expression=Rank(),
-            order_by=F('num_decks').desc(),
-        ))
+        Commander.objects
+        .decks_of_exact_color(w, u, b, r, g)
+        .count_and_rank_decks()
     )
     paginator = Paginator(cmdrs, 25, orphans=3)
     page_number = request.GET.get('page')
     cmdrs_page = paginator.get_page(page_number)
+
+    deck_count = (
+        Commander.objects
+        .decks_of_exact_color(w, u, b, r, g)
+        .count()
+    )
 
     return render(
         request,
@@ -251,7 +161,7 @@ def commanders_by_color(request, w=False, u=False, b=False, r=False, g=False):
         context={
             'heading': filter_to_name({'W':w,'U':u,'B':b,'R':r,'G':g}),
             'commanders': cmdrs_page,
-            'deck_count': _deck_count_exact_color(w, u, b, r, g),
+            'deck_count': deck_count,
         },
     )
 
@@ -276,20 +186,9 @@ def land_index(request):
 
 @cache_page(10 * 60)
 def top_lands(request):
-    land_cards = (
-        Card.objects
-        .filter(
-            deck_list__deck__pdh_legal=True,
-            type_line__contains='Land',
-        )
-        .annotate(num_decks=Count('deck_list'))
-        .filter(num_decks__gt=0)
-        .annotate(rank=Window(
-            expression=Rank(),
-            order_by=F('num_decks').desc(),
-        ))
-    )
-    deck_count = Deck.objects.filter(pdh_legal=True).count()
+    land_cards = Card.objects.top_lands()
+    deck_count = Deck.objects.legal().count()
+
     paginator = Paginator(land_cards, 25, orphans=3)
     page_number = request.GET.get('page')
     cards_page = paginator.get_page(page_number)
@@ -308,28 +207,18 @@ def top_lands(request):
 def lands_by_color(request, w=False, u=False, b=False, r=False, g=False):
     land_cards = (
         Card.objects
-        .filter(
-            type_line__contains='Land',
-            identity_w=w,
-            identity_u=u,
-            identity_b=b,
-            identity_r=r,
-            identity_g=g,
-        )
-        .annotate(num_decks=Count(
-            'deck_list',
-            distinct=True,
-            filter=Q(deck_list__deck__pdh_legal=True),
-        ))
-        .filter(num_decks__gt=0)
-        .annotate(rank=Window(
-            expression=Rank(),
-            order_by=F('num_decks').desc(),
-        ))
+        .lands_by_color(w, u, b, r, g)
+        .count_and_rank_decks()
     )
     paginator = Paginator(land_cards, 25, orphans=3)
     page_number = request.GET.get('page')
     cards_page = paginator.get_page(page_number)
+
+    deck_count = (
+        Commander.objects
+        .decks_of_at_least_color(w, u, b, r, g)
+        .count()
+    )
 
     return render(
         request,
@@ -337,7 +226,7 @@ def lands_by_color(request, w=False, u=False, b=False, r=False, g=False):
         context={
             'heading': filter_to_name({'W':w,'U':u,'B':b,'R':r,'G':g}),
             'cards': cards_page,
-            'deck_count': _deck_count_at_least_color(w, u, b, r, g),
+            'deck_count': deck_count,
         },
     )
 
@@ -363,28 +252,15 @@ def card_index(request):
 @cache_page(10 * 60)
 def top_cards(request, include_land=True):
     if include_land:
-        cards = Card.objects
+        cards = Card.objects.top()
     else:
-        cards = Card.objects.exclude(type_line__contains='Land')
+        cards = Card.objects.top_nonlands()
 
-    cards = (
-        cards
-        .annotate(num_decks=Count(
-            'deck_list',
-            distinct=True,
-            filter=Q(deck_list__deck__pdh_legal=True),
-        ))
-        .filter(num_decks__gt=0)
-        .annotate(rank=Window(
-            expression=Rank(),
-            order_by=F('num_decks').desc(),
-        ))
-    )
     paginator = Paginator(cards, 25, orphans=3)
     page_number = request.GET.get('page')
     cards_page = paginator.get_page(page_number)
 
-    deck_count = Deck.objects.filter(pdh_legal=True).count()
+    deck_count = Deck.objects.legal().count()
 
     heading = 'top' if include_land else 'top non-land'
 
@@ -402,27 +278,18 @@ def top_cards(request, include_land=True):
 def cards_by_color(request, w=False, u=False, b=False, r=False, g=False):
     cards = (
         Card.objects
-        .filter(
-            identity_w=w,
-            identity_u=u,
-            identity_b=b,
-            identity_r=r,
-            identity_g=g,
-        )
-        .annotate(num_decks=Count(
-            'deck_list',
-            distinct=True,
-            filter=Q(deck_list__deck__pdh_legal=True),
-        ))
-        .filter(num_decks__gt=0)
-        .annotate(rank=Window(
-            expression=Rank(),
-            order_by=F('num_decks').desc(),
-        ))
+        .cards_by_color(w, u, b, r, g)
+        .count_and_rank_decks()
     )
     paginator = Paginator(cards, 25, orphans=3)
     page_number = request.GET.get('page')
     cards_page = paginator.get_page(page_number)
+
+    deck_count = (
+        Commander.objects
+        .decks_of_at_least_color(w, u, b, r, g)
+        .count()
+    )
 
     return render(
         request,
@@ -430,7 +297,7 @@ def cards_by_color(request, w=False, u=False, b=False, r=False, g=False):
         context={
             'heading': filter_to_name({'W':w,'U':u,'B':b,'R':r,'G':g}),
             'cards': cards_page,
-            'deck_count': _deck_count_at_least_color(w, u, b, r, g),
+            'deck_count': deck_count,
         },
     )
 
@@ -459,14 +326,7 @@ def single_theme_redirect(request, theme_slug):
 def single_theme(request, theme_slug):
     theme = get_object_or_404(Theme, slug=theme_slug)
 
-    results = (
-        ThemeResult.objects
-        .filter(theme=theme)
-        .annotate(rank=Window(
-            expression=Rank(),
-            order_by=F('theme_deck_count').desc(),
-        ))
-    )
+    results = ThemeResult.objects.for_theme(theme)
 
     return render(
         request,
@@ -485,51 +345,25 @@ def single_theme(request, theme_slug):
 def single_card(request, card_id, sort_by_synergy=False):
     card = get_object_or_404(Card, pk=card_id)
 
-    could_be_in = _deck_count_at_least_color(
-        card.identity_w,
-        card.identity_u,
-        card.identity_b,
-        card.identity_r,
-        card.identity_g
-    )
-
-    is_in = (
-        Deck.objects
-        .filter(
-            pdh_legal=True,
-            card_list__card=card,
-            card_list__is_pdh_commander=False,
-        )
-    )
-
-    solo_commander = (
+    could_be_in = (
         Commander.objects
-        .filter(commander1=card, commander2=None)
-        .first()
-    )
-
-    commands = (
-        Commander.objects
-        .filter(Q(commander1=card) | Q(commander2=card))
-        .exclude(commander1=card, commander2=None)
-    )
-
-    synergy = (
-        SynergyScore.objects
-        .filter(
-            commander=OuterRef('pk'),
-            card=card,
+        .decks_of_at_least_color(
+            card.identity_w,
+            card.identity_u,
+            card.identity_b,
+            card.identity_r,
+            card.identity_g,
         )
+        .count()
     )
+
+    solo_commander = Commander.objects.solo_card(card)
+
+    commands = Commander.objects.pairs_for_card(card)
+
     cmdrs = (
         Commander.objects
-        .filter(
-            decks__card_list__card=card,
-            decks__card_list__is_pdh_commander=False,
-        )
-        .distinct()
-        .annotate(synergy=Subquery(synergy.values('score')[:1]))
-        .annotate(count=Count('decks'))
+        .for_card_in_99(card)
         .order_by('-count', '-synergy')
     )
     if sort_by_synergy:
@@ -546,7 +380,6 @@ def single_card(request, card_id, sort_by_synergy=False):
         "stats/single_card.html",
         context={
             'card': card,
-            'is_in': is_in.count(),
             'solo_commander': solo_commander,
             'all_commander': commands,
             'could_be_in': could_be_in,
@@ -559,15 +392,9 @@ def single_card(request, card_id, sort_by_synergy=False):
 def single_card_pairings(request, card_id):
     card = get_object_or_404(Card, pk=card_id)
 
-    commands = (
-        Commander.objects
-        .filter(Q(commander1=card) | Q(commander2=card))
-        .exclude(commander1=card, commander2=None)
-        .annotate(count=Count('decks'))
-        .order_by('-count')
-    )
+    pairs = Commander.objects.pairs_for_card(card)
 
-    paginator = Paginator(commands, 25, orphans=3)
+    paginator = Paginator(pairs, 25, orphans=3)
     page_number = request.GET.get('page')
     partners_page = paginator.get_page(page_number)
 
@@ -601,7 +428,11 @@ def single_cmdr(request, cmdr_id):
             'g': cmdr.commander1.identity_g,
         }
 
-    could_be_in = _deck_count_at_least_color(**identity)
+    could_be_in = (
+        Commander.objects
+        .decks_of_at_least_color(**identity)
+        .count()
+    )
 
     commands = cmdr.decks.order_by('-updated_time')
 
@@ -657,15 +488,8 @@ def single_cmdr_decklist(request, cmdr_id):
 def single_cmdr_synergy(request, cmdr_id):
     commander = get_object_or_404(Commander, sfid=cmdr_id)
 
-    scores = (
-        SynergyScore.objects
-        .filter(commander=commander)
-        .select_related('card')
-        .annotate(rank=Window(
-            expression=Rank(),
-            order_by=F('score').desc(nulls_last=True),
-        ))
-    )
+    scores = SynergyScore.objects.for_commander(commander).ranked()
+
     paginator = Paginator(scores, 25, orphans=3)
     page_number = request.GET.get('page')
     scores_page = paginator.get_page(page_number)
@@ -718,23 +542,7 @@ def hx_common_cards(request, cmdr_id, card_type, page_number):
             return HttpResponseNotAllowed()
 
     
-    common_cards = (
-        CardInDeck.objects
-        .filter(
-            is_pdh_commander=False,
-            deck__commander=cmdr,
-        )
-        .exclude(card__type_line__contains='Basic')
-        .filter(card__type_line__contains=filter_to)
-        .values('card')
-        .annotate(count=Count('deck'))
-        .values('count', 'card__id', 'card__name')
-        .filter(count__gt=0)
-        .annotate(rank=Window(
-            expression=Rank(),
-            order_by=F('count').desc(),
-        ))
-    )
+    common_cards = CardInDeck.objects.common_cards(cmdr, filter_to)
     paginator = Paginator(common_cards, 10, orphans=3)
     cards_page = paginator.get_page(page_number)
 
@@ -809,28 +617,8 @@ def set_editorial_image(request, card_id):
 def search(request):
     query = request.GET.get('q', '')
 
-    results = (
-        Card.objects
-        .filter(name__icontains=query)
-        .annotate(
-            in_decks=Count(
-                'deck_list',
-                filter=Q(deck_list__deck__pdh_legal=True),
-            ),
-            ninetynine_decks=Count(
-                'deck_list',
-                filter=Q(deck_list__is_pdh_commander=False)
-                     & Q(deck_list__deck__pdh_legal=True),
-            ),
-            helms_decks=Count(
-                'deck_list',
-                filter=Q(deck_list__is_pdh_commander=True)
-                     & Q(deck_list__deck__pdh_legal=True),
-            ),
-        )
-        .filter(in_decks__gt=0)
-        .order_by('-in_decks', 'name')
-    )
+    results = Card.objects.search(query)
+
     paginator = Paginator(results, 25, orphans=3)
     page_number = request.GET.get('page')
     results_page = paginator.get_page(page_number)

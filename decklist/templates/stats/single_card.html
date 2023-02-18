@@ -24,7 +24,7 @@
   {% include 'stats/_card_image_gallery.html' with pos="start" %}
   <p>{{ card.type_line }} {{ card.color_identity|mana_symbols|safe }}</p>
   <p>{% if solo_commander %}<a href="{% url 'cmdr-single' solo_commander.sfid %}">View as commander</a> | {% endif %}<a href="{{ card.scryfall_uri }}">View on Scryfall</a></p>
-  <p>Appears in {{ is_in|intcomma }} of {{ could_be_in|intcomma }} decks ({{ is_in|percent_of:could_be_in }}).</p>
+  <p>Appears in {{ card.in_deck_count|intcomma }} of {{ could_be_in|intcomma }} decks ({{ card.in_deck_count|percent_of:could_be_in }}).</p>
   {% if commanders %}
   <p>Appears with these commanders:</p>
   <table class="table d-block mb-3">
