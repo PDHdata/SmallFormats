@@ -11,74 +11,12 @@ from django.utils import timezone
 from django.conf import settings
 from decklist.models import Card, Deck, Printing, CardInDeck, PartnerType, SiteStat, Commander, Theme, ThemeResult, SynergyScore
 from .wubrg_utils import COLORS, filter_to_name, name_to_symbol
-from .synergy import compute_synergy, commanders_of_identity
+from .synergy import compute_synergy
 from django_htmx.http import trigger_client_event, HttpResponseClientRefresh
-import operator
 import functools
 
 
 FRONT_PAGE_TOP_COMMANDERS_TO_ROTATE = 25
-
-def _deck_count_exact_color(w, u, b, r, g):
-    wubrg = {
-        'w': w,
-        'u': u,
-        'b': b,
-        'r': r,
-        'g': g,
-    }
-    filters = []
-    # for each color...
-    for c in 'wubrg':
-        cmdr1 = f'commander1__identity_{c}'
-        cmdr2 = f'commander2__identity_{c}'
-        # ... if we want the color, either partner can bring it
-        if wubrg[c]:
-            filters.append(Q(**dict([(cmdr1,True),])) | Q(**dict([(cmdr2,True),])))
-        # ... if we don't want the color, neither partner can bring it
-        # ... or else partner2 can be empty
-        else:
-            filters.append(
-                Q(**dict([(cmdr1,False),])) & 
-                (Q(commander2__isnull=True) | Q(**dict([(cmdr2,False),])))
-            )
-    
-    return (
-        Commander.objects
-        .filter(decks__pdh_legal=True)
-        .filter(*filters)
-        .count()
-    )
-
-
-def _deck_count_at_least_color(w, u, b, r, g):
-    if not any([w, u, b, r, g]):
-        return Deck.objects.filter(pdh_legal=True).count()
-
-    # build up a filter for the aggregation
-    # that has a Q object set to True for each color we
-    # care about and nothing for the colors which we don't
-    wubrg = {
-        'w': w,
-        'u': u,
-        'b': b,
-        'r': r,
-        'g': g,
-    }
-    filters = []
-    for c in 'wubrg':
-        if wubrg[c]:
-            cmdr1 = f'commander1__identity_{c}'
-            cmdr2 = f'commander2__identity_{c}'
-            filters.append(Q(**dict([(cmdr1,True),])) | Q(**dict([(cmdr2,True),])))
-    filters = functools.reduce(operator.and_, filters)
-
-    return (
-        Commander.objects
-        .filter(decks__pdh_legal=True)
-        .filter(filters)
-        .count()
-    )
 
 
 @functools.lru_cache(maxsize=2)
@@ -221,7 +159,8 @@ def _partner_commanders(request, heading, filters):
 
 def commanders_by_color(request, w=False, u=False, b=False, r=False, g=False):
     cmdrs = (
-        commanders_of_identity(w, u, b, r, g)
+        Commander.objects
+        .decks_of_exact_color(w, u, b, r, g)
         .annotate(num_decks=Count('decks'))
         .annotate(rank=Window(
             expression=Rank(),
@@ -232,13 +171,19 @@ def commanders_by_color(request, w=False, u=False, b=False, r=False, g=False):
     page_number = request.GET.get('page')
     cmdrs_page = paginator.get_page(page_number)
 
+    deck_count = (
+        Commander.objects
+        .decks_of_exact_color(w, u, b, r, g)
+        .count()
+    )
+
     return render(
         request,
         "stats/commanders.html",
         context={
             'heading': filter_to_name({'W':w,'U':u,'B':b,'R':r,'G':g}),
             'commanders': cmdrs_page,
-            'deck_count': _deck_count_exact_color(w, u, b, r, g),
+            'deck_count': deck_count,
         },
     )
 
@@ -318,13 +263,19 @@ def lands_by_color(request, w=False, u=False, b=False, r=False, g=False):
     page_number = request.GET.get('page')
     cards_page = paginator.get_page(page_number)
 
+    deck_count = (
+        Commander.objects
+        .decks_of_at_least_color(w, u, b, r, g)
+        .count()
+    )
+
     return render(
         request,
         "stats/lands.html",
         context={
             'heading': filter_to_name({'W':w,'U':u,'B':b,'R':r,'G':g}),
             'cards': cards_page,
-            'deck_count': _deck_count_at_least_color(w, u, b, r, g),
+            'deck_count': deck_count,
         },
     )
 
@@ -411,13 +362,19 @@ def cards_by_color(request, w=False, u=False, b=False, r=False, g=False):
     page_number = request.GET.get('page')
     cards_page = paginator.get_page(page_number)
 
+    deck_count = (
+        Commander.objects
+        .decks_of_at_least_color(w, u, b, r, g)
+        .count()
+    )
+
     return render(
         request,
         "stats/cards.html",
         context={
             'heading': filter_to_name({'W':w,'U':u,'B':b,'R':r,'G':g}),
             'cards': cards_page,
-            'deck_count': _deck_count_at_least_color(w, u, b, r, g),
+            'deck_count': deck_count,
         },
     )
 
@@ -472,12 +429,16 @@ def single_theme(request, theme_slug):
 def single_card(request, card_id, sort_by_synergy=False):
     card = get_object_or_404(Card, pk=card_id)
 
-    could_be_in = _deck_count_at_least_color(
-        card.identity_w,
-        card.identity_u,
-        card.identity_b,
-        card.identity_r,
-        card.identity_g
+    could_be_in = (
+        Commander.objects
+        .decks_of_at_least_color(
+            card.identity_w,
+            card.identity_u,
+            card.identity_b,
+            card.identity_r,
+            card.identity_g,
+        )
+        .count()
     )
 
     is_in = (
@@ -582,7 +543,11 @@ def single_cmdr(request, cmdr_id):
             'g': cmdr.commander1.identity_g,
         }
 
-    could_be_in = _deck_count_at_least_color(**identity)
+    could_be_in = (
+        Commander.objects
+        .decks_of_at_least_color(**identity)
+        .count()
+    )
 
     commands = cmdr.decks.order_by('-updated_time')
 

@@ -1,4 +1,6 @@
 import uuid
+import functools
+import operator
 from django.db import models
 from django.db.models import Q, F, Count, Window
 from django.db.models.functions import Rank
@@ -28,6 +30,65 @@ class CommanderQuerySet(models.QuerySet):
                 expression=Rank(),
                 order_by=F('num_decks').desc(),
             ))
+        )
+
+    def decks_of_exact_color(self, w, u, b, r, g):
+        wubrg = {
+            'w': w,
+            'u': u,
+            'b': b,
+            'r': r,
+            'g': g,
+        }
+        filters = []
+        # for each color...
+        for c in 'wubrg':
+            cmdr1 = f'commander1__identity_{c}'
+            cmdr2 = f'commander2__identity_{c}'
+            # ... if we want the color, either partner can bring it
+            if wubrg[c]:
+                filters.append(Q(**dict([(cmdr1,True),])) | Q(**dict([(cmdr2,True),])))
+            # ... if we don't want the color, neither partner can bring it
+            # ... or else partner2 can be empty
+            else:
+                filters.append(
+                    Q(**dict([(cmdr1,False),])) & 
+                    (Q(commander2__isnull=True) | Q(**dict([(cmdr2,False),])))
+                )
+        
+        return (
+            self
+            .legal_decks()
+            .filter(*filters)
+        )
+
+    def decks_of_at_least_color(self, w, u, b, r, g):
+        # for colorless, it's all legal decks
+        if not any([w, u, b, r, g]):
+            return self.legal_decks()
+
+        # build up a filter for the aggregation
+        # that has a Q object set to True for each color we
+        # care about and nothing for the colors which we don't
+        wubrg = {
+            'w': w,
+            'u': u,
+            'b': b,
+            'r': r,
+            'g': g,
+        }
+        filters = []
+        for c in 'wubrg':
+            if wubrg[c]:
+                cmdr1 = f'commander1__identity_{c}'
+                cmdr2 = f'commander2__identity_{c}'
+                filters.append(Q(**dict([(cmdr1,True),])) | Q(**dict([(cmdr2,True),])))
+        filters = functools.reduce(operator.and_, filters)
+
+        return (
+            self
+            .legal_decks()
+            .filter(filters)
         )
 
 
