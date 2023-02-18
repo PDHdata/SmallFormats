@@ -91,6 +91,45 @@ class CommanderQuerySet(models.QuerySet):
             .filter(filters)
         )
 
+    def partner_pairs(self):
+        all_parters = [
+            PartnerType.PARTNER,
+            PartnerType.PARTNER_WITH_BLARING,
+            PartnerType.PARTNER_WITH_CHAKRAM,
+            PartnerType.PARTNER_WITH_PROTEGE,
+            PartnerType.PARTNER_WITH_SOULBLADE,
+            PartnerType.PARTNER_WITH_WEAVER,
+        ]
+
+        return (
+            self
+            .legal_decks()
+            .filter(
+                Q(commander1__partner_type__in=all_parters)
+                | Q(commander2__partner_type__in=all_parters)
+            )
+            .annotate(num_decks=Count('decks'))
+            .annotate(rank=Window(
+                expression=Rank(),
+                order_by=F('num_decks').desc(),
+            ))
+        )
+    
+    def background_pairs(self):
+        return (
+            self
+            .legal_decks()
+            .filter(
+                Q(commander1__partner_type=PartnerType.BACKGROUND)
+                | Q(commander2__partner_type=PartnerType.BACKGROUND)
+            )
+            .annotate(num_decks=Count('decks'))
+            .annotate(rank=Window(
+                expression=Rank(),
+                order_by=F('num_decks').desc(),
+            ))
+        )
+
 
 class Commander(models.Model):
     objects = CommanderQuerySet.as_manager()

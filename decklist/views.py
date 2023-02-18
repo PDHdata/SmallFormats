@@ -9,7 +9,7 @@ from django.views.decorators.http import require_POST
 from django.views.decorators.cache import cache_page
 from django.utils import timezone
 from django.conf import settings
-from decklist.models import Card, Deck, Printing, CardInDeck, PartnerType, SiteStat, Commander, Theme, ThemeResult, SynergyScore
+from decklist.models import Card, Deck, Printing, CardInDeck, SiteStat, Commander, Theme, ThemeResult, SynergyScore
 from .wubrg_utils import COLORS, filter_to_name, name_to_symbol
 from .synergy import compute_synergy
 from django_htmx.http import trigger_client_event, HttpResponseClientRefresh
@@ -108,39 +108,23 @@ def top_commanders(request):
 
 
 def partner_commanders(request):
-    all_parters = [
-        PartnerType.PARTNER,
-        PartnerType.PARTNER_WITH_BLARING,
-        PartnerType.PARTNER_WITH_CHAKRAM,
-        PartnerType.PARTNER_WITH_PROTEGE,
-        PartnerType.PARTNER_WITH_SOULBLADE,
-        PartnerType.PARTNER_WITH_WEAVER,
-    ]
-    return _partner_commanders(request, 'Partner', [
-        Q(commander1__partner_type__in=all_parters)
-        | Q(commander2__partner_type__in=all_parters)
-    ])
+    return _partner_boilerplate(
+        request,
+        'Partner',
+        Commander.objects.partner_pairs(),
+    )
 
 
 def background_commanders(request):
-    return _partner_commanders(request, 'Background', [
-        Q(commander1__partner_type=PartnerType.BACKGROUND)
-        | Q(commander2__partner_type=PartnerType.BACKGROUND)
-    ])
-
-
-def _partner_commanders(request, heading, filters):
-    cmdrs = (
-        Commander.objects
-        .filter(decks__pdh_legal=True)
-        .filter(*filters)
-        .annotate(num_decks=Count('decks'))
-        .annotate(rank=Window(
-            expression=Rank(),
-            order_by=F('num_decks').desc(),
-        ))
+    return _partner_boilerplate(
+        request,
+        'Background',
+        Commander.objects.background_pairs(),
     )
-    paginator = Paginator(cmdrs, 25, orphans=3)
+
+
+def _partner_boilerplate(request, heading, partner_queryset):
+    paginator = Paginator(partner_queryset, 25, orphans=3)
     page_number = request.GET.get('page')
     cmdrs_page = paginator.get_page(page_number)
 
