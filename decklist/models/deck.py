@@ -8,7 +8,14 @@ from .partnertype import PartnerType
 from .rarity import Rarity
 
 
+class DeckQuerySet(models.QuerySet):
+    def legal(self):
+        return self.filter(pdh_legal=True)
+
+
 class Deck(models.Model):
+    objects = DeckQuerySet.as_manager()
+
     name = models.CharField(max_length=100)
     source = models.IntegerField(choices=DataSource.choices)
     source_id = models.CharField(max_length=30, blank=True)

@@ -92,7 +92,7 @@ def top_commanders(request):
     page_number = request.GET.get('page')
     cmdrs_page = paginator.get_page(page_number)
 
-    deck_count = Deck.objects.filter(pdh_legal=True).count()
+    deck_count = Deck.objects.legal().count()
 
     return render(
         request,
@@ -126,7 +126,7 @@ def _partner_boilerplate(request, heading, partner_queryset):
     page_number = request.GET.get('page')
     cmdrs_page = paginator.get_page(page_number)
 
-    deck_count = Deck.objects.filter(pdh_legal=True).count()
+    deck_count = Deck.objects.legal().count()
 
     return render(
         request,
@@ -187,7 +187,7 @@ def land_index(request):
 @cache_page(10 * 60)
 def top_lands(request):
     land_cards = Card.objects.top_lands()
-    deck_count = Deck.objects.filter(pdh_legal=True).count()
+    deck_count = Deck.objects.legal().count()
 
     paginator = Paginator(land_cards, 25, orphans=3)
     page_number = request.GET.get('page')
@@ -260,7 +260,7 @@ def top_cards(request, include_land=True):
     page_number = request.GET.get('page')
     cards_page = paginator.get_page(page_number)
 
-    deck_count = Deck.objects.filter(pdh_legal=True).count()
+    deck_count = Deck.objects.legal().count()
 
     heading = 'top' if include_land else 'top non-land'
 
@@ -326,10 +326,7 @@ def single_theme_redirect(request, theme_slug):
 def single_theme(request, theme_slug):
     theme = get_object_or_404(Theme, slug=theme_slug)
 
-    results = (
-        ThemeResult.objects
-        .for_theme(theme)
-    )
+    results = ThemeResult.objects.for_theme(theme)
 
     return render(
         request,
@@ -369,15 +366,9 @@ def single_card(request, card_id, sort_by_synergy=False):
         )
     )
 
-    solo_commander = (
-        Commander.objects
-        .solo_card(card)
-    )
+    solo_commander = Commander.objects.solo_card(card)
 
-    commands = (
-        Commander.objects
-        .pairs_for_card(card)
-    )
+    commands = Commander.objects.pairs_for_card(card)
 
     cmdrs = (
         Commander.objects
@@ -561,10 +552,7 @@ def hx_common_cards(request, cmdr_id, card_type, page_number):
             return HttpResponseNotAllowed()
 
     
-    common_cards = (
-        CardInDeck.objects
-        .common_cards(cmdr, filter_to)
-    )
+    common_cards = CardInDeck.objects.common_cards(cmdr, filter_to)
     paginator = Paginator(common_cards, 10, orphans=3)
     cards_page = paginator.get_page(page_number)
 
