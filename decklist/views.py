@@ -385,11 +385,7 @@ def single_theme(request, theme_slug):
 
     results = (
         ThemeResult.objects
-        .filter(theme=theme)
-        .annotate(rank=Window(
-            expression=Rank(),
-            order_by=F('theme_deck_count').desc(),
-        ))
+        .for_theme(theme)
     )
 
     return render(
@@ -624,20 +620,7 @@ def hx_common_cards(request, cmdr_id, card_type, page_number):
     
     common_cards = (
         CardInDeck.objects
-        .filter(
-            is_pdh_commander=False,
-            deck__commander=cmdr,
-        )
-        .exclude(card__type_line__contains='Basic')
-        .filter(card__type_line__contains=filter_to)
-        .values('card')
-        .annotate(count=Count('deck'))
-        .values('count', 'card__id', 'card__name')
-        .filter(count__gt=0)
-        .annotate(rank=Window(
-            expression=Rank(),
-            order_by=F('count').desc(),
-        ))
+        .common_cards(cmdr, filter_to)
     )
     paginator = Paginator(common_cards, 10, orphans=3)
     cards_page = paginator.get_page(page_number)

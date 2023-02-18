@@ -1,9 +1,24 @@
 from django.db import models
+from django.db.models import F, Window
+from django.db.models.functions import Rank
 from .theme import Theme
 from .commander import Commander
 
 
+class ThemeResultQuerySet(models.QuerySet):
+    def for_theme(self, theme: Theme):
+        return (self
+            .filter(theme=theme)
+            .annotate(rank=Window(
+                expression=Rank(),
+                order_by=F('theme_deck_count').desc(),
+            ))
+        )
+
+
 class ThemeResult(models.Model):
+    objects = ThemeResultQuerySet.as_manager()
+
     theme = models.ForeignKey(
         Theme,
         on_delete=models.CASCADE,
