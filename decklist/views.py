@@ -1,8 +1,7 @@
 from django.shortcuts import render, get_object_or_404
 from django.http import HttpResponseNotAllowed, Http404, HttpResponsePermanentRedirect
 from django.urls import reverse
-from django.db.models import Count, Q, F, Window
-from django.db.models.functions import Rank
+from django.db.models import Count, Q
 from django.core.paginator import Paginator
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_POST
@@ -188,20 +187,9 @@ def land_index(request):
 
 @cache_page(10 * 60)
 def top_lands(request):
-    land_cards = (
-        Card.objects
-        .filter(
-            deck_list__deck__pdh_legal=True,
-            type_line__contains='Land',
-        )
-        .annotate(num_decks=Count('deck_list'))
-        .filter(num_decks__gt=0)
-        .annotate(rank=Window(
-            expression=Rank(),
-            order_by=F('num_decks').desc(),
-        ))
-    )
+    land_cards = Card.objects.top_lands()
     deck_count = Deck.objects.filter(pdh_legal=True).count()
+
     paginator = Paginator(land_cards, 25, orphans=3)
     page_number = request.GET.get('page')
     cards_page = paginator.get_page(page_number)
@@ -220,24 +208,8 @@ def top_lands(request):
 def lands_by_color(request, w=False, u=False, b=False, r=False, g=False):
     land_cards = (
         Card.objects
-        .filter(
-            type_line__contains='Land',
-            identity_w=w,
-            identity_u=u,
-            identity_b=b,
-            identity_r=r,
-            identity_g=g,
-        )
-        .annotate(num_decks=Count(
-            'deck_list',
-            distinct=True,
-            filter=Q(deck_list__deck__pdh_legal=True),
-        ))
-        .filter(num_decks__gt=0)
-        .annotate(rank=Window(
-            expression=Rank(),
-            order_by=F('num_decks').desc(),
-        ))
+        .lands_by_color(w, u, b, r, g)
+        .count_and_rank_decks()
     )
     paginator = Paginator(land_cards, 25, orphans=3)
     page_number = request.GET.get('page')
@@ -278,26 +250,13 @@ def card_index(request):
     )
 
 
-@cache_page(10 * 60)
+# @cache_page(10 * 60)
 def top_cards(request, include_land=True):
     if include_land:
-        cards = Card.objects
+        cards = Card.objects.top()
     else:
-        cards = Card.objects.exclude(type_line__contains='Land')
+        cards = Card.objects.top_nonlands()
 
-    cards = (
-        cards
-        .annotate(num_decks=Count(
-            'deck_list',
-            distinct=True,
-            filter=Q(deck_list__deck__pdh_legal=True),
-        ))
-        .filter(num_decks__gt=0)
-        .annotate(rank=Window(
-            expression=Rank(),
-            order_by=F('num_decks').desc(),
-        ))
-    )
     paginator = Paginator(cards, 25, orphans=3)
     page_number = request.GET.get('page')
     cards_page = paginator.get_page(page_number)
@@ -320,23 +279,8 @@ def top_cards(request, include_land=True):
 def cards_by_color(request, w=False, u=False, b=False, r=False, g=False):
     cards = (
         Card.objects
-        .filter(
-            identity_w=w,
-            identity_u=u,
-            identity_b=b,
-            identity_r=r,
-            identity_g=g,
-        )
-        .annotate(num_decks=Count(
-            'deck_list',
-            distinct=True,
-            filter=Q(deck_list__deck__pdh_legal=True),
-        ))
-        .filter(num_decks__gt=0)
-        .annotate(rank=Window(
-            expression=Rank(),
-            order_by=F('num_decks').desc(),
-        ))
+        .cards_by_color(w, u, b, r, g)
+        .count_and_rank_decks()
     )
     paginator = Paginator(cards, 25, orphans=3)
     page_number = request.GET.get('page')

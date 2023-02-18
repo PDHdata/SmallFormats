@@ -1,9 +1,106 @@
 from django.db import models
+from django.db.models import Count, F, Q, Window
+from django.db.models.functions import Rank
 from .partnertype import PartnerType
 from .rarity import Rarity
 
 
+class CardQuerySet(models.QuerySet):
+    def _lands_in_legal_decks(self):
+        return (
+            self
+            .filter(
+                deck_list__deck__pdh_legal=True,
+                type_line__contains='Land',
+            )
+        )
+    
+    def _nonlands_in_legal_decks(self):
+        return (
+            self
+            .filter(deck_list__deck__pdh_legal=True)
+            .exclude(type_line__contains='Land')
+        )
+    
+    def _cards_in_legal_decks(self):
+        return self.filter(deck_list__deck__pdh_legal=True)
+    
+    def _count_decks_and_rank(self):
+        return (
+            self
+            .annotate(num_decks=Count('deck_list'))
+            .filter(num_decks__gt=0)
+            .annotate(rank=Window(
+                expression=Rank(),
+                order_by=F('num_decks').desc(),
+            ))
+        )
+
+    def top_lands(self):
+        return (
+            self
+            ._lands_in_legal_decks()
+            ._count_decks_and_rank()
+        )
+    
+    def top_nonlands(self):
+        return (
+            self
+            ._nonlands_in_legal_decks()
+            ._count_decks_and_rank()
+        )
+    
+    def top(self):
+        return (
+            self
+            ._cards_in_legal_decks()
+            ._count_decks_and_rank()
+        )
+    
+    def lands_by_color(self, w: bool, u: bool, b: bool, r: bool, g: bool):
+        return (
+            self
+            .filter(
+                type_line__contains='Land',
+                identity_w=w,
+                identity_u=u,
+                identity_b=b,
+                identity_r=r,
+                identity_g=g,
+            )
+        )
+
+    def cards_by_color(self, w: bool, u: bool, b: bool, r: bool, g: bool):
+        return (
+            self
+            .filter(
+                identity_w=w,
+                identity_u=u,
+                identity_b=b,
+                identity_r=r,
+                identity_g=g,
+            )
+        )
+
+    def count_and_rank_decks(self):
+        return (
+            self
+            .annotate(num_decks=Count(
+                'deck_list',
+                distinct=True,
+                filter=Q(deck_list__deck__pdh_legal=True),
+            ))
+            .filter(num_decks__gt=0)
+            .annotate(rank=Window(
+                expression=Rank(),
+                order_by=F('num_decks').desc(),
+            ))
+        )
+
+
 class Card(models.Model):
+    objects = CardQuerySet.as_manager()
+
     # this must be the Scryfall oracle ID for the card
     # because we're mostly dealing in abstract cards here.
     id = models.UUIDField(primary_key=True)
