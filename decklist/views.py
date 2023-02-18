@@ -207,8 +207,7 @@ def top_lands(request):
 def lands_by_color(request, w=False, u=False, b=False, r=False, g=False):
     land_cards = (
         Card.objects
-        .lands_by_color(w, u, b, r, g)
-        .count_and_rank_decks()
+        .ranked_lands_of_color(w, u, b, r, g)
     )
     paginator = Paginator(land_cards, 25, orphans=3)
     page_number = request.GET.get('page')
@@ -278,8 +277,7 @@ def top_cards(request, include_land=True):
 def cards_by_color(request, w=False, u=False, b=False, r=False, g=False):
     cards = (
         Card.objects
-        .cards_by_color(w, u, b, r, g)
-        .count_and_rank_decks()
+        .ranked_cards_of_color(w, u, b, r, g)
     )
     paginator = Paginator(cards, 25, orphans=3)
     page_number = request.GET.get('page')

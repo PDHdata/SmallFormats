@@ -10,22 +10,20 @@ class CardQuerySet(models.QuerySet):
         return (
             self
             .filter(type_line__contains='Land')
-            .count_and_rank_decks()
+            ._count_and_rank_decks()
         )
     
     def top_nonlands(self):
         return (
             self
             .exclude(type_line__contains='Land')
-            .count_and_rank_decks()
+            ._count_and_rank_decks()
         )
     
     def top(self):
-        # this is a synonym for now, but the access pattern
-        # might be different in the future
-        return self.count_and_rank_decks()
+        return self._count_and_rank_decks()
     
-    def lands_by_color(self, w: bool, u: bool, b: bool, r: bool, g: bool):
+    def ranked_lands_of_color(self, w: bool, u: bool, b: bool, r: bool, g: bool):
         return (
             self
             .filter(
@@ -36,9 +34,10 @@ class CardQuerySet(models.QuerySet):
                 identity_r=r,
                 identity_g=g,
             )
+            ._count_and_rank_decks()
         )
 
-    def cards_by_color(self, w: bool, u: bool, b: bool, r: bool, g: bool):
+    def ranked_cards_of_color(self, w: bool, u: bool, b: bool, r: bool, g: bool):
         return (
             self
             .filter(
@@ -48,9 +47,10 @@ class CardQuerySet(models.QuerySet):
                 identity_r=r,
                 identity_g=g,
             )
+            ._count_and_rank_decks()
         )
 
-    def count_and_rank_decks(self):
+    def _count_and_rank_decks(self):
         return (
             self
             .annotate(num_decks=Count(
