@@ -357,15 +357,6 @@ def single_card(request, card_id, sort_by_synergy=False):
         .count()
     )
 
-    is_in = (
-        Deck.objects
-        .filter(
-            pdh_legal=True,
-            card_list__card=card,
-            card_list__is_pdh_commander=False,
-        )
-    )
-
     solo_commander = Commander.objects.solo_card(card)
 
     commands = Commander.objects.pairs_for_card(card)
@@ -389,7 +380,6 @@ def single_card(request, card_id, sort_by_synergy=False):
         "stats/single_card.html",
         context={
             'card': card,
-            'is_in': is_in.count(),
             'solo_commander': solo_commander,
             'all_commander': commands,
             'could_be_in': could_be_in,

@@ -164,3 +164,14 @@ class Card(models.Model):
             )
             .first()
         )
+
+    @property
+    def in_deck_count(self):
+        return (
+            self.deck_list
+            .filter(
+                deck__pdh_legal=True,
+                is_pdh_commander=False,
+            )
+            .count()
+        )
