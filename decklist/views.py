@@ -250,7 +250,7 @@ def card_index(request):
     )
 
 
-# @cache_page(10 * 60)
+@cache_page(10 * 60)
 def top_cards(request, include_land=True):
     if include_land:
         cards = Card.objects.top()

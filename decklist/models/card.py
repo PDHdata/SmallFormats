@@ -6,56 +6,24 @@ from .rarity import Rarity
 
 
 class CardQuerySet(models.QuerySet):
-    def _lands_in_legal_decks(self):
-        return (
-            self
-            .filter(
-                deck_list__deck__pdh_legal=True,
-                type_line__contains='Land',
-            )
-        )
-    
-    def _nonlands_in_legal_decks(self):
-        return (
-            self
-            .filter(deck_list__deck__pdh_legal=True)
-            .exclude(type_line__contains='Land')
-        )
-    
-    def _cards_in_legal_decks(self):
-        return self.filter(deck_list__deck__pdh_legal=True)
-    
-    def _count_decks_and_rank(self):
-        return (
-            self
-            .annotate(num_decks=Count('deck_list'))
-            .filter(num_decks__gt=0)
-            .annotate(rank=Window(
-                expression=Rank(),
-                order_by=F('num_decks').desc(),
-            ))
-        )
-
     def top_lands(self):
         return (
             self
-            ._lands_in_legal_decks()
-            ._count_decks_and_rank()
+            .filter(type_line__contains='Land')
+            .count_and_rank_decks()
         )
     
     def top_nonlands(self):
         return (
             self
-            ._nonlands_in_legal_decks()
-            ._count_decks_and_rank()
+            .exclude(type_line__contains='Land')
+            .count_and_rank_decks()
         )
     
     def top(self):
-        return (
-            self
-            ._cards_in_legal_decks()
-            ._count_decks_and_rank()
-        )
+        # this is a synonym for now, but the access pattern
+        # might be different in the future
+        return self.count_and_rank_decks()
     
     def lands_by_color(self, w: bool, u: bool, b: bool, r: bool, g: bool):
         return (
