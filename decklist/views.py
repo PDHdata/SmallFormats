@@ -1,7 +1,6 @@
 from django.shortcuts import render, get_object_or_404
 from django.http import HttpResponseNotAllowed, Http404, HttpResponsePermanentRedirect
 from django.urls import reverse
-from django.db.models import Count, Q
 from django.core.paginator import Paginator
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_POST
@@ -640,28 +639,8 @@ def set_editorial_image(request, card_id):
 def search(request):
     query = request.GET.get('q', '')
 
-    results = (
-        Card.objects
-        .filter(name__icontains=query)
-        .annotate(
-            in_decks=Count(
-                'deck_list',
-                filter=Q(deck_list__deck__pdh_legal=True),
-            ),
-            ninetynine_decks=Count(
-                'deck_list',
-                filter=Q(deck_list__is_pdh_commander=False)
-                     & Q(deck_list__deck__pdh_legal=True),
-            ),
-            helms_decks=Count(
-                'deck_list',
-                filter=Q(deck_list__is_pdh_commander=True)
-                     & Q(deck_list__deck__pdh_legal=True),
-            ),
-        )
-        .filter(in_decks__gt=0)
-        .order_by('-in_decks', 'name')
-    )
+    results = Card.objects.search(query)
+
     paginator = Paginator(results, 25, orphans=3)
     page_number = request.GET.get('page')
     results_page = paginator.get_page(page_number)

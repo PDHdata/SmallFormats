@@ -64,6 +64,30 @@ class CardQuerySet(models.QuerySet):
                 order_by=F('num_decks').desc(),
             ))
         )
+    
+    def search(self, query):
+        return (
+            self
+            .filter(name__icontains=query)
+            .annotate(
+                in_decks=Count(
+                    'deck_list',
+                    filter=Q(deck_list__deck__pdh_legal=True),
+                ),
+                ninetynine_decks=Count(
+                    'deck_list',
+                    filter=Q(deck_list__is_pdh_commander=False)
+                        & Q(deck_list__deck__pdh_legal=True),
+                ),
+                helms_decks=Count(
+                    'deck_list',
+                    filter=Q(deck_list__is_pdh_commander=True)
+                        & Q(deck_list__deck__pdh_legal=True),
+                ),
+            )
+            .filter(in_decks__gt=0)
+            .order_by('-in_decks', 'name')
+        )
 
 
 class Card(models.Model):
