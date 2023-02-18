@@ -31,13 +31,13 @@ def compute_synergy(commander: Commander, card: Card):
     # what fraction of decks belonging to other legal commanders for this card
     # does it appear in?
     in_percent_noncommander_decks = (
-        commanders_of_identity(
+        Commander.objects
+        .decks_of_at_least_color(
             card.identity_w,
             card.identity_u,
             card.identity_b,
             card.identity_r,
             card.identity_g,
-            allow_superset=True,
         )
         .exclude(id=commander.id)
         .aggregate(
@@ -61,20 +61,16 @@ def compute_synergy_bulk(card: Card) -> list[tuple[Commander, float]]:
     all commanders at once than going one by one."""
     # calculate this card's appearance in all valid decks once
     in_all_decks = (
-        commanders_of_identity(
+        Commander.objects
+        .decks_of_at_least_color(
             card.identity_w,
             card.identity_u,
             card.identity_b,
             card.identity_r,
             card.identity_g,
-            allow_superset=True,
         )
-        .exclude(
-            commander1=card,
-        )
-        .exclude(
-            commander2=card,
-        )
+        .exclude(commander1=card)
+        .exclude(commander2=card)
         .aggregate(
             appears=Count('decks', filter=Q(decks__pdh_legal=True) & Q(decks__card_list__card=card), distinct=True),
             total=Count('decks', filter=Q(decks__pdh_legal=True), distinct=True),
@@ -89,20 +85,16 @@ def compute_synergy_bulk(card: Card) -> list[tuple[Commander, float]]:
 
     # then calculate its appearance with each commander
     with_each_commander = (
-        commanders_of_identity(
+        Commander.objects
+        .decks_of_at_least_color(
             card.identity_w,
             card.identity_u,
             card.identity_b,
             card.identity_r,
             card.identity_g,
-            allow_superset=True,
         )
-        .exclude(
-            commander1=card,
-        )
-        .exclude(
-            commander2=card,
-        )
+        .exclude(commander1=card)
+        .exclude(commander2=card)
         .annotate(
             appears=Count('decks', filter=Q(decks__pdh_legal=True) & Q(decks__card_list__card=card), distinct=True),
             total=Count('decks', filter=Q(decks__pdh_legal=True), distinct=True),
@@ -127,37 +119,3 @@ def compute_synergy_bulk(card: Card) -> list[tuple[Commander, float]]:
         ))
         for cmdr in with_each_commander
     ]
-
-
-def commanders_of_identity(w, u, b, r, g, allow_superset=False):
-    """Find all commanders with a color identity. If allow_superset
-    is True, then find all commanders of at least that identity."""
-    wubrg = {
-        'w': w,
-        'u': u,
-        'b': b,
-        'r': r,
-        'g': g,
-    }
-
-    filters = []
-    # for each color...
-    for c in 'wubrg':
-        cmdr1 = f'commander1__identity_{c}'
-        cmdr2 = f'commander2__identity_{c}'
-        # ... if we want the color, either partner can bring it
-        if wubrg[c]:
-            filters.append(Q(**dict([(cmdr1,True),])) | Q(**dict([(cmdr2,True),])))
-        # ... if we don't want to allow the color, neither partner can bring it
-        # ... (or partner2 can be empty)
-        elif not allow_superset:
-            filters.append(
-                Q(**dict([(cmdr1,False),])) & 
-                (Q(commander2__isnull=True) | Q(**dict([(cmdr2,False),])))
-            )
-
-    return (
-        Commander.objects
-        .filter(decks__pdh_legal=True)
-        .filter(*filters)
-    )
