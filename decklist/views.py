@@ -145,11 +145,7 @@ def commanders_by_color(request, w=False, u=False, b=False, r=False, g=False):
     cmdrs = (
         Commander.objects
         .decks_of_exact_color(w, u, b, r, g)
-        .annotate(num_decks=Count('decks'))
-        .annotate(rank=Window(
-            expression=Rank(),
-            order_by=F('num_decks').desc(),
-        ))
+        .count_and_rank_decks()
     )
     paginator = Paginator(cmdrs, 25, orphans=3)
     page_number = request.GET.get('page')

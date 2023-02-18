@@ -25,11 +25,7 @@ class CommanderQuerySet(models.QuerySet):
         return (
             self
             .legal_decks()
-            .annotate(num_decks=Count('decks'))
-            .annotate(rank=Window(
-                expression=Rank(),
-                order_by=F('num_decks').desc(),
-            ))
+            .count_and_rank_decks()
         )
 
     def decks_of_exact_color(self, w, u, b, r, g):
@@ -89,6 +85,16 @@ class CommanderQuerySet(models.QuerySet):
             self
             .legal_decks()
             .filter(filters)
+        )
+    
+    def count_and_rank_decks(self):
+        return (
+            self
+            .annotate(num_decks=Count('decks'))
+            .annotate(rank=Window(
+                expression=Rank(),
+                order_by=F('num_decks').desc(),
+            ))
         )
 
     def partner_pairs(self):
