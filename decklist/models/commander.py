@@ -2,10 +2,11 @@ import uuid
 import functools
 import operator
 from django.db import models
-from django.db.models import Q, F, Count, Window
+from django.db.models import Q, F, Count, Window, Subquery, OuterRef
 from django.db.models.functions import Rank
 from .card import Card
 from .partnertype import PartnerType
+from .synergyscore import SynergyScore
 
 
 class CommanderQuerySet(models.QuerySet):
@@ -19,6 +20,32 @@ class CommanderQuerySet(models.QuerySet):
             .exclude(commander1=card, commander2=None)
             .annotate(count=Count('decks'))
             .order_by('-count')
+        )
+    
+    def solo_card(self, card: Card):
+        return (
+            self
+            .filter(commander1=card, commander2=None)
+            .first()
+        )
+    
+    def for_card_in_99(self, card: Card):
+        synergy = (
+            SynergyScore.objects
+            .filter(
+                commander=OuterRef('pk'),
+                card=card,
+            )
+        )
+        return (
+            Commander.objects
+            .filter(
+                decks__card_list__card=card,
+                decks__card_list__is_pdh_commander=False,
+            )
+            .distinct()
+            .annotate(synergy=Subquery(synergy.values('score')[:1]))
+            .annotate(count=Count('decks'))
         )
     
     def top(self):

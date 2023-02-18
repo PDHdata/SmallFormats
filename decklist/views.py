@@ -1,7 +1,7 @@
 from django.shortcuts import render, get_object_or_404
 from django.http import HttpResponseNotAllowed, Http404, HttpResponsePermanentRedirect
 from django.urls import reverse
-from django.db.models import Count, Q, F, Window, Subquery, OuterRef
+from django.db.models import Count, Q, F, Window
 from django.db.models.functions import Rank
 from django.core.paginator import Paginator
 from django.contrib.auth.decorators import login_required
@@ -432,32 +432,17 @@ def single_card(request, card_id, sort_by_synergy=False):
 
     solo_commander = (
         Commander.objects
-        .filter(commander1=card, commander2=None)
-        .first()
+        .solo_card(card)
     )
 
     commands = (
         Commander.objects
-        .filter(Q(commander1=card) | Q(commander2=card))
-        .exclude(commander1=card, commander2=None)
+        .pairs_for_card(card)
     )
 
-    synergy = (
-        SynergyScore.objects
-        .filter(
-            commander=OuterRef('pk'),
-            card=card,
-        )
-    )
     cmdrs = (
         Commander.objects
-        .filter(
-            decks__card_list__card=card,
-            decks__card_list__is_pdh_commander=False,
-        )
-        .distinct()
-        .annotate(synergy=Subquery(synergy.values('score')[:1]))
-        .annotate(count=Count('decks'))
+        .for_card_in_99(card)
         .order_by('-count', '-synergy')
     )
     if sort_by_synergy:

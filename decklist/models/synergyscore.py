@@ -1,12 +1,15 @@
 from django.db import models
 from django.db.models import F, Window
 from django.db.models.functions import Rank
-from .commander import Commander
 from .card import Card
+
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+    from .commander import Commander
 
 
 class SynergyQuerySet(models.QuerySet):
-    def for_commander(self, commander: Commander):
+    def for_commander(self, commander: "Commander"):
         return self.filter(commander=commander)
     
     def ranked(self):
@@ -20,7 +23,7 @@ class SynergyScore(models.Model):
     objects = SynergyQuerySet.as_manager()
 
     commander = models.ForeignKey(
-        Commander,
+        'Commander',
         on_delete=models.CASCADE,
         related_name='synergy_scores',
     )
