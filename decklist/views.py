@@ -7,7 +7,7 @@ from django.views.decorators.http import require_POST
 from django.views.decorators.cache import cache_page
 from django.utils import timezone
 from django.conf import settings
-from decklist.models import Card, Deck, Printing, CardInDeck, SiteStat, Commander, Theme, ThemeResult, SynergyScore
+from decklist.models import Card, TopCardView, TopLandCardView, TopNonLandCardView, Deck, Printing, CardInDeck, SiteStat, Commander, Theme, ThemeResult, SynergyScore
 from .wubrg_utils import COLORS, filter_to_name, name_to_symbol
 from .synergy import compute_synergy
 from django_htmx.http import trigger_client_event, HttpResponseClientRefresh
@@ -184,9 +184,8 @@ def land_index(request):
     )
 
 
-@cache_page(10 * 60)
 def top_lands(request):
-    land_cards = Card.objects.top_lands()
+    land_cards = TopLandCardView.objects.all()
     deck_count = Deck.objects.legal().count()
 
     paginator = Paginator(land_cards, 25, orphans=3)
@@ -207,8 +206,7 @@ def top_lands(request):
 def lands_by_color(request, w=False, u=False, b=False, r=False, g=False):
     land_cards = (
         Card.objects
-        .lands_by_color(w, u, b, r, g)
-        .count_and_rank_decks()
+        .ranked_lands_of_color(w, u, b, r, g)
     )
     paginator = Paginator(land_cards, 25, orphans=3)
     page_number = request.GET.get('page')
@@ -249,12 +247,11 @@ def card_index(request):
     )
 
 
-@cache_page(10 * 60)
 def top_cards(request, include_land=True):
     if include_land:
-        cards = Card.objects.top()
+        cards = TopCardView.objects.all()
     else:
-        cards = Card.objects.top_nonlands()
+        cards = TopNonLandCardView.objects.all()
 
     paginator = Paginator(cards, 25, orphans=3)
     page_number = request.GET.get('page')
@@ -278,8 +275,7 @@ def top_cards(request, include_land=True):
 def cards_by_color(request, w=False, u=False, b=False, r=False, g=False):
     cards = (
         Card.objects
-        .cards_by_color(w, u, b, r, g)
-        .count_and_rank_decks()
+        .ranked_cards_of_color(w, u, b, r, g)
     )
     paginator = Paginator(cards, 25, orphans=3)
     page_number = request.GET.get('page')

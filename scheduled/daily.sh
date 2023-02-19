@@ -10,4 +10,5 @@ set +e
 ./manage get-decklists --no-stdout
 ./manage compute-commanders --no-stdout
 ./manage compute-themes --no-stdout
+./manage compute-top-cards --no-stdout
 ./manage update-site-stats
