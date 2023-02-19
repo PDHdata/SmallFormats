@@ -175,3 +175,29 @@ class Card(models.Model):
             )
             .count()
         )
+
+
+class CardView(models.Model):
+    # TODO: pass missing attribute accesses through to `card`
+    # so that this view functions like a plain queryset on Card
+    card = models.OneToOneField(
+        Card,
+        on_delete=models.DO_NOTHING,
+        related_name='+',
+        primary_key=True,
+    )
+    num_decks = models.IntegerField()
+    rank = models.IntegerField()
+
+    class Meta:
+        managed = False
+        abstract = True
+        ordering = ['rank',]
+
+    def __str__(self):
+        return f"{self.card.name} #{self.rank}"    
+
+
+class TopCardView(CardView): pass
+class TopLandCardView(CardView): pass
+class TopNonLandCardView(CardView): pass
