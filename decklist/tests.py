@@ -3,6 +3,7 @@ from warnings import filterwarnings
 from django.core.paginator import UnorderedObjectListWarning
 from django.test import TestCase, Client
 from .models import SynergyScore, Card, Commander, Deck, CardInDeck
+import logging
 
 
 class SynergyForCommanderTestCase(TestCase):
@@ -120,12 +121,9 @@ class EnsureTopCardViewsMatchQueryTestCase(TestCase):
         )
 
     def _test_qs(self, qs):
-        self.assertEqual(
-            type(qs).__name__,
-            'CardQuerySet',
-            'expected to get the real CardQuerySet object for testing',
-        )        
-        values = qs.values()[0]
+        with self.assertLogs('decklist.models.card', logging.WARNING):
+            # we expect to get a logging message about the "slow path"
+            values = qs().values()[0]
 
         # now we're going to walk the fields of Card, popping them out
         missing = object()
@@ -149,12 +147,12 @@ class EnsureTopCardViewsMatchQueryTestCase(TestCase):
 
     def test_top_card_qs(self):
         # SELECT "decklist_card"."id", "decklist_card"."name", "decklist_card"."identity_w", "decklist_card"."identity_u", "decklist_card"."identity_b", "decklist_card"."identity_r", "decklist_card"."identity_g", "decklist_card"."type_line", "decklist_card"."keywords", "decklist_card"."scryfall_uri", "decklist_card"."editorial_printing_id", "decklist_card"."partner_type", COUNT(DISTINCT "decklist_cardindeck"."id") FILTER (WHERE "decklist_deck"."pdh_legal") AS "num_decks", RANK() OVER (ORDER BY COUNT(DISTINCT "decklist_cardindeck"."id") FILTER (WHERE "decklist_deck"."pdh_legal") DESC) AS "rank" FROM "decklist_card" LEFT OUTER JOIN "decklist_cardindeck" ON ("decklist_card"."id" = "decklist_cardindeck"."card_id") LEFT OUTER JOIN "decklist_deck" ON ("decklist_cardindeck"."deck_id" = "decklist_deck"."id") GROUP BY "decklist_card"."id" HAVING COUNT(DISTINCT "decklist_cardindeck"."id") FILTER (WHERE ("decklist_deck"."pdh_legal")) > 0
-        self._test_qs(Card.objects.top())
+        self._test_qs(Card.objects.top)
 
     def test_top_land_card_qs(self):
         # SELECT "decklist_card"."id", "decklist_card"."name", "decklist_card"."identity_w", "decklist_card"."identity_u", "decklist_card"."identity_b", "decklist_card"."identity_r", "decklist_card"."identity_g", "decklist_card"."type_line", "decklist_card"."keywords", "decklist_card"."scryfall_uri", "decklist_card"."editorial_printing_id", "decklist_card"."partner_type", COUNT(DISTINCT "decklist_cardindeck"."id") FILTER (WHERE "decklist_deck"."pdh_legal") AS "num_decks", RANK() OVER (ORDER BY COUNT(DISTINCT "decklist_cardindeck"."id") FILTER (WHERE "decklist_deck"."pdh_legal") DESC) AS "rank" FROM "decklist_card" LEFT OUTER JOIN "decklist_cardindeck" ON ("decklist_card"."id" = "decklist_cardindeck"."card_id") LEFT OUTER JOIN "decklist_deck" ON ("decklist_cardindeck"."deck_id" = "decklist_deck"."id") WHERE "decklist_card"."type_line"::text LIKE %Land% GROUP BY "decklist_card"."id" HAVING COUNT(DISTINCT "decklist_cardindeck"."id") FILTER (WHERE ("decklist_deck"."pdh_legal")) > 0
-        self._test_qs(Card.objects.top_lands())
+        self._test_qs(Card.objects.top_lands)
 
     def test_top_nonland_card_qs(self):
         # SELECT "decklist_card"."id", "decklist_card"."name", "decklist_card"."identity_w", "decklist_card"."identity_u", "decklist_card"."identity_b", "decklist_card"."identity_r", "decklist_card"."identity_g", "decklist_card"."type_line", "decklist_card"."keywords", "decklist_card"."scryfall_uri", "decklist_card"."editorial_printing_id", "decklist_card"."partner_type", COUNT(DISTINCT "decklist_cardindeck"."id") FILTER (WHERE "decklist_deck"."pdh_legal") AS "num_decks", RANK() OVER (ORDER BY COUNT(DISTINCT "decklist_cardindeck"."id") FILTER (WHERE "decklist_deck"."pdh_legal") DESC) AS "rank" FROM "decklist_card" LEFT OUTER JOIN "decklist_cardindeck" ON ("decklist_card"."id" = "decklist_cardindeck"."card_id") LEFT OUTER JOIN "decklist_deck" ON ("decklist_cardindeck"."deck_id" = "decklist_deck"."id") WHERE NOT ("decklist_card"."type_line"::text LIKE %Land%) GROUP BY "decklist_card"."id" HAVING COUNT(DISTINCT "decklist_cardindeck"."id") FILTER (WHERE ("decklist_deck"."pdh_legal")) > 0
-        self._test_qs(Card.objects.top_nonlands())
+        self._test_qs(Card.objects.top_nonlands)

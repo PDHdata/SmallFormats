@@ -4,9 +4,13 @@ from django.db.models.functions import Rank
 from .partnertype import PartnerType
 from .rarity import Rarity
 
+import logging
+logger = logging.getLogger('decklist.models.card')
+
 
 class CardQuerySet(models.QuerySet):
     def top_lands(self):
+        logger.warn("Called slow path: CardQuerySet::top_lands (use TopLandCardView instead)")
         return (
             self
             .filter(type_line__contains='Land')
@@ -14,6 +18,7 @@ class CardQuerySet(models.QuerySet):
         )
     
     def top_nonlands(self):
+        logger.warn("Called slow path: CardQuerySet::top_nonlands (use TopNonLandCardView instead)")
         return (
             self
             .exclude(type_line__contains='Land')
@@ -21,6 +26,7 @@ class CardQuerySet(models.QuerySet):
         )
     
     def top(self):
+        logger.warn("Called slow path: CardQuerySet::top (use TopCardView instead)")
         return self._count_and_rank_decks()
     
     def ranked_lands_of_color(self, w: bool, u: bool, b: bool, r: bool, g: bool):

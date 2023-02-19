@@ -8,7 +8,7 @@ class User(AbstractUser):
 from .datasource import DataSource
 from .partnertype import PartnerType
 from .deck import Deck
-from .card import Card
+from .card import Card, TopCardView, TopLandCardView, TopNonLandCardView
 from .printing import Printing
 from .cardindeck import CardInDeck
 from .sitestat import SiteStat
