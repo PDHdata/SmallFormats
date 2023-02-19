@@ -178,8 +178,6 @@ class Card(models.Model):
 
 
 class CardView(models.Model):
-    # TODO: pass missing attribute accesses through to `card`
-    # so that this view functions like a plain queryset on Card
     card = models.OneToOneField(
         Card,
         on_delete=models.DO_NOTHING,
@@ -193,6 +191,9 @@ class CardView(models.Model):
         managed = False
         abstract = True
         ordering = ['rank',]
+    
+    def __getattr__(self, name):
+        return getattr(self.card, name)
 
     def __str__(self):
         return f"{self.card.name} #{self.rank}"    
