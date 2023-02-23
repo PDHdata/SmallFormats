@@ -22,7 +22,7 @@ class Command(LoggingBaseCommand):
 
         self._log(f"Fetch cards begin: {Card.objects.all().count()} cards, {Printing.objects.all().count()} printings")
         with httpx.Client(base_url=SCRYFALL_API_BASE, headers=HEADERS) as client:
-            result = client.get("bulk-data/default-cards")
+            result = client.get("bulk-data/default-cards", timeout=httpx.Timeout(10.0))
             result.raise_for_status()
             download_target = result.json()["download_uri"]
             self._log(f"Fetching {download_target}")
