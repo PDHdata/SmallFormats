@@ -117,7 +117,7 @@ class Card(models.Model):
     # double-sided cards have double-sided type_lines
     type_line = models.CharField(max_length=100)
     keywords = models.JSONField(default=list)
-    scryfall_uri = models.URLField(max_length=200)
+    scryfall_uri = models.URLField(max_length=300)
     editorial_printing = models.ForeignKey(
         'Printing',
         on_delete=models.SET_NULL,
