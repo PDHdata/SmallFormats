@@ -1,6 +1,7 @@
 from django.db import models
 from django.db.models import Count, F, Q, Window
 from django.db.models.functions import Rank
+from django.contrib.postgres.search import SearchVector
 from .partnertype import PartnerType
 from .rarity import Rarity
 
@@ -74,7 +75,10 @@ class CardQuerySet(models.QuerySet):
     def search(self, query):
         return (
             self
-            .filter(name__icontains=query)
+            .annotate(
+                search=SearchVector('name', 'type_line')
+            )
+            .filter(search=query)
             .annotate(
                 in_decks=Count(
                     'deck_list',
