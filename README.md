@@ -11,8 +11,19 @@ That means you may use some or all of it to run your own project.
 However, you don't have the right to the name `SmallFormats` or `PDHdata`.
 You'll need to set an environment variable `SMALLFORMATS_NAME` or edit the config in `smallformats/settings.py` to whatever you're choosing to call your project.
 
+### Database setup
+_Unlike_ many Django projects, this one doesn't use SQLite locally.
+We depend on several Postgres-specific features (materialized views, JSON field features, etc.).
+While we **love** SQLite, it was becoming burdensome to support dev-only hacks mirroring Postgres features.
+So as of now, we only support [Postgres](https://postgresql.org).
+At time of writing (2023-02-26), we're using Postgres 14 in production.
+
+For local dev work on my Mac, I've found [Postgres.app](https://postgresapp.com/) to work well.
+You can either create a database called `pdhdev` or pass a `DATABASE_URL` with appropriate details every time you call `./manage`.
+
 ### Initial setup
-It's a Django project managed with Poetry. For local dev, it's mostly the usual cycle of commands (though I've added a `./manage` shell script so you can avoid typing `poetry run ./manage.py` all the time)
+It's a Django project managed with Poetry. For local dev, it's mostly the usual cycle of commands (though I've added a `./manage` shell script so you can avoid typing `poetry run ./manage.py` all the time).
+
 
 ```shell
 poetry install
