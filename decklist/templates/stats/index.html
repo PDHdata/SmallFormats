@@ -14,7 +14,7 @@
         {% endif %}
       </p>
       <p>
-        New feature: card synergy! Learn more on <a href="{% url 'about' %}">the About page</a>, and you can view high-synergy cards on each commander's page.
+        New feature: improved search. We're now taking advantage of Postgresql's full-text search capabilities. Try searching for something like <q><a href="{% url 'search' %}?q=elf">elf</a></q> to see how much better it is!
       </p>
       <div class="d-grid gap-2 d-md-flex justify-content-md-start">
         <a class="btn btn-primary btn-lg px-4 me-md-2" href="{% url 'cmdr-top' %}">Explore</a>
