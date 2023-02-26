@@ -4,11 +4,6 @@ from django.core.management.base import CommandError
 from decklist.models import Deck, Commander, Theme, ThemeResult
 
 
-# HACK: see `Command._get_decks_for_theme` below for why this is necessary
-from django.db import connections
-USE_SQLITE_JSON_HACK = True if connections['default'].vendor == 'sqlite' else False
-
-
 class Command(LoggingBaseCommand):
     help = 'Compute themes for commanders'
 
@@ -69,20 +64,12 @@ class Command(LoggingBaseCommand):
                     )
 
             case Theme.Type.KEYWORD:
-                # HACK: `contains` is not supported on JSONField on SQLite.
-                # Because we're only storing a flat array, `regex` is a good
-                # enough approximation in this instance.
-                if USE_SQLITE_JSON_HACK:
-                    filter = Q(card_list__card__keywords__regex=rf'"{theme.filter_text}"')
-                else:
-                    filter = Q(card_list__card__keywords__contains=theme.filter_text)
-
                 return (
                     Deck.objects
                     .filter(pdh_legal=True)
                     .annotate(keyword_count=Count(
                         'card_list',
-                        filter=filter,
+                        filter=Q(card_list__card__keywords__contains=theme.filter_text),
                     ))
                     .filter(keyword_count__gt=theme.card_threshold)
                 )

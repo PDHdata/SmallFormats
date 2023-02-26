@@ -4,20 +4,11 @@ from django.db import transaction, connection
 from decklist.models.card import TopCardView, TopLandCardView, TopNonLandCardView
 
 
-# only Postgres has materialized views to refresh
-from django.db import connections
-WE_ARE_POSTGRES = True if connections['default'].vendor == 'postgresql' else False
-
-
 class Command(LoggingBaseCommand):
     help = 'Compute top cards results'
 
     def handle(self, *args, **options):
         super().handle(*args, **options)
-
-        if not WE_ARE_POSTGRES:
-            self._log("Non-Postgres database detected; nothing to do.")
-            return
 
         self._log("Computing top cards")
 
