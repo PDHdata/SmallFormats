@@ -18,6 +18,7 @@ json-stream = "^2.1.0"
 django-debug-toolbar = "^3.7.0"
 django-htmx = "^1.12.2"
 django-cache-url = "^3.4.4"
+whitenoise = "^6.4.0"
 
 
 [build-system]

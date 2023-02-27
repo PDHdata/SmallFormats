@@ -17,9 +17,8 @@ processes = []
   cron = "supercronic /app/scheduled/crontab"
 
 [[statics]]
-  guest_path = "/app/static"
-  url_prefix = "/static"
-  cache_key = "cachebust-202212131139"
+  guest_path = "/fake"
+  url_prefix = "/fake"
 
 [experimental]
   allowed_public_ports = []
