@@ -1,51 +1,51 @@
-# fly.toml file generated for pdhdata on 2022-11-11T13:09:22-05:00
+# fly.toml app configuration file generated for pdhdata on 2023-05-24T04:34:02-04:00
+#
+# See https://fly.io/docs/reference/configuration/ for information about how to use this file.
+#
 
 app = "pdhdata"
+primary_region = "iad"
 kill_signal = "SIGINT"
-kill_timeout = 5
-processes = []
+kill_timeout = "5s"
+
+[experimental]
+  auto_rollback = true
+
+[deploy]
+  release_command = "poetry run python _manage.py migrate"
 
 [env]
   DJANGO_SETTINGS_MODULE = "smallformats.settings"
   SMALLFORMATS_NAME = "PDHdata"
 
-[deploy]
-  release_command = "poetry run python _manage.py migrate"
-
 [processes]
   app = "poetry run daphne -b 0.0.0.0 -p 8080 smallformats.asgi:application"
   cron = "supercronic /app/scheduled/crontab"
 
+[[services]]
+  protocol = "tcp"
+  internal_port = 8080
+  processes = ["app"]
+
+  [[services.ports]]
+    port = 80
+    handlers = ["http"]
+    force_https = true
+
+  [[services.ports]]
+    port = 443
+    handlers = ["tls", "http"]
+  [services.concurrency]
+    type = "connections"
+    hard_limit = 25
+    soft_limit = 20
+
+  [[services.tcp_checks]]
+    interval = "15s"
+    timeout = "2s"
+    grace_period = "1s"
+    restart_limit = 0
+
 [[statics]]
   guest_path = "/fake"
   url_prefix = "/fake"
-
-[experimental]
-  allowed_public_ports = []
-  auto_rollback = true
-
-[[services]]
-  http_checks = []
-  internal_port = 8080
-  processes = ["app"]
-  protocol = "tcp"
-  script_checks = []
-  [services.concurrency]
-    hard_limit = 25
-    soft_limit = 20
-    type = "connections"
-
-  [[services.ports]]
-    force_https = true
-    handlers = ["http"]
-    port = 80
-
-  [[services.ports]]
-    handlers = ["tls", "http"]
-    port = 443
-
-  [[services.tcp_checks]]
-    grace_period = "1s"
-    interval = "15s"
-    restart_limit = 0
-    timeout = "2s"
