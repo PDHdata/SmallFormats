@@ -7,7 +7,6 @@ from crawler.models import CrawlRun, LogEntry, LogStart
 from decklist.models import Deck, SiteStat
 
 
-@login_required
 def crawler_index(request):
     try:
         stats = SiteStat.objects.latest()
@@ -19,11 +18,11 @@ def crawler_index(request):
         'crawler/index.html',
         {
             'stats': stats,
+            'user_logged_in': request.user.is_authenticated,
         },
     )
 
 
-@login_required
 def run_index(request):
     runs = CrawlRun.objects.order_by('-crawl_start_time')
     paginator = Paginator(runs, 8, orphans=3)
@@ -39,7 +38,6 @@ def run_index(request):
     )
 
 
-@login_required
 def run_detail(request, run_id):
     run = get_object_or_404(CrawlRun, pk=run_id)
 
@@ -51,6 +49,7 @@ def run_detail(request, run_id):
             'errored': run.state == CrawlRun.State.ERROR,
             'allow_search_infinite': run.state == CrawlRun.State.NOT_STARTED and run.search_back_to,
             'can_cancel': run.state not in (CrawlRun.State.CANCELLED, CrawlRun.State.COMPLETE),
+            'user_logged_in': request.user.is_authenticated,
         },
     )
 
@@ -109,7 +108,6 @@ def update_stats(request):
     return HttpResponseClientRefresh()
 
 
-@login_required
 def log_index(request):
     logs = LogStart.objects.all()
     paginator = Paginator(logs, 10, orphans=3)
@@ -125,7 +123,6 @@ def log_index(request):
     )
 
 
-@login_required
 def log_one(request, logstart_id):
     log_start = get_object_or_404(LogStart, pk=logstart_id)
     logs = (

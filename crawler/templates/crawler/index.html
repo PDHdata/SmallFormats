@@ -1,10 +1,10 @@
 {% extends 'base.html' %}
-{% block title %}Crawler admin{% endblock %}
+{% block title %}Crawler backstage{% endblock %}
 {% block body %}
 <div class="container" hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'>
   <nav aria-label="breadcrumb" class="mt-3">
     <ol class="breadcrumb">
-      <li class="breadcrumb-item active" aria-current="page">Crawler admin</li>
+      <li class="breadcrumb-item active" aria-current="page">Crawler backstage</li>
     </ol>
   </nav>
   <div class="mb-3">
@@ -14,7 +14,7 @@
 
   <hr>
   <div>
-    <button hx-post="{% url 'crawler:update-stats' %}" class="btn btn-outline-primary mb-2">Update site stats</button>
+    {% if user_logged_in %}<button hx-post="{% url 'crawler:update-stats' %}" class="btn btn-outline-primary mb-2">Update site stats</button>{% endif %}
     Last update: {{ stats.timestamp|default:"--" }} //
     Legal decks: {{ stats.legal_decks|default:"--" }}
   </div>

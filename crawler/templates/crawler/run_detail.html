@@ -20,7 +20,7 @@
       <div class="ms-2 me-auto">
         <div class="fw-bold">Search back to</div>
         {% if run.search_back_to %}{{ run.search_back_to }}{% else %}no limit{% endif %}
-        {% if allow_search_infinite %}
+        {% if allow_search_infinite and user_logged_in %}
         <br><button class="btn btn-outline-secondary" hx-post="{% url 'crawler:run-remove-limit' run.id %}">Remove limit</button> (to re-crawl everything)
         {% endif %}
       </div>
@@ -29,7 +29,7 @@
       <div class="ms-2 me-auto">
         <div class="fw-bold">State</div>
         {{ run.get_state_display }}
-        {% if can_cancel %}
+        {% if can_cancel and user_logged_in %}
         <br><button class="btn btn-outline-danger"
           hx-post="{% url 'crawler:run-cancel' run.id %}"
           hx-confirm="Are you sure you want to cancel this run?">Cancel run</button>
@@ -37,7 +37,7 @@
       </div>
     </li>
 
-    {% if run.next_fetch %}
+    {% if run.next_fetch and user_logged_in %}
     <li class="list-group-item d-flex justify-content-between align-items-start">
       <div class="ms-2 me-auto">
         <div class="fw-bold">Next URL</div>
@@ -59,7 +59,7 @@
     <li class="list-group-item d-flex justify-content-between align-items-start">
       <div class="ms-2 me-auto">
         <div class="fw-bold">Clear error</div>
-        <button class="btn btn-outline-danger me-2" hx-post="{% url 'crawler:run-remove-error' run.id %}">Clear error</button>
+        {% if user_logged_in %}<button class="btn btn-outline-danger me-2" hx-post="{% url 'crawler:run-remove-error' run.id %}">Clear error</button>{% endif %}
       </div>
     </li>
     {% endif %}
