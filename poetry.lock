@@ -22,13 +22,13 @@ trio = ["trio (>=0.16,<0.22)"]
 
 [[package]]
 name = "asgiref"
-version = "3.5.2"
+version = "3.8.1"
 description = "ASGI specs, helper code, and adapters"
 optional = false
-python-versions = ">=3.7"
+python-versions = ">=3.8"
 files = [
-    {file = "asgiref-3.5.2-py3-none-any.whl", hash = "sha256:1d2880b792ae8757289136f1db2b7b99100ce959b2aa57fd69dab783d05afac4"},
-    {file = "asgiref-3.5.2.tar.gz", hash = "sha256:4a29362a6acebe09bf1d6640db38c1dc3d9217c68e6f9f6204d72667fc19a424"},
+    {file = "asgiref-3.8.1-py3-none-any.whl", hash = "sha256:3e1e3ecc849832fe52ccf2cb6686b7a55f82bb1d6aee72a58826471390335e47"},
+    {file = "asgiref-3.8.1.tar.gz", hash = "sha256:c343bd80a0bec947a9860adb4c432ffa7db769836c64238fc34bdc3fec84d590"},
 ]
 
 [package.extras]
@@ -243,13 +243,13 @@ test = ["hypothesis (>=1.11.4,!=3.79.2)", "iso8601", "pretend", "pytest (>=6.2.0
 
 [[package]]
 name = "daphne"
-version = "4.0.0"
+version = "4.1.2"
 description = "Django ASGI (HTTP/WebSocket) server"
 optional = false
-python-versions = ">=3.7"
+python-versions = ">=3.8"
 files = [
-    {file = "daphne-4.0.0-py3-none-any.whl", hash = "sha256:a288ece46012b6b719c37150be67c69ebfca0793a8521bf821533bad983179b2"},
-    {file = "daphne-4.0.0.tar.gz", hash = "sha256:cce9afc8f49a4f15d4270b8cfb0e0fe811b770a5cc795474e97e4da287497666"},
+    {file = "daphne-4.1.2-py3-none-any.whl", hash = "sha256:618d1322bb4d875342b99dd2a10da2d9aae7ee3645f765965fdc1e658ea5290a"},
+    {file = "daphne-4.1.2.tar.gz", hash = "sha256:fcbcace38eb86624ae247c7ffdc8ac12f155d7d19eafac4247381896d6f33761"},
 ]
 
 [package.dependencies]
@@ -262,17 +262,18 @@ tests = ["django", "hypothesis", "pytest", "pytest-asyncio"]
 
 [[package]]
 name = "dj-database-url"
-version = "1.0.0"
+version = "2.1.0"
 description = "Use Database URLs in your Django Application."
 optional = false
 python-versions = "*"
 files = [
-    {file = "dj-database-url-1.0.0.tar.gz", hash = "sha256:ccf3e8718f75ddd147a1e212fca88eecdaa721759ee48e38b485481c77bca3dc"},
-    {file = "dj_database_url-1.0.0-py3-none-any.whl", hash = "sha256:cd354a3b7a9136d78d64c17b2aec369e2ae5616fbca6bfbe435ef15bb372ce39"},
+    {file = "dj-database-url-2.1.0.tar.gz", hash = "sha256:f2042cefe1086e539c9da39fad5ad7f61173bf79665e69bf7e4de55fa88b135f"},
+    {file = "dj_database_url-2.1.0-py3-none-any.whl", hash = "sha256:04bc34b248d4c21aaa13e4ab419ae6575ef5f10f3df735ce7da97722caa356e0"},
 ]
 
 [package.dependencies]
-Django = ">3.2"
+Django = ">=3.2"
+typing-extensions = ">=3.10.0.0"
 
 [[package]]
 name = "django"
@@ -322,16 +323,17 @@ sqlparse = ">=0.2.0"
 
 [[package]]
 name = "django-htmx"
-version = "1.13.0"
+version = "1.17.3"
 description = "Extensions for using Django with htmx."
 optional = false
-python-versions = ">=3.7"
+python-versions = ">=3.8"
 files = [
-    {file = "django-htmx-1.13.0.tar.gz", hash = "sha256:848c3e195b8757656626c8a099f9be59c6d30f468f1d54e69f0f2a48f0a14928"},
-    {file = "django_htmx-1.13.0-py3-none-any.whl", hash = "sha256:781a59376d769aa28302619e73d37d481a125ab155d9fdd7fb17f10e7d25f352"},
+    {file = "django-htmx-1.17.3.tar.gz", hash = "sha256:a2069219920d7ef0883ddbf5e8d931069db145a0d4a8a032a2708f840c7a68a6"},
+    {file = "django_htmx-1.17.3-py3-none-any.whl", hash = "sha256:0de964ca257eda2a4ebeeaa8181320119378fa5f95a2fc2f2bfbdd35034ed424"},
 ]
 
 [package.dependencies]
+asgiref = ">=3.6"
 Django = ">=3.2"
 
 [[package]]
@@ -912,5 +914,5 @@ testing = ["coverage (>=5.0.3)", "zope.event", "zope.testing"]
 
 [metadata]
 lock-version = "2.0"
-python-versions = "^3.11"
-content-hash = "976e1ec0ea3e368e1f937f23a2c54e73a8d2d706bfa1f56ab534c905221299fb"
+python-versions = "^3.12"
+content-hash = "1cc02654f4682a0bc2efe0899ffb9cadb80cc6bc55fc705100579fdf2b01af81"
