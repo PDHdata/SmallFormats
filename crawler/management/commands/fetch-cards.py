@@ -5,6 +5,9 @@ from django.db.utils import DataError
 from django.utils.dateparse import parse_date
 import httpx
 import json_stream.httpx
+# don't use Rust-based tokenizer
+# it throws an OSError about incomplete utf-8 sequences
+from json_stream.tokenizer import tokenize
 from decklist.models import Card, Printing, PartnerType, Rarity
 from crawler.crawlers import HEADERS, SCRYFALL_API_BASE
 from ._command_base import LoggingBaseCommand
@@ -31,7 +34,7 @@ class Command(LoggingBaseCommand):
 
             card_count = PROGRESS_EVERY_N_CARDS
             with client.stream('GET', download_target) as f:
-                for json_card in json_stream.httpx.load(f).persistent():
+                for json_card in json_stream.httpx.load(f, tokenizer=tokenize).persistent():
                     card_count -= 1
                     if card_count <= 0:
                         self.stdout.write('.', ending='')
