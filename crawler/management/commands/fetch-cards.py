@@ -40,11 +40,12 @@ class Command(LoggingBaseCommand):
                         self.stdout.write('.', ending='')
                         self.stdout.flush()
                         card_count = PROGRESS_EVERY_N_CARDS
+                    parse_failures = {}
                     for parse in [self._extract_card_and_printing, self._extract_verhey_card_and_printing]:
                         try:
                             c, p = parse(json_card)
                         except CantParseCardError as e:
-                            self._log(f"{e}")
+                            parse_failures[parse.__name__] = str(e)
                             # try the next method
                             c, p = None, None
                         
@@ -52,6 +53,8 @@ class Command(LoggingBaseCommand):
                     
                     if not c or not p:
                         self._err(f"failed to parse {json_card['name']}")
+                        for k, v in parse_failures.items():
+                            self._err(f".. {k}: {v}")
 
                     elif self._want_card(json_card):
                         try:
@@ -211,4 +214,4 @@ class Command(LoggingBaseCommand):
         elif 'Partner with Ley Weaver' in oracle_text:
             return PartnerType.PARTNER_WITH_WEAVER
         
-        raise CantParseCardError(f'Unknown PARTNER_WITH_*: "{oracle_text}"')
+        raise CantParseCardError(f'Has keyword "Partner with", but partner unknown')
