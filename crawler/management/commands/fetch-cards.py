@@ -124,6 +124,12 @@ class Command(LoggingBaseCommand):
     def _extract_verhey_card_and_printing(self, json_card):
         # Gavin Verhey's Commander deck has double-sided reprints of
         # single-sided cards, e.g. https://scryfall.com/card/sld/381/propaganda-propaganda
+        if (
+                not 'card_faces' in json_card
+                or not len(json_card['card_faces']) == 2
+                or not 'oracle_id' in json_card['card_faces'][0]):
+            raise CantParseCardError("this isn't shaped like a Verhey card")
+
         if json_card['card_faces'][0]['oracle_id'] == json_card['card_faces'][1]['oracle_id']:
             try:
                 face = json_card['card_faces'][0]
