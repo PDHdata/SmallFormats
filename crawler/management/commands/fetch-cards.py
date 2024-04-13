@@ -40,16 +40,21 @@ class Command(LoggingBaseCommand):
                         self.stdout.write('.', ending='')
                         self.stdout.flush()
                         card_count = PROGRESS_EVERY_N_CARDS
+                    parse_failures = {}
                     for parse in [self._extract_card_and_printing, self._extract_verhey_card_and_printing]:
                         try:
                             c, p = parse(json_card)
-                        except CantParseCardError:
-                            ... # try the next method
+                        except CantParseCardError as e:
+                            parse_failures[parse.__name__] = str(e)
+                            # try the next method
+                            c, p = None, None
                         
                         if c and p: break
                     
                     if not c or not p:
                         self._err(f"failed to parse {json_card['name']}")
+                        for k, v in parse_failures.items():
+                            self._err(f".. {k}: {v}")
 
                     elif self._want_card(json_card):
                         try:
@@ -110,19 +115,32 @@ class Command(LoggingBaseCommand):
             
             # determine partnership
             keywords = json_card['keywords']
-            oracle_text = json_card['oracle_text']
             type_line = json_card['type_line']
+
+            if 'oracle_text' in json_card:
+                oracle_text = json_card['oracle_text']
+            elif 'card_faces' in json_card and 'oracle_text' in json_card['card_faces'][0]:
+                oracle_text = json_card['card_faces'][0]['oracle_text']
+            else:
+                oracle_text = ''
+
             c.partner_type = self._determine_partnership(
                 keywords, oracle_text, type_line
             )
                 
             return c, p
-        except KeyError:
-            raise CantParseCardError()
+        except KeyError as ke:
+            raise CantParseCardError(f"missing keyword {ke}")
 
     def _extract_verhey_card_and_printing(self, json_card):
         # Gavin Verhey's Commander deck has double-sided reprints of
         # single-sided cards, e.g. https://scryfall.com/card/sld/381/propaganda-propaganda
+        if (
+                not 'card_faces' in json_card
+                or not len(json_card['card_faces']) == 2
+                or not 'oracle_id' in json_card['card_faces'][0]):
+            raise CantParseCardError("this isn't shaped like a Verhey card")
+
         if json_card['card_faces'][0]['oracle_id'] == json_card['card_faces'][1]['oracle_id']:
             try:
                 face = json_card['card_faces'][0]
@@ -196,4 +214,4 @@ class Command(LoggingBaseCommand):
         elif 'Partner with Ley Weaver' in oracle_text:
             return PartnerType.PARTNER_WITH_WEAVER
         
-        raise CantParseCardError(f'Unknown PARTNER_WITH_*: "{oracle_text}"')
+        raise CantParseCardError(f'Has keyword "Partner with", but partner unknown')
