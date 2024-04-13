@@ -44,7 +44,8 @@ class Command(LoggingBaseCommand):
                         try:
                             c, p = parse(json_card)
                         except CantParseCardError:
-                            ... # try the next method
+                            # try the next method
+                            c, p = None, None
                         
                         if c and p: break
                     
