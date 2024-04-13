@@ -43,7 +43,8 @@ class Command(LoggingBaseCommand):
                     for parse in [self._extract_card_and_printing, self._extract_verhey_card_and_printing]:
                         try:
                             c, p = parse(json_card)
-                        except CantParseCardError:
+                        except CantParseCardError as e:
+                            self._log(f"{e}")
                             # try the next method
                             c, p = None, None
                         
@@ -111,15 +112,22 @@ class Command(LoggingBaseCommand):
             
             # determine partnership
             keywords = json_card['keywords']
-            oracle_text = json_card['oracle_text']
             type_line = json_card['type_line']
+
+            if 'oracle_text' in json_card:
+                oracle_text = json_card['oracle_text']
+            elif 'card_faces' in json_card and 'oracle_text' in json_card['card_faces'][0]:
+                oracle_text = json_card['card_faces'][0]['oracle_text']
+            else:
+                oracle_text = ''
+
             c.partner_type = self._determine_partnership(
                 keywords, oracle_text, type_line
             )
                 
             return c, p
-        except KeyError:
-            raise CantParseCardError()
+        except KeyError as ke:
+            raise CantParseCardError(f"missing keyword {ke}")
 
     def _extract_verhey_card_and_printing(self, json_card):
         # Gavin Verhey's Commander deck has double-sided reprints of
