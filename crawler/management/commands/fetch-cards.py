@@ -125,7 +125,7 @@ class Command(LoggingBaseCommand):
                 oracle_text = ''
 
             c.partner_type = self._determine_partnership(
-                keywords, oracle_text, type_line
+                p.rarity, keywords, oracle_text, type_line
             )
                 
             return c, p
@@ -173,7 +173,7 @@ class Command(LoggingBaseCommand):
                 oracle_text = face['oracle_text']
                 type_line = face['type_line']
                 c.partner_type = self._determine_partnership(
-                    keywords, oracle_text, type_line
+                    p.rarity, keywords, oracle_text, type_line
                 )
 
                 return c, p
@@ -182,7 +182,11 @@ class Command(LoggingBaseCommand):
 
         raise CantParseCardError("card face oracle_ids don't match")
 
-    def _determine_partnership(self, keywords, oracle_text, type_line):
+    def _determine_partnership(self, rarity, keywords, oracle_text, type_line):
+        # we don't care about non-C/U partners
+        if rarity not in (Rarity.COMMON, Rarity.UNCOMMON):
+            return PartnerType.NONE
+
         if 'Partner with' in keywords:
             return self._determine_partner_with(oracle_text)
         elif 'Partner' in keywords:
