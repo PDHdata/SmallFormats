@@ -1,6 +1,7 @@
 .git/
 __pycache__/
 _nonship/
+backups/
 
 fly.toml
 *.sqlite3
