@@ -10,7 +10,7 @@
       <h2 class="flex-shrink-0 me-3">{{ forloop.counter0 }}</h2>
       <div>
       {% if forloop.first %}
-      <a href="{% url 'card-top' %}">Top commanders (any color)</a><br>
+      <a href="{% url 'cmdr-top' %}">Top commanders (any color)</a><br>
       {% endif %}
       {% for color in entry %}
       <a href="{% url color.2 %}">{{ color.0.title }} {% for img in color.1 %}<img src="{% static img %}" class="mana-symbol">{% endfor %}</a><br>
