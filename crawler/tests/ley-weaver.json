@@ -1,0 +1,144 @@
+{
+  "object": "card",
+  "id": "2c7e9d68-d419-4ec5-97e9-2478ecb7007f",
+  "oracle_id": "24f1f0e9-8c9b-4f32-95ec-7af883bbeef4",
+  "multiverse_ids": [
+    445989
+  ],
+  "mtgo_id": 68770,
+  "tcgplayer_id": 167802,
+  "cardmarket_id": 358615,
+  "name": "Ley Weaver",
+  "lang": "en",
+  "released_at": "2018-06-08",
+  "uri": "https://api.scryfall.com/cards/2c7e9d68-d419-4ec5-97e9-2478ecb7007f",
+  "scryfall_uri": "https://scryfall.com/card/bbd/21/ley-weaver?utm_source=api",
+  "layout": "normal",
+  "highres_image": true,
+  "image_status": "highres_scan",
+  "image_uris": {
+    "small": "https://cards.scryfall.io/small/front/2/c/2c7e9d68-d419-4ec5-97e9-2478ecb7007f.jpg?1562904079",
+    "normal": "https://cards.scryfall.io/normal/front/2/c/2c7e9d68-d419-4ec5-97e9-2478ecb7007f.jpg?1562904079",
+    "large": "https://cards.scryfall.io/large/front/2/c/2c7e9d68-d419-4ec5-97e9-2478ecb7007f.jpg?1562904079",
+    "png": "https://cards.scryfall.io/png/front/2/c/2c7e9d68-d419-4ec5-97e9-2478ecb7007f.png?1562904079",
+    "art_crop": "https://cards.scryfall.io/art_crop/front/2/c/2c7e9d68-d419-4ec5-97e9-2478ecb7007f.jpg?1562904079",
+    "border_crop": "https://cards.scryfall.io/border_crop/front/2/c/2c7e9d68-d419-4ec5-97e9-2478ecb7007f.jpg?1562904079"
+  },
+  "mana_cost": "{3}{G}",
+  "cmc": 4.0,
+  "type_line": "Creature — Human Druid",
+  "oracle_text": "Partner with Lore Weaver (When this creature enters the battlefield, target player may put Lore Weaver into their hand from their library, then shuffle.)\n{T}: Untap two target lands.",
+  "power": "2",
+  "toughness": "2",
+  "colors": [
+    "G"
+  ],
+  "color_identity": [
+    "G"
+  ],
+  "keywords": [
+    "Partner with",
+    "Partner"
+  ],
+  "all_parts": [
+    {
+      "object": "related_card",
+      "id": "f3366998-5ea0-4dcd-bf2a-f654b1c68e93",
+      "component": "combo_piece",
+      "name": "Lore Weaver",
+      "type_line": "Creature — Human Wizard",
+      "uri": "https://api.scryfall.com/cards/f3366998-5ea0-4dcd-bf2a-f654b1c68e93"
+    },
+    {
+      "object": "related_card",
+      "id": "2c7e9d68-d419-4ec5-97e9-2478ecb7007f",
+      "component": "combo_piece",
+      "name": "Ley Weaver",
+      "type_line": "Creature — Human Druid",
+      "uri": "https://api.scryfall.com/cards/2c7e9d68-d419-4ec5-97e9-2478ecb7007f"
+    }
+  ],
+  "legalities": {
+    "standard": "not_legal",
+    "future": "not_legal",
+    "historic": "not_legal",
+    "timeless": "not_legal",
+    "gladiator": "not_legal",
+    "pioneer": "not_legal",
+    "explorer": "not_legal",
+    "modern": "not_legal",
+    "legacy": "legal",
+    "pauper": "not_legal",
+    "vintage": "legal",
+    "penny": "not_legal",
+    "commander": "legal",
+    "oathbreaker": "legal",
+    "standardbrawl": "not_legal",
+    "brawl": "not_legal",
+    "alchemy": "not_legal",
+    "paupercommander": "restricted",
+    "duel": "legal",
+    "oldschool": "not_legal",
+    "premodern": "not_legal",
+    "predh": "not_legal"
+  },
+  "games": [
+    "paper",
+    "mtgo"
+  ],
+  "reserved": false,
+  "foil": true,
+  "nonfoil": true,
+  "finishes": [
+    "nonfoil",
+    "foil"
+  ],
+  "oversized": false,
+  "promo": false,
+  "reprint": false,
+  "variation": false,
+  "set_id": "95f97fbc-58ef-4645-982e-43e2db6f1124",
+  "set": "bbd",
+  "set_name": "Battlebond",
+  "set_type": "draft_innovation",
+  "set_uri": "https://api.scryfall.com/sets/95f97fbc-58ef-4645-982e-43e2db6f1124",
+  "set_search_uri": "https://api.scryfall.com/cards/search?order=set&q=e%3Abbd&unique=prints",
+  "scryfall_set_uri": "https://scryfall.com/sets/bbd?utm_source=api",
+  "rulings_uri": "https://api.scryfall.com/cards/2c7e9d68-d419-4ec5-97e9-2478ecb7007f/rulings",
+  "prints_search_uri": "https://api.scryfall.com/cards/search?order=released&q=oracleid%3A24f1f0e9-8c9b-4f32-95ec-7af883bbeef4&unique=prints",
+  "collector_number": "21",
+  "digital": false,
+  "rarity": "uncommon",
+  "card_back_id": "0aeebaf5-8c7d-4636-9e82-8c27447861f7",
+  "artist": "Livia Prima",
+  "artist_ids": [
+    "0f41e561-bc26-4d85-aab6-66c384e01b74"
+  ],
+  "illustration_id": "adf3cbd8-0636-47d2-af6f-e2707de2d68a",
+  "border_color": "black",
+  "frame": "2015",
+  "full_art": false,
+  "textless": false,
+  "booster": true,
+  "story_spotlight": false,
+  "edhrec_rank": 9204,
+  "prices": {
+    "usd": "0.21",
+    "usd_foil": "2.91",
+    "usd_etched": null,
+    "eur": "0.26",
+    "eur_foil": "2.02",
+    "tix": "0.04"
+  },
+  "related_uris": {
+    "gatherer": "https://gatherer.wizards.com/Pages/Card/Details.aspx?multiverseid=445989&printed=false",
+    "tcgplayer_infinite_articles": "https://tcgplayer.pxf.io/c/4931599/1830156/21018?subId1=api&trafcat=infinite&u=https%3A%2F%2Finfinite.tcgplayer.com%2Fsearch%3FcontentMode%3Darticle%26game%3Dmagic%26partner%3Dscryfall%26q%3DLey%2BWeaver",
+    "tcgplayer_infinite_decks": "https://tcgplayer.pxf.io/c/4931599/1830156/21018?subId1=api&trafcat=infinite&u=https%3A%2F%2Finfinite.tcgplayer.com%2Fsearch%3FcontentMode%3Ddeck%26game%3Dmagic%26partner%3Dscryfall%26q%3DLey%2BWeaver",
+    "edhrec": "https://edhrec.com/route/?cc=Ley+Weaver"
+  },
+  "purchase_uris": {
+    "tcgplayer": "https://tcgplayer.pxf.io/c/4931599/1830156/21018?subId1=api&u=https%3A%2F%2Fwww.tcgplayer.com%2Fproduct%2F167802%3Fpage%3D1",
+    "cardmarket": "https://www.cardmarket.com/en/Magic/Products/Singles/Battlebond/Ley-Weaver?referrer=scryfall&utm_campaign=card_prices&utm_medium=text&utm_source=scryfall",
+    "cardhoarder": "https://www.cardhoarder.com/cards/68770?affiliate_id=scryfall&ref=card-profile&utm_campaign=affiliate&utm_medium=card&utm_source=scryfall"
+  }
+}
