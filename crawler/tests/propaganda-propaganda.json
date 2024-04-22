@@ -1,0 +1,157 @@
+{
+  "object": "card",
+  "id": "3e3f0bcd-0796-494d-bf51-94b33c1671e9",
+  "multiverse_ids": [
+
+  ],
+  "tcgplayer_id": 259214,
+  "name": "Propaganda // Propaganda",
+  "lang": "en",
+  "released_at": "2022-04-22",
+  "uri": "https://api.scryfall.com/cards/3e3f0bcd-0796-494d-bf51-94b33c1671e9",
+  "scryfall_uri": "https://scryfall.com/card/sld/381/propaganda-propaganda?utm_source=api",
+  "layout": "reversible_card",
+  "highres_image": true,
+  "image_status": "highres_scan",
+  "color_identity": [
+    "U"
+  ],
+  "keywords": [
+
+  ],
+  "card_faces": [
+    {
+      "object": "card_face",
+      "oracle_id": "ea9709b6-4c37-4d5a-b04d-cd4c42e4f9dd",
+      "layout": "normal",
+      "name": "Propaganda",
+      "mana_cost": "{2}{U}",
+      "cmc": 3.0,
+      "type_line": "Enchantment",
+      "oracle_text": "Creatures can't attack you unless their controller pays {2} for each creature they control that's attacking you.",
+      "colors": [
+        "U"
+      ],
+      "flavor_text": "\"Obedience is the true path to happiness.\"\n—Dolorus, magister equitum",
+      "artist": "Scott Balmer",
+      "artist_id": "c26dd9c9-54f9-4a8c-9d54-caac6be0161d",
+      "illustration_id": "7af368fa-6036-462a-a480-02ccc589bea5",
+      "image_uris": {
+        "small": "https://cards.scryfall.io/small/front/3/e/3e3f0bcd-0796-494d-bf51-94b33c1671e9.jpg?1670031727",
+        "normal": "https://cards.scryfall.io/normal/front/3/e/3e3f0bcd-0796-494d-bf51-94b33c1671e9.jpg?1670031727",
+        "large": "https://cards.scryfall.io/large/front/3/e/3e3f0bcd-0796-494d-bf51-94b33c1671e9.jpg?1670031727",
+        "png": "https://cards.scryfall.io/png/front/3/e/3e3f0bcd-0796-494d-bf51-94b33c1671e9.png?1670031727",
+        "art_crop": "https://cards.scryfall.io/art_crop/front/3/e/3e3f0bcd-0796-494d-bf51-94b33c1671e9.jpg?1670031727",
+        "border_crop": "https://cards.scryfall.io/border_crop/front/3/e/3e3f0bcd-0796-494d-bf51-94b33c1671e9.jpg?1670031727"
+      }
+    },
+    {
+      "object": "card_face",
+      "oracle_id": "ea9709b6-4c37-4d5a-b04d-cd4c42e4f9dd",
+      "layout": "normal",
+      "name": "Propaganda",
+      "flavor_name": "",
+      "mana_cost": "{2}{U}",
+      "cmc": 3.0,
+      "type_line": "Enchantment",
+      "oracle_text": "Creatures can't attack you unless their controller pays {2} for each creature they control that's attacking you.",
+      "colors": [
+        "U"
+      ],
+      "flavor_text": "\"Why rebel? The system can be changed from within.\"\n—Dolorus, magister equitum",
+      "artist": "Scott Balmer",
+      "artist_id": "c26dd9c9-54f9-4a8c-9d54-caac6be0161d",
+      "illustration_id": "fee742d4-3025-430f-9094-b67f249e54f5",
+      "image_uris": {
+        "small": "https://cards.scryfall.io/small/back/3/e/3e3f0bcd-0796-494d-bf51-94b33c1671e9.jpg?1670031727",
+        "normal": "https://cards.scryfall.io/normal/back/3/e/3e3f0bcd-0796-494d-bf51-94b33c1671e9.jpg?1670031727",
+        "large": "https://cards.scryfall.io/large/back/3/e/3e3f0bcd-0796-494d-bf51-94b33c1671e9.jpg?1670031727",
+        "png": "https://cards.scryfall.io/png/back/3/e/3e3f0bcd-0796-494d-bf51-94b33c1671e9.png?1670031727",
+        "art_crop": "https://cards.scryfall.io/art_crop/back/3/e/3e3f0bcd-0796-494d-bf51-94b33c1671e9.jpg?1670031727",
+        "border_crop": "https://cards.scryfall.io/border_crop/back/3/e/3e3f0bcd-0796-494d-bf51-94b33c1671e9.jpg?1670031727"
+      }
+    }
+  ],
+  "legalities": {
+    "standard": "not_legal",
+    "future": "not_legal",
+    "historic": "not_legal",
+    "timeless": "not_legal",
+    "gladiator": "not_legal",
+    "pioneer": "not_legal",
+    "explorer": "not_legal",
+    "modern": "not_legal",
+    "legacy": "legal",
+    "pauper": "not_legal",
+    "vintage": "legal",
+    "penny": "not_legal",
+    "commander": "legal",
+    "oathbreaker": "legal",
+    "standardbrawl": "not_legal",
+    "brawl": "not_legal",
+    "alchemy": "not_legal",
+    "paupercommander": "not_legal",
+    "duel": "legal",
+    "oldschool": "not_legal",
+    "premodern": "legal",
+    "predh": "legal"
+  },
+  "games": [
+    "paper"
+  ],
+  "reserved": false,
+  "foil": true,
+  "nonfoil": false,
+  "finishes": [
+    "foil"
+  ],
+  "oversized": false,
+  "promo": false,
+  "reprint": true,
+  "variation": false,
+  "set_id": "4d92a8a7-ccb0-437d-abdc-9d70fc5ed672",
+  "set": "sld",
+  "set_name": "Secret Lair Drop",
+  "set_type": "box",
+  "set_uri": "https://api.scryfall.com/sets/4d92a8a7-ccb0-437d-abdc-9d70fc5ed672",
+  "set_search_uri": "https://api.scryfall.com/cards/search?order=set&q=e%3Asld&unique=prints",
+  "scryfall_set_uri": "https://scryfall.com/sets/sld?utm_source=api",
+  "rulings_uri": "https://api.scryfall.com/cards/3e3f0bcd-0796-494d-bf51-94b33c1671e9/rulings",
+  "prints_search_uri": "https://api.scryfall.com/cards/search?order=released&q=oracleid%3Aea9709b6-4c37-4d5a-b04d-cd4c42e4f9dd&unique=prints",
+  "collector_number": "381",
+  "digital": false,
+  "rarity": "rare",
+  "artist": "Scott Balmer",
+  "artist_ids": [
+    "c26dd9c9-54f9-4a8c-9d54-caac6be0161d"
+  ],
+  "border_color": "borderless",
+  "frame": "2015",
+  "frame_effects": [
+    "inverted"
+  ],
+  "security_stamp": "oval",
+  "full_art": false,
+  "textless": false,
+  "booster": false,
+  "story_spotlight": false,
+  "edhrec_rank": 180,
+  "prices": {
+    "usd": null,
+    "usd_foil": "31.43",
+    "usd_etched": null,
+    "eur": null,
+    "eur_foil": null,
+    "tix": null
+  },
+  "related_uris": {
+    "tcgplayer_infinite_articles": "https://tcgplayer.pxf.io/c/4931599/1830156/21018?subId1=api&trafcat=infinite&u=https%3A%2F%2Finfinite.tcgplayer.com%2Fsearch%3FcontentMode%3Darticle%26game%3Dmagic%26partner%3Dscryfall%26q%3DPropaganda%2B%252F%252F%2BPropaganda",
+    "tcgplayer_infinite_decks": "https://tcgplayer.pxf.io/c/4931599/1830156/21018?subId1=api&trafcat=infinite&u=https%3A%2F%2Finfinite.tcgplayer.com%2Fsearch%3FcontentMode%3Ddeck%26game%3Dmagic%26partner%3Dscryfall%26q%3DPropaganda%2B%252F%252F%2BPropaganda",
+    "edhrec": "https://edhrec.com/route/?cc=Propaganda+%2F%2F+Propaganda"
+  },
+  "purchase_uris": {
+    "tcgplayer": "https://tcgplayer.pxf.io/c/4931599/1830156/21018?subId1=api&u=https%3A%2F%2Fwww.tcgplayer.com%2Fproduct%2F259214%3Fpage%3D1",
+    "cardmarket": "https://www.cardmarket.com/en/Magic/Products/Search?referrer=scryfall&searchString=Propaganda+%2F%2F+Propaganda&utm_campaign=card_prices&utm_medium=text&utm_source=scryfall",
+    "cardhoarder": "https://www.cardhoarder.com/cards?affiliate_id=scryfall&data%5Bsearch%5D=Propaganda+%2F%2F+Propaganda&ref=card-profile&utm_campaign=affiliate&utm_medium=card&utm_source=scryfall"
+  }
+}
