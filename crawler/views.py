@@ -123,6 +123,26 @@ def log_index(request):
     )
 
 
+def log_errors(request):
+    logs = (
+        LogEntry.objects
+        .filter(is_stderr=True)
+        .order_by('created')
+    )
+
+    paginator = Paginator(logs, 10, orphans=3)
+    page_number = request.GET.get('page')
+    logs_page = paginator.get_page(page_number)
+
+    return render(
+        request,
+        'crawler/log_errors.html',
+        {
+            'logs': logs_page,
+        },
+    )
+
+
 def log_one(request, logstart_id):
     log_start = get_object_or_404(LogStart, pk=logstart_id)
     logs = (

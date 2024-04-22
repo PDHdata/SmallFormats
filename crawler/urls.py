@@ -6,6 +6,7 @@ app_name = 'crawler'
 urlpatterns = [
     path('', views.crawler_index, name="index"),
     path('logs/', views.log_index, name="log-index"),
+    path('logs/errors', views.log_errors, name="log-errors"),
     path('logs/<int:logstart_id>', views.log_one, name="log-one"),
     path('runs/', views.run_index, name="run-index"),
     path('runs/<int:run_id>/', views.run_detail, name="run-detail"),
