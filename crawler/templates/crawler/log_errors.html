@@ -15,7 +15,10 @@
     <tr>
       <td><a href="{% url 'crawler:log-one-errors' log.parent.id %}">{{ log.parent.id }}</a></td>
       <td>{{ log.created }}</td>
-      <td class="text-danger">{{ log.text|truncatechars:100 }}</td>
+      <td>
+        <div class="text-danger">{{ log.text|truncatechars:100 }}</div>
+        <div class="text-secondary"><small>from <q>{{ log.parent.text|truncatechars:100 }}</q></small></div>
+      </td>
     </tr>
     {% empty %}
     <tr><td colspan="2">No error logs found.</td></tr>
