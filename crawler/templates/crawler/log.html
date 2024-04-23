@@ -6,9 +6,13 @@
     <ol class="breadcrumb">
       <li class="breadcrumb-item"><a href="{% url 'crawler:index' %}">Crawler admin</a></li>
       <li class="breadcrumb-item"><a href="{% url 'crawler:log-index' %}">Logs</a></li>
-      <li class="breadcrumb-item active" aria-current="page">#{{ log_start.id }}</li>
+      <li class="breadcrumb-item active" aria-current="page">#{{ log_start.id }}{% if limited_to_errors %} errors{% endif %}</li>
     </ol>
   </nav>
+  <div class="mb-3">
+    {% if limited_to_errors %}<a href="{% url 'crawler:log-one' log_start.id %}" class="btn btn-primary">Show all logs</a>{% endif %}
+    {% if not limited_to_errors %}<a href="{% url 'crawler:log-one-errors' log_start.id %}" class="btn btn-primary">Limit to errors</a>{% endif %}
+  </div>
   <table class="table">
     <tr><th>Timestamp</th><th>Line</th></tr>
     {% for log in logs %}

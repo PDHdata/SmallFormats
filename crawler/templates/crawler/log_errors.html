@@ -13,7 +13,7 @@
     <tr><th>Log</th><th>Timestamp</th><th>Line</th></tr>
     {% for log in logs %}
     <tr>
-      <td><a href="{% url 'crawler:log-one' log.parent.id %}">{{ log.parent.id }}</a></td>
+      <td><a href="{% url 'crawler:log-one-errors' log.parent.id %}">{{ log.parent.id }}</a></td>
       <td>{{ log.created }}</td>
       <td class="text-danger">{{ log.text|truncatechars:100 }}</td>
     </tr>
