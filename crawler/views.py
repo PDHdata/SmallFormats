@@ -123,13 +123,40 @@ def log_index(request):
     )
 
 
-def log_one(request, logstart_id):
+def log_errors(request):
+    logs = (
+        LogEntry.objects
+        .filter(is_stderr=True)
+        .order_by('created')
+    )
+
+    paginator = Paginator(logs, 10, orphans=3)
+    page_number = request.GET.get('page')
+    logs_page = paginator.get_page(page_number)
+
+    return render(
+        request,
+        'crawler/log_errors.html',
+        {
+            'logs': logs_page,
+        },
+    )
+
+
+def log_one_error(request, logstart_id):
+    return log_one(request, logstart_id, limit_to_errors=True)
+
+
+def log_one(request, logstart_id, limit_to_errors=False):
     log_start = get_object_or_404(LogStart, pk=logstart_id)
     logs = (
         LogEntry.objects
         .filter(parent=log_start)
         .order_by('created')
     )
+    if limit_to_errors:
+        logs = logs.filter(is_stderr=True)
+
     paginator = Paginator(logs, 40, orphans=3)
     page_number = request.GET.get('page')
     logs_page = paginator.get_page(page_number)
@@ -140,5 +167,6 @@ def log_one(request, logstart_id):
         {
             'log_start': log_start,
             'logs': logs_page,
+            'limited_to_errors': limit_to_errors,
         },
     )
