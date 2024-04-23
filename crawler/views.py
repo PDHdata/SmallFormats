@@ -127,7 +127,7 @@ def log_errors(request):
     logs = (
         LogEntry.objects
         .filter(is_stderr=True)
-        .order_by('created')
+        .order_by('-created')
     )
 
     paginator = Paginator(logs, 10, orphans=3)
