@@ -1,6 +1,6 @@
 from django.db import transaction
 import httpx
-from decklist.models import DataSource, Printing, CardInDeck
+from decklist.models import DataSource, Printing, Card, CardInDeck
 from crawler.models import DeckCrawlResult
 from ._command_base import LoggingBaseCommand
 import time
@@ -30,6 +30,20 @@ def lookup_card(name, set_code):
     )
     if p:
         return p.card
+
+    # HACK:
+    # cards with set_code `j21` often don't resolve
+    # so we relax the restriction and try again
+    if set_code == 'j21':
+        c = (
+            Card.objects
+            .filter(name__iexact=name)
+            .first()
+        )
+        if c:
+            return c
+    # /HACK
+
     raise CardNotFound(f'"{name}" ({set_code})')
 
 
