@@ -34,7 +34,9 @@ def lookup_card(name, set_code):
     # HACK:
     # cards with set_code `j21` often don't resolve
     # so we relax the restriction and try again
-    if set_code == 'j21':
+    # likewise, the `rex` lands don't resolve, so also
+    # relax and try again.
+    if set_code in ('j21', 'rex'):
         c = (
             Card.objects
             .filter(name__iexact=name)
