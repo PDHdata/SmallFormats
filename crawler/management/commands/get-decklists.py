@@ -124,7 +124,7 @@ class Command(LoggingBaseCommand):
         new_cards = []
 
         for card_json in cards:
-            card_categories = set(card_json['categories'])
+            card_categories = set(card_json['categories'] or [])
             # if card is in a non-included category, skip it
             if not card_categories.isdisjoint(skip_categories):
                 continue
