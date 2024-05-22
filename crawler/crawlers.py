@@ -149,7 +149,7 @@ class ArchidektCrawler(_BaseCrawler):
         # Archidekt seems to send "count = -1" under some conditions
         if count <= 0:
             self._keep_going = False
-            raise CrawlerExit(f"client got: {response.text}", response)
+            raise CrawlerExit(f"Archidekt client got: {response.text}", response)
 
         if next:
             # Archidekt "next" comes back as http:// so fix that up
@@ -201,7 +201,7 @@ class MoxfieldCrawler(_BaseCrawler):
 
         if count <= 0:
             self._keep_going = False
-            raise CrawlerExit(f"client got: {response.text}", response)
+            raise CrawlerExit(f"Moxfield client got: {response.text}", response)
 
         oldest_seen = self._process_page(envelope['data'], self.stop_after)
         if self.stop_after and oldest_seen < self.stop_after:
