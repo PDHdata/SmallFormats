@@ -7,6 +7,7 @@ app = "pdhdata"
 primary_region = "iad"
 kill_signal = "SIGINT"
 kill_timeout = "5s"
+console_command = "poetry run python _manage.py shell"
 
 [experimental]
   auto_rollback = true
