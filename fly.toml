@@ -23,29 +23,26 @@ console_command = "poetry run python _manage.py shell"
   app = "poetry run daphne -b 0.0.0.0 -p 8080 smallformats.asgi:application"
   cron = "supercronic /app/scheduled/crontab"
 
-[[services]]
-  protocol = "tcp"
+[http_service]
   internal_port = 8080
   processes = ["app"]
 
-  [[services.ports]]
-    port = 80
-    handlers = ["http"]
-    force_https = true
-
-  [[services.ports]]
-    port = 443
-    handlers = ["tls", "http"]
-  [services.concurrency]
-    type = "connections"
+  [http_service.concurrency]
+    type = "requests"
     hard_limit = 25
     soft_limit = 20
 
-  [[services.tcp_checks]]
-    interval = "15s"
-    timeout = "2s"
-    grace_period = "1s"
-    restart_limit = 0
+  [http_service.http_options]
+    idle_timeout = 600
+
+# health checks come with an incorrect HTTP_HOST header
+# (an IPv4 address), probably due to something with https/http.
+#
+# [[http_service.checks]]
+#   interval = "30s"
+#   timeout = "2s"
+#   grace_period = "5s"
+#   restart_limit = 0
 
 [[statics]]
   guest_path = "/fake"
