@@ -16,7 +16,7 @@ _Unlike_ many Django projects, this one doesn't use SQLite locally.
 We depend on several Postgres-specific features (materialized views, JSON field features, etc.).
 While we **love** SQLite, it was becoming burdensome to support dev-only hacks mirroring Postgres features.
 So as of now, we only support [Postgres](https://postgresql.org).
-At time of writing (2023-02-26), we're using Postgres 14 in production.
+At time of writing (2024-11-26), we're using Postgres 15 in production.
 
 For local dev work on my Mac, I've found [Postgres.app](https://postgresapp.com/) to work well.
 You can either create a database called `pdhdev` or pass a `DATABASE_URL` with appropriate details every time you call `./manage`.
@@ -56,14 +56,15 @@ Portions of the materials used are property of Wizards of the Coast.
 You should not have paid anything to anyone for its use.
 You may not use Scryfall data to create new games, or to imply the information and images are from any other game besides Magic: The Gathering.
 
-[Archidekt][archidekt] has not endorsed this app or its creators.
+[Archidekt][archidekt] and [Moxfield][moxfield] have not endorsed this app or its creators.
 
 Thanks to Davis Haupt for the [fly.io deployment article][djangoonfly] which informed the layout of this project.
 
 [archidekt]: https://www.archidekt.com/
+[moxfield]: https://www.moxfield.com/
 [djangoonfly]: https://davi.sh/blog/2022/10/django-with-flyio/
 [edhrec]: https://www.edhrec.com/
-[pdhdata]: https://COMING-SOON.example.com/
+[pdhdata]: https://pdhdata.com/
 [pdhhomebase]: https://www.pdhhomebase.com/
 [scryfall]: https://www.scryfall.com/
 [wotc]: https://magic.wizards.com/
