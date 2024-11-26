@@ -11,6 +11,8 @@ SCRYFALL_API_BASE = "https://api.scryfall.com/"
 
 HEADERS = {
     'User-agent': f'SmallFormats/{__version__}',
+    # Scryfall requires an Accept header
+    'Accept': 'application/json;q=0.9,*/*;q=0.8',
 }
 
 
