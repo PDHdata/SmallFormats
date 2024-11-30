@@ -13,6 +13,7 @@ from ._command_base import LoggingBaseCommand
 
 class CrawlCommand(LoggingBaseCommand):
     help = f'Ask source for PDH decklists'
+    HEADERS = HEADERS
 
     def handle(self, *args, **options):
         super().handle(*args, **options)
@@ -60,7 +61,7 @@ class CrawlCommand(LoggingBaseCommand):
 
     def _create_client(self):
         return httpx.Client(
-            headers=HEADERS,
+            headers=self.HEADERS,
             base_url=self.API_BASE,
             event_hooks={
                 'request': [self._request_log],
