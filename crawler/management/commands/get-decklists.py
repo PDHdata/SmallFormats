@@ -1,3 +1,5 @@
+import os
+
 from django.db import transaction
 import httpx
 from decklist.models import DataSource, Printing, Card, CardInDeck
@@ -6,6 +8,17 @@ from ._command_base import LoggingBaseCommand
 import time
 from itertools import chain
 from crawler.crawlers import HEADERS
+
+MOXFIELD_API_KEY = os.environ.get('SMALLFORMATS_MOXFIELD_USERAGENT')
+if not MOXFIELD_API_KEY:
+    # TODO: make this a real warning
+    print("Moxfield API key missing; will not fetch decklists from Moxfield")
+    MOXFIELD_HEADERS = None
+else:
+    MOXFIELD_HEADERS = HEADERS.copy()
+    MOXFIELD_HEADERS.update({
+        'User-agent': MOXFIELD_API_KEY,
+    })
 
 
 def get_known_printings(cards, get_printing_id):
@@ -69,7 +82,13 @@ class Command(LoggingBaseCommand):
 
         with httpx.Client(headers=HEADERS) as client:
             for updatable_deck in updatable_decks:
-                response = client.get(updatable_deck.url)
+                if 'moxfield.com' in updatable_deck.url:
+                    if not MOXFIELD_HEADERS:
+                        self._log(f"Skipping {updatable_deck.url} due to missing Moxfield API key")
+                        continue
+                    response = client.get(updatable_deck.url, headers=MOXFIELD_HEADERS)
+                else:
+                    response = client.get(updatable_deck.url)
                 if 200 <= response.status_code < 300:
                     deck_name = updatable_deck.deck.name
                     new_deck = True if updatable_deck.deck.card_list.count() == 0 else False
