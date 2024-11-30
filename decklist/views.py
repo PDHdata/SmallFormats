@@ -300,7 +300,7 @@ def cards_by_color(request, w=False, u=False, b=False, r=False, g=False):
 
 def theme_index(request, limit_to=None):
     themes = Theme.objects.order_by('display_name')
-    if limit_to in (Theme.Type.TRIBE, Theme.Type.KEYWORD):
+    if limit_to in (Theme.Type.TYPAL, Theme.Type.KEYWORD):
         themes = themes.filter(filter_type=limit_to)
     else:
         limit_to = None
@@ -330,7 +330,7 @@ def single_theme(request, theme_slug):
         context={
             'theme': theme.display_name,
             'kind': theme.get_filter_type_display(),
-            'word_themed': 'tribal' if theme.filter_type == Theme.Type.TRIBE else 'themed',
+            'word_themed': 'typal' if theme.filter_type == Theme.Type.TYPAL else 'themed',
             'card_threshold': theme.card_threshold,
             'deck_threshold': theme.deck_threshold,
             'results': results,

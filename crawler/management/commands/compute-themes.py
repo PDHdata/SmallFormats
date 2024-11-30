@@ -52,7 +52,7 @@ class Command(LoggingBaseCommand):
 
     def _get_decks_for_theme(self, theme):
         match theme.filter_type:
-            case Theme.Type.TRIBE:
+            case Theme.Type.TYPAL:
                 return (
                         Deck.objects
                         .filter(pdh_legal=True)

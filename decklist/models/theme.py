@@ -4,7 +4,7 @@ from django.db import models
 
 class Theme(models.Model):
     class Type(models.TextChoices):
-        TRIBE = 'T', "tribal"
+        TYPAL = 'T', "typal"
         KEYWORD = 'K', "keyword"
     
     display_name = models.CharField(
