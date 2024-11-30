@@ -42,6 +42,10 @@ The `crawl` step will fetch each deck, and then the `populate` step will fetch t
 ./manage populate-archidekt --crawl-id $ID_FROM_PREVIOUS_STEP
 ```
 
+To fetch from Moxfield, you'll need to ask them nicely.
+If approved, they'll set you up with an API key in the form of a specific user-agent.
+Put your API key into the `SMALLFORMATS_MOXFIELD_USERAGENT` variable, otherwise you'll get a 403.
+
 ### Deploying to production
 That part is up to you!
 
