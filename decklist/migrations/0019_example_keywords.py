@@ -6,7 +6,7 @@ from django.db import migrations
 def add_sample_themes(apps, schema_editor):
     Theme = apps.get_model('decklist', 'Theme')
     # note 1: filter_type='K' corresponds to Theme.Type.KEYWORD.
-    # note 2: like tribal, thresholds have been tuned based on eyeballing 2023-01-02
+    # note 2: like typal, thresholds have been tuned based on eyeballing 2023-01-02
     # data. They'll need tweaking over time.
     Theme.objects.bulk_create(
         [

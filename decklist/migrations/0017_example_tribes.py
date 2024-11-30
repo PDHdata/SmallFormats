@@ -5,7 +5,7 @@ from django.db import migrations
 
 def add_sample_themes(apps, schema_editor):
     Theme = apps.get_model('decklist', 'Theme')
-    # note 1: filter_type='T' corresponds to Theme.Type.TRIBE.
+    # note 1: filter_type='T' corresponds to Theme.Type.TYPAL.
     # note 2: the thresholds have been tuned based on eyeballing 2023-01-02 data,
     # and should not be taken as gospel truth.
     Theme.objects.bulk_create(

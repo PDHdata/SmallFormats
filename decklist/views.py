@@ -1,10 +1,9 @@
 from django.shortcuts import render, get_object_or_404
-from django.http import HttpResponseNotAllowed, Http404, HttpResponsePermanentRedirect
+from django.http import HttpResponseNotAllowed, Http404
 from django.urls import reverse
 from django.core.paginator import Paginator
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_POST
-from django.views.decorators.cache import cache_page
 from django.utils import timezone
 from django.conf import settings
 from decklist.models import Card, TopCardView, TopLandCardView, TopNonLandCardView, Deck, Printing, CardInDeck, SiteStat, Commander, Theme, ThemeResult, SynergyScore
@@ -300,7 +299,7 @@ def cards_by_color(request, w=False, u=False, b=False, r=False, g=False):
 
 def theme_index(request, limit_to=None):
     themes = Theme.objects.order_by('display_name')
-    if limit_to in (Theme.Type.TRIBE, Theme.Type.KEYWORD):
+    if limit_to in (Theme.Type.TYPAL, Theme.Type.KEYWORD):
         themes = themes.filter(filter_type=limit_to)
     else:
         limit_to = None
@@ -316,9 +315,6 @@ def theme_index(request, limit_to=None):
     )
 
 
-def single_theme_redirect(request, theme_slug):
-    return HttpResponsePermanentRedirect(reverse('theme-single', kwargs={'theme_slug': theme_slug}))
-
 def single_theme(request, theme_slug):
     theme = get_object_or_404(Theme, slug=theme_slug)
 
@@ -330,7 +326,7 @@ def single_theme(request, theme_slug):
         context={
             'theme': theme.display_name,
             'kind': theme.get_filter_type_display(),
-            'word_themed': 'tribal' if theme.filter_type == Theme.Type.TRIBE else 'themed',
+            'word_themed': 'typal' if theme.filter_type == Theme.Type.TYPAL else 'themed',
             'card_threshold': theme.card_threshold,
             'deck_threshold': theme.deck_threshold,
             'results': results,
