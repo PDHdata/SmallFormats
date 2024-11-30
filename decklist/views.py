@@ -1,10 +1,9 @@
 from django.shortcuts import render, get_object_or_404
-from django.http import HttpResponseNotAllowed, Http404, HttpResponsePermanentRedirect
+from django.http import HttpResponseNotAllowed, Http404
 from django.urls import reverse
 from django.core.paginator import Paginator
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_POST
-from django.views.decorators.cache import cache_page
 from django.utils import timezone
 from django.conf import settings
 from decklist.models import Card, TopCardView, TopLandCardView, TopNonLandCardView, Deck, Printing, CardInDeck, SiteStat, Commander, Theme, ThemeResult, SynergyScore
@@ -315,9 +314,6 @@ def theme_index(request, limit_to=None):
         }
     )
 
-
-def single_theme_redirect(request, theme_slug):
-    return HttpResponsePermanentRedirect(reverse('theme-single', kwargs={'theme_slug': theme_slug}))
 
 def single_theme(request, theme_slug):
     theme = get_object_or_404(Theme, slug=theme_slug)

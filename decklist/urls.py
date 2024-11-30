@@ -41,10 +41,6 @@ urlpatterns = (
     path('card/<uuid:card_id>/pairs', views.single_card_pairings, name="card-single-pairings"),
     path('card/<uuid:card_id>/setimage', views.set_editorial_image, name="card-setimage"),
     path('land/top/', views.top_lands, name="land-top"),
-    # legacy redirects
-    path('theme/tribe/<slug:theme_slug>/', views.single_theme_redirect),
-    path('theme/keyword/<slug:theme_slug>/', views.single_theme_redirect),
-    # end legacy routes
 ] +
 [
     path(
