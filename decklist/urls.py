@@ -7,8 +7,11 @@ from .wubrg_utils import COLORS
 urlpatterns = (
 [
     path('', views.stats_index, name="index"),
+    path('robots.txt', views.robots_txt, name="robots-txt"),
     path('about/', views.stats_index, {'page': 'stats/about.html'}, name="about"),
     path('privacy/', views.stats_index, {'page': 'stats/privacy.html'}, name="privacy"),
+    path('versions/', views.versions, name="versions"),
+    path('headers/', views.echo_headers, name="headers"),
     path('cmdr/', views.commander_index, name="cmdr"),
     path('land/', views.land_index, name="land"),
     path('card/', views.card_index, name="card"),

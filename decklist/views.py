@@ -1,9 +1,12 @@
+from sys import version_info as py_version
+
 from django.shortcuts import render, get_object_or_404
 from django.http import HttpResponseNotAllowed, Http404
 from django.urls import reverse
 from django.core.paginator import Paginator
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_POST
+from django import VERSION as django_version
 from django.utils import timezone
 from django.conf import settings
 from decklist.models import Card, TopCardView, TopLandCardView, TopNonLandCardView, Deck, Printing, CardInDeck, SiteStat, Commander, Theme, ThemeResult, SynergyScore
@@ -11,6 +14,7 @@ from .wubrg_utils import COLORS, filter_to_name, name_to_symbol
 from .synergy import compute_synergy
 from django_htmx.http import trigger_client_event, HttpResponseClientRefresh
 import functools
+from psycopg import __version__ as psycopg_version
 
 
 FRONT_PAGE_TOP_COMMANDERS_TO_ROTATE = 25
@@ -45,6 +49,10 @@ def _get_face_card(index):
         "https://cards.scryfall.io/normal/front/b/f/bf5dafb0-4fb1-470d-85ce-88f3ae32340b.jpg?1568580226",
         "https://scryfall.com/search?q=%21%22Command+Tower%22",
     )
+
+
+def robots_txt(request):
+    return render(request, 'robots.txt', content_type='text/plain')
 
 
 def stats_index(request, page="stats/index.html"):
@@ -622,4 +630,35 @@ def search(request):
             'results': results_page,
             'query': query,
         }
+    )
+
+
+def _version_string(version: list[str | int]):
+    return ".".join([str(x) for x in version])
+
+def versions(request):
+    packages = {
+        'python': _version_string(py_version[0:3]),
+        'django': _version_string(django_version[0:3]),
+        'psycopg': psycopg_version,
+    }
+
+    return render(
+        request,
+        'versions.json',
+        {
+            'packages': packages,
+        },
+        content_type='application/json',
+    )
+
+
+def echo_headers(request):
+    return render(
+        request,
+        'headers.json',
+        {
+            'request': request.META,
+        },
+        content_type='application/json',
     )
