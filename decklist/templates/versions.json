@@ -1,0 +1,4 @@
+{
+  {% for name, version in packages.items %}"{{ name|escapejs }}": "{{ version|escapejs }}"{% if not forloop.last %},
+  {% endif %}{% endfor %}
+}
