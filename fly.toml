@@ -26,10 +26,10 @@ console_command = "poetry run python _manage.py shell"
 [http_service]
   internal_port = 8080
   processes = ["app"]
+  force_https = true
 
   [http_service.concurrency]
     type = "requests"
-    hard_limit = 25
     soft_limit = 20
 
   [http_service.http_options]
