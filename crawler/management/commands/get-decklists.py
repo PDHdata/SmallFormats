@@ -1,5 +1,4 @@
-import os
-
+from django.conf import settings
 from django.db import transaction
 import httpx
 from decklist.models import DataSource, Printing, Card, CardInDeck
@@ -9,16 +8,15 @@ import time
 from itertools import chain
 from crawler.crawlers import HEADERS
 
-MOXFIELD_API_KEY = os.environ.get('SMALLFORMATS_MOXFIELD_USERAGENT')
-if not MOXFIELD_API_KEY:
+if settings.MOXFIELD_API_KEY:
+    MOXFIELD_HEADERS = HEADERS.copy()
+    MOXFIELD_HEADERS.update({
+        'User-agent': settings.MOXFIELD_API_KEY,
+    })
+else:
     # TODO: make this a real warning
     print("Moxfield API key missing; will not fetch decklists from Moxfield")
     MOXFIELD_HEADERS = None
-else:
-    MOXFIELD_HEADERS = HEADERS.copy()
-    MOXFIELD_HEADERS.update({
-        'User-agent': MOXFIELD_API_KEY,
-    })
 
 
 def get_known_printings(cards, get_printing_id):
