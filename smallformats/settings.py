@@ -28,12 +28,19 @@ DEBUG = SECRET_KEY.startswith('django-insecure-')
 
 SMALLFORMATS_NAME = os.getenv("SMALLFORMATS_NAME", "Nameless Knockoff")
 
-# on fly.io, allow any host because we don't know where health
-# checks will come from
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = [
+    '.localhost',
+    '127.0.0.1',
+    '[::1]',
+    'pdhdata.fly.dev',
+    'pdhdata.com',
+    'www.pdhdata.com',
+]
 
 CSRF_TRUSTED_ORIGINS = [
+    'http://*.localhost',
     'http://127.0.0.1',
+    'http://[::1]',
     'https://pdhdata.fly.dev',
     'https://pdhdata.com',
     'https://www.pdhdata.com',
