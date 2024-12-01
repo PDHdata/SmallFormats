@@ -51,6 +51,10 @@ def _get_face_card(index):
     )
 
 
+def robots_txt(request):
+    return render(request, 'robots.txt', content_type='text/plain')
+
+
 def stats_index(request, page="stats/index.html"):
     date_ord = timezone.now().toordinal()
     name, image_uri, link = _get_face_card(date_ord % FRONT_PAGE_TOP_COMMANDERS_TO_ROTATE)
