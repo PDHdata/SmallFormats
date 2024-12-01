@@ -20,7 +20,7 @@ console_command = "poetry run python _manage.py shell"
   SMALLFORMATS_NAME = "PDHdata"
 
 [processes]
-  app = "poetry run daphne -b 0.0.0.0 -p 8080 smallformats.asgi:application"
+  app = "poetry run daphne -b 0.0.0.0 -p 8080 --proxy-headers --proxy-headers-host Fly-Client-IP smallformats.asgi:application"
   cron = "supercronic /app/scheduled/crontab"
 
 [http_service]
