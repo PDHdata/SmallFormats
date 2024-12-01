@@ -28,6 +28,9 @@ DEBUG = SECRET_KEY.startswith('django-insecure-')
 
 SMALLFORMATS_NAME = os.getenv("SMALLFORMATS_NAME", "Nameless Knockoff")
 
+# SECURITY WARNING: don't leak this
+MOXFIELD_API_KEY = os.environ.get('SMALLFORMATS_MOXFIELD_USERAGENT')
+
 ALLOWED_HOSTS = [
     '.localhost',
     '127.0.0.1',
