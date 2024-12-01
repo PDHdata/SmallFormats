@@ -647,3 +647,14 @@ def versions(request):
         },
         content_type='application/json',
     )
+
+
+def echo_headers(request):
+    return render(
+        request,
+        'headers.json',
+        {
+            'request': request.META,
+        },
+        content_type='application/json',
+    )

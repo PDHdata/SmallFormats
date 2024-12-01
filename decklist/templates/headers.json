@@ -1,0 +1,6 @@
+{
+  "request": {
+  {% for name, value in request.items %}  "{{ name|escapejs }}": "{% if 'COOKIE' in name %}**REDACTED**{% else %}{{ value|escapejs }}{% endif %}"{% if not forloop.last %},
+  {% endif %}{% endfor %}
+  }
+}
