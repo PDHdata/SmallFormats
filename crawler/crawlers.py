@@ -127,12 +127,11 @@ class _BaseCrawler:
 
 class ArchidektCrawler(_BaseCrawler):
     API_BASE = ARCHIDEKT_API_BASE
-    INITIAL_PAGE_ROUTE = "decks/cards/"
+    INITIAL_PAGE_ROUTE = "decks/v3/"
     INITIAL_PAGE_PARAMS = {
-        'formats': 17,
+        'deckFormat': 17,
         'orderBy': '-updatedAt',
         'size': 100,
-        'pageSize': 48,
     }
     SOURCE_LINK = 'https://archidekt.com/decks/{0}'
     DECK_FETCH_LINK = ARCHIDEKT_API_BASE + "decks/{0}/"
