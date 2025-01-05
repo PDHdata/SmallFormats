@@ -45,14 +45,15 @@ class CrawlCommand(LoggingBaseCommand):
         except CrawlerExit as e:
             # TODO: check for 429. that's not fatal, it means we need
             # to slow down.
-            run.state = CrawlRun.State.ERROR
-            run.note = (
+            err_text = (
                 format_response_error(e.respose) if e.response
                 else str(e)
             )
+            run.state = CrawlRun.State.ERROR
+            run.note = err_text
             run.save()
-            self._err(f"{e}")
-            raise CommandError(str(e))
+            self._err(err_text)
+            raise CommandError(err_text)
         
         # if we got here without exiting, we're done
         self._log("Done!")
