@@ -16,3 +16,5 @@ class Command(LoggingBaseCommand):
 
         s = SiteStat(legal_decks=legal_decks)
         s.save()
+
+        self._log(f"updated site stats; {str(s)}")
