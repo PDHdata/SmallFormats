@@ -1,4 +1,4 @@
-# at 5am, run daily stuff
-0 5 * * * bash /app/scheduled/daily.sh
-# on Saturday at 5:30am, run weekly stuff
-30 5 * * 6 bash /app/scheduled/weekly.sh
+# at 3am, run daily stuff
+0 3 * * * bash /app/scheduled/daily.sh
+# on Saturday at 6am, run weekly stuff
+0 6 * * 6 bash /app/scheduled/weekly.sh
