@@ -18,6 +18,7 @@ console_command = "poetry run python _manage.py shell"
 [env]
   DJANGO_SETTINGS_MODULE = "smallformats.settings"
   SMALLFORMATS_NAME = "PDHdata"
+  FLY_API_HOSTNAME = "http://_api.internal:4280"
 
 [processes]
   app = "poetry run daphne -b 0.0.0.0 -p 8080 --proxy-headers --proxy-headers-host Fly-Client-IP smallformats.asgi:application"

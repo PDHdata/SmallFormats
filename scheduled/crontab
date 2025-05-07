@@ -1,3 +1,5 @@
+# 55 minutes past the hour (5 min before the hour, really), kick the app machine
+55 * * * * bash /app/scheduled/hourly.sh
 # at 3am, run daily stuff
 0 3 * * * bash /app/scheduled/daily.sh
 # on Saturday at 6am, run weekly stuff
