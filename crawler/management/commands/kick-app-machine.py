@@ -40,9 +40,14 @@ class Command(BaseCommand):
 
         with httpx.Client(headers=headers) as client:
             self.stdout.write('locating machine')
-            response = client.get(f"{BASE_URL}{BASE_API}/machines?metadata.fly_process_group=app")
+            response = client.get(
+                f"{BASE_URL}{BASE_API}/machines?metadata.fly_process_group=app",
+            )
             if not (200 <= response.status_code < 300):
-                raise CommandError(f'failed to locate machine; got {response.status_code} {response.reason_phrase}')
+                raise CommandError(
+                    'failed to locate machine; '
+                    f'got {response.status_code} {response.reason_phrase}'
+                )
 
             # ensure there's only one machine
             self.stdout.write('ensuring only one machine exists')
@@ -62,16 +67,26 @@ class Command(BaseCommand):
             if options['stop']:
                 time.sleep(RATE_LIMIT_DELAY)
                 self.stdout.write('stopping the machine')
-                response = client.post(f"{BASE_URL}{BASE_API}/machines/{machine_id}/stop", timeout=60.0)
+                response = client.post(
+                    f"{BASE_URL}{BASE_API}/machines/{machine_id}/stop",
+                    timeout=60.0,
+                )
                 if not (200 <= response.status_code < 300):
-                    raise CommandError(f'failed to stop machine; got {response.status_code} {response.reason_phrase}')
+                    raise CommandError(
+                        'failed to stop machine; '
+                        f'got {response.status_code} {response.reason_phrase}'
+                    )
 
                 # await its instance id to move to "stopped"
                 time.sleep(RATE_LIMIT_DELAY)
                 self.stdout.write('waiting for stop')
-                response = client.get(f"{BASE_URL}{BASE_API}/machines/{machine_id}/wait?state=stopped&instance_id={machine_instance_id}")
+                response = client.get(
+                    f"{BASE_URL}{BASE_API}/machines/{machine_id}/wait?state=stopped&instance_id={machine_instance_id}",
+                )
                 if not (200 <= response.status_code < 300):
-                    raise CommandError(f'failed to await machine stoppage; got {response.status_code} {response.reason_phrase}')
+                    raise CommandError(
+                        'failed to await machine stoppage; '
+                        f'got {response.status_code} {response.reason_phrase}')
             else:
                 self.stdout.write('skipping machine stop')
 
@@ -80,6 +95,9 @@ class Command(BaseCommand):
                 self.stdout.write('starting the machine')
                 response = client.post(f"{BASE_URL}{BASE_API}/machines/{machine_id}/start")
                 if not (200 <= response.status_code < 300):
-                    raise CommandError(f'failed to start machine; got {response.status_code} {response.reason_phrase}')
+                    raise CommandError(
+                        'failed to start machine; '
+                        f'got {response.status_code} {response.reason_phrase}'
+                    )
             else:
                 self.stdout.write('skipping machine start')
