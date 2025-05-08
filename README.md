@@ -49,6 +49,13 @@ Put your API key into the `SMALLFORMATS_MOXFIELD_USERAGENT` variable, otherwise 
 ### Deploying to production
 That part is up to you!
 
+An incomplete list of steps required:
+- Get a fly.io account
+- Run Postgres in that fly.io account
+- Deploy the app
+- Set the `DATABASE_URL` and `SMALLFORMATS_MOXFIELD_USERAGENT` secrets
+- Set the `FLY_API_HOST` and `FLY_API_TOKEN` secrets
+
 ## Disclaimers & disclosures
 
 SmallFormats is unofficial Fan Content permitted under WOTC's Fan Content Policy.
