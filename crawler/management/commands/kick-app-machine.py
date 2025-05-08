@@ -69,7 +69,6 @@ class Command(BaseCommand):
                 self.stdout.write('stopping the machine')
                 response = client.post(
                     f"{BASE_URL}{BASE_API}/machines/{machine_id}/stop",
-                    timeout=60.0,
                 )
                 if not (200 <= response.status_code < 300):
                     raise CommandError(
@@ -82,6 +81,7 @@ class Command(BaseCommand):
                 self.stdout.write('waiting for stop')
                 response = client.get(
                     f"{BASE_URL}{BASE_API}/machines/{machine_id}/wait?state=stopped&instance_id={machine_instance_id}",
+                    timeout=60.0,
                 )
                 if not (200 <= response.status_code < 300):
                     raise CommandError(
