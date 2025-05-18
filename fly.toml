@@ -21,7 +21,9 @@ console_command = "poetry run python _manage.py shell"
   FLY_API_HOSTNAME = "http://_api.internal:4280"
 
 [processes]
-  app = "poetry run daphne -b 0.0.0.0 -p 8080 --proxy-headers --proxy-headers-host Fly-Client-IP smallformats.asgi:application"
+  # Daphne was able to use "--proxy-headers-host Fly-Client-IP" to directly read Fly-Client-IP
+  # but under uvicorn, it looks like we have to rely on just --proxy-headers
+  app = "poetry run uvicorn --host 0.0.0.0 --port 8080 --workers 2 --proxy-headers smallformats.asgi:application"
   cron = "supercronic /app/scheduled/crontab"
 
 [[services]]
