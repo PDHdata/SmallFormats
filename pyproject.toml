@@ -19,6 +19,8 @@ django-cache-url = "^3.4.5"
 whitenoise = "^6.8.2"
 psycopg = {extras = ["binary"], version = "^3.2.3"}
 uvicorn = {extras = ["standard"], version = "^0.34.2"}
+uvicorn-worker = "^0.3.0"
+gunicorn = "^23.0.0"
 
 
 [build-system]
