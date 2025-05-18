@@ -21,7 +21,7 @@ console_command = "poetry run python _manage.py shell"
   FLY_API_HOSTNAME = "http://_api.internal:4280"
 
 [processes]
-  app = "poetry run daphne -b 0.0.0.0 -p 8080 --proxy-headers --proxy-headers-host Fly-Client-IP smallformats.asgi:application"
+  app = "poetry run gunicorn --bind=0.0.0.0:8080 --workers=2 --worker-class=uvicorn_worker.UvicornWorker smallformats.asgi:application"
   cron = "supercronic /app/scheduled/crontab"
 
 [[services]]
