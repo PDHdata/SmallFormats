@@ -50,5 +50,5 @@ console_command = "poetry run python _manage.py shell"
     restart_limit = 0
 
 [[statics]]
-  guest_path = "/fake"
-  url_prefix = "/fake"
+  guest_path = "/app/static"
+  url_prefix = "/static"

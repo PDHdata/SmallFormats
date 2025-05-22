@@ -926,22 +926,7 @@ files = [
     {file = "websockets-15.0.1.tar.gz", hash = "sha256:82544de02076bafba038ce055ee6412d68da13ab47f0c60cab827346de828dee"},
 ]
 
-[[package]]
-name = "whitenoise"
-version = "6.8.2"
-description = "Radically simplified static file serving for WSGI applications"
-optional = false
-python-versions = ">=3.9"
-groups = ["main"]
-files = [
-    {file = "whitenoise-6.8.2-py3-none-any.whl", hash = "sha256:df12dce147a043d1956d81d288c6f0044147c6d2ab9726e5772ac50fb45d2280"},
-    {file = "whitenoise-6.8.2.tar.gz", hash = "sha256:486bd7267a375fa9650b136daaec156ac572971acc8bf99add90817a530dd1d4"},
-]
-
-[package.extras]
-brotli = ["brotli"]
-
 [metadata]
 lock-version = "2.1"
 python-versions = "^3.13"
-content-hash = "87f4674f4ed7d8240aadfda522566ea6dd62e554afaea8fd2133cac576dbbe47"
+content-hash = "d1e30fe2c1e80cdcbc1f68872688d721cca2fd0caa010e8f6bd656cfe962c4d0"
