@@ -16,7 +16,7 @@ class SynergyQuerySet(models.QuerySet):
         return self.annotate(rank=Window(
             expression=Rank(),
             order_by=F('score').desc(nulls_last=True),
-        ))
+        )).order_by('rank')
 
 
 class SynergyScore(models.Model):

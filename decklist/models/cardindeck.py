@@ -24,6 +24,7 @@ class CardInDeckQuerySet(models.QuerySet):
                 expression=Rank(),
                 order_by=F('count').desc(),
             ))
+            .order_by('rank')
         )
 
 

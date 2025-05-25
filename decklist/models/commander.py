@@ -122,6 +122,7 @@ class CommanderQuerySet(models.QuerySet):
                 expression=Rank(),
                 order_by=F('num_decks').desc(),
             ))
+            .order_by('rank')
         )
 
     def partner_pairs(self):
@@ -146,6 +147,7 @@ class CommanderQuerySet(models.QuerySet):
                 expression=Rank(),
                 order_by=F('num_decks').desc(),
             ))
+            .order_by('rank')
         )
     
     def background_pairs(self):
@@ -161,6 +163,7 @@ class CommanderQuerySet(models.QuerySet):
                 expression=Rank(),
                 order_by=F('num_decks').desc(),
             ))
+            .order_by('rank')
         )
 
 
