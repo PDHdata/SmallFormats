@@ -12,12 +12,10 @@ class Command(LoggingBaseCommand):
 
         self._log("Computing top cards")
 
-        with (
-            transaction.atomic(),
-            connection.cursor() as cursor,
-        ):
+        with connection.cursor() as cursor:
             for model in (TopCardView, TopLandCardView, TopNonLandCardView):
                 self._log(f"Refreshing {model._meta.db_table}")
                 cursor.execute(f"REFRESH MATERIALIZED VIEW CONCURRENTLY {model._meta.db_table};")
+                self._log(f"Done with {model._meta.db_table}")
 
         self._log("Done!")
