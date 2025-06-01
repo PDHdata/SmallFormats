@@ -22,11 +22,11 @@ For local dev work on my Mac, I've found [Postgres.app](https://postgresapp.com/
 You can either create a database called `pdhdev` or pass a `DATABASE_URL` with appropriate details every time you call `./manage`.
 
 ### Initial setup
-It's a Django project managed with Poetry. For local dev, it's mostly the usual cycle of commands (though I've added a `./manage` shell script so you can avoid typing `poetry run ./manage.py` all the time).
+It's a Django project managed with uv. For local dev, it's mostly the usual cycle of commands (though I've added a `./manage` shell script so you can avoid typing `uv run ./manage.py` all the time).
 
 
 ```shell
-poetry install
+uv sync
 ./manage migrate
 ./manage createsuperuser
 ./manage runserver
