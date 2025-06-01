@@ -1,6 +1,6 @@
 #!/usr/bin/env sh
 
-if [ "$1" == "runserver" ] ; then
+if [ "$1" = "runserver" ] ; then
   echo Skipping _manage.py and running uvicorn instead
   SMALLFORMATS_NAME=PDHdata-dev poetry run python -m uvicorn --reload smallformats.asgi:application
 else
