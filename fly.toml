@@ -7,13 +7,13 @@ app = "pdhdata"
 primary_region = "iad"
 kill_signal = "SIGINT"
 kill_timeout = "5s"
-console_command = "poetry run python _manage.py shell"
+console_command = "uv run python _manage.py shell"
 
 [experimental]
   auto_rollback = true
 
 [deploy]
-  release_command = "poetry run python _manage.py migrate"
+  release_command = "uv run python _manage.py migrate"
 
 [env]
   DJANGO_SETTINGS_MODULE = "smallformats.settings"
@@ -21,7 +21,7 @@ console_command = "poetry run python _manage.py shell"
   FLY_API_HOSTNAME = "http://_api.internal:4280"
 
 [processes]
-  app = "poetry run gunicorn --bind=0.0.0.0:8080 --workers=2 --worker-class=uvicorn_worker.UvicornWorker smallformats.asgi:application"
+  app = "uv run gunicorn --bind=0.0.0.0:8080 --workers=2 --worker-class=uvicorn_worker.UvicornWorker smallformats.asgi:application"
   cron = "supercronic /app/scheduled/crontab"
 
 [[services]]

@@ -20,16 +20,16 @@ RUN curl -fsSLO "$SUPERCRONIC_URL" \
 
 # end supercronic
 
-COPY poetry.lock pyproject.toml /app/
+COPY uv.lock pyproject.toml README.md /app/
 
-RUN pip3 install poetry
-RUN poetry install --no-root
+RUN pip3 install uv
+RUN uv sync --no-editable --no-group dev --compile
 
 COPY . .
 
 ENV DJANGO_SETTINGS_MODULE "smallformats.settings"
 ENV DJANGO_SECRET_KEY "this is a secret key for building purposes"
 
-RUN poetry run python _manage.py collectstatic --noinput
+RUN uv run python _manage.py collectstatic --noinput
 
 CMD tail -f /dev/null

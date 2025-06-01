@@ -2,7 +2,7 @@
 
 if [ "$1" = "runserver" ] ; then
   echo Skipping _manage.py and running uvicorn instead
-  SMALLFORMATS_NAME=PDHdata-dev poetry run python -m uvicorn --reload smallformats.asgi:application
+  SMALLFORMATS_NAME=PDHdata-dev uv run python -m uvicorn --reload smallformats.asgi:application
 else
-  SMALLFORMATS_NAME=PDHdata-dev poetry run python _manage.py "$@"
+  SMALLFORMATS_NAME=PDHdata-dev uv run python _manage.py "$@"
 fi
