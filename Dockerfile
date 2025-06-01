@@ -20,7 +20,7 @@ RUN curl -fsSLO "$SUPERCRONIC_URL" \
 
 # end supercronic
 
-COPY uv.lock pyproject.toml /app/
+COPY uv.lock pyproject.toml README.md /app/
 
 RUN pip3 install uv
 RUN uv sync --no-editable --no-group dev --compile
