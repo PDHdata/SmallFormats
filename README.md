@@ -1,7 +1,16 @@
 # SmallFormats
 
+## The end
+
+PDHdata is going offline as of December 20, 2025.
+It never had much of a user base, and it's outgrown the Fly.io hobbyist plan so it's starting to cost real money.
+Basically, it graduated from "fun side project" to "needs care and feeding".
+
+The codebase is still available, and I'm making the final database state available as a postgres "dump" in [backups/2025-12-20](backups/2025-12-20). (You'll need to rejoin the parts into a single file by running `cat backup_* > backup.sql` before it can be imported into your Postgres instance.)
+
 Inspired by [EDHrec][edhrec], this is a deck-stats tool for [Pauper EDH][pdhhomebase] and hopefully other "smaller" (less common) Magic: the Gathering formats someday.
-It was built to power [PDHdata][pdhdata], which is a deck-stats site specifically for PDH.
+It was built to power [PDHdata][pdhdata], which was a deck-stats site specifically for PDH.
+(PDHdata is now offline.)
 
 ## Running your own
 
@@ -16,7 +25,7 @@ _Unlike_ many Django projects, this one doesn't use SQLite locally.
 We depend on several Postgres-specific features (materialized views, JSON field features, etc.).
 While we **love** SQLite, it was becoming burdensome to support dev-only hacks mirroring Postgres features.
 So as of now, we only support [Postgres](https://postgresql.org).
-At time of writing (2024-11-26), we're using Postgres 15 in production.
+At time of closure (2025-12-20), we were using Postgres 15 in production.
 
 For local dev work on my Mac, I've found [Postgres.app](https://postgresapp.com/) to work well.
 You can either create a database called `pdhdev` or pass a `DATABASE_URL` with appropriate details every time you call `./manage`.
